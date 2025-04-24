@@ -16,11 +16,11 @@ import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { eq } from "drizzle-orm";
 import { TrendingUpIcon, User } from "lucide-react";
 
-export default async function PatientPage({
-  params,
-}: {
+type PatientPageProps = {
   params: { "patient-id": string };
-}) {
+};
+
+export default async function PatientPage({ params }: PatientPageProps) {
   const data = await db
     .select()
     .from(patient)
