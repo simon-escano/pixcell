@@ -1,6 +1,15 @@
-"use client";
-
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import {
+  ChevronRight,
+  ContactRound,
+  FileText,
+  House,
+  Images,
+  ImageUp,
+  Info,
+  MailIcon,
+  PlusCircleIcon,
+  type LucideIcon,
+} from "lucide-react";
 
 import {
   Collapsible,
@@ -18,24 +27,47 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Button } from "./ui/button";
+import { UploadSampleDrawer } from "./upload-sample-drawer";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function NavMain() {
+  const items = [
+    {
+      title: "Home",
+      url: "/",
+      icon: House,
+    },
+    {
+      title: "Patients",
+      url: "/patients",
+      icon: ContactRound,
+      isActive: true,
+    },
+    {
+      title: "Samples",
+      url: "/samples",
+      icon: Images,
+    },
+    {
+      title: "Reports",
+      url: "/reports",
+      icon: FileText,
+    },
+  ];
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarMenuItem className="flex items-center gap-2">
+        <UploadSampleDrawer />
+        <Button
+          size="icon"
+          className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
+          variant="outline"
+        >
+          <Info />
+          <span className="sr-only">Help</span>
+        </Button>
+      </SidebarMenuItem>
+      <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
@@ -46,29 +78,6 @@ export function NavMain({
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
             </SidebarMenuItem>
           </Collapsible>
         ))}

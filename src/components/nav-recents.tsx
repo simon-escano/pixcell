@@ -1,8 +1,9 @@
 "use client";
 
 import {
-  Folder,
+  FileImage,
   MoreHorizontal,
+  ScanEye,
   Share,
   Trash2,
   type LucideIcon,
@@ -25,22 +26,27 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavProjects({
-  projects,
-}: {
-  projects: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-}) {
+export function NavRecents() {
   const { isMobile } = useSidebar();
+
+  const recents = [
+    {
+      name: "6bee892a345.png",
+      url: "#",
+      icon: FileImage,
+    },
+    {
+      name: "842ab2a3e4.png",
+      url: "#",
+      icon: FileImage,
+    },
+  ];
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Recent</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {recents.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
@@ -61,17 +67,17 @@ export function NavProjects({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
+                  <ScanEye className="text-muted-foreground" />
+                  <span>View Sample</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Share className="text-muted-foreground" />
-                  <span>Share Project</span>
+                  <span>Share Sample</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
+                  <span>Delete Sample</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

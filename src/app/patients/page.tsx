@@ -4,11 +4,9 @@ import Header from "@/components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import db from "@/db";
 import { patient } from "@/db/schema";
-import { getUser } from "@/lib/auth";
 
 export default async function PatientsPage() {
   const patients = await db.select().from(patient);
-  const user = await getUser();
 
   const transformedPatients: {
     id: string;

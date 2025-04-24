@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema, integer } from "drizzle-orm/pg-core";
 
 const authSchema = pgSchema('auth');
 
@@ -17,6 +17,7 @@ export const profile = pgTable("profile", {
   roleId: uuid("role_id").notNull().references(() => role.id),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
+  imageUrl: text("image_url")
 });
 
 export const patient = pgTable("patient", {
@@ -30,6 +31,10 @@ export const patient = pgTable("patient", {
   contactNumber: varchar("contact_number").notNull(),
   email: varchar("email").notNull(),
   address: text("address").notNull(),
+  height: integer("height").notNull(),
+  weight: integer("weight").notNull(),
+  bloodType: varchar("blood_type", { length: 3 }).notNull(),
+  imageUrl: text("image_url")
 });
 
 
