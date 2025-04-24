@@ -31,11 +31,28 @@ export function PatientSearchCombobox({
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  const filteredPatients = patients.filter((p) =>
-    `${p.firstName} ${p.lastName} ${p.email}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
-  );
+  const filteredPatients = patients.filter((p) => {
+    const term = searchTerm.toLowerCase().trim();
+    if (term === "") return true;
+
+    const individualMatch =
+      p.firstName.toLowerCase().includes(term) ||
+      p.lastName.toLowerCase().includes(term) ||
+      p.email.toLowerCase().includes(term);
+
+    const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
+    const fullNameMatch = fullName.includes(term);
+
+    const searchTerms = term.split(/\s+/);
+    const multiTermMatch = searchTerms.every(
+      (term) =>
+        p.firstName.toLowerCase().includes(term) ||
+        p.lastName.toLowerCase().includes(term) ||
+        p.email.toLowerCase().includes(term),
+    );
+
+    return individualMatch || fullNameMatch || multiTermMatch;
+  });
 
   const selected = patients.find((p) => p.id === value);
 
@@ -67,7 +84,7 @@ export function PatientSearchCombobox({
               {filteredPatients.map((patient) => (
                 <CommandItem
                   key={patient.id}
-                  value={patient.id}
+                  value={`${patient.firstName} ${patient.lastName} ${patient.email}`.toLowerCase()}
                   onSelect={() => {
                     onChange(patient.id);
                     setOpen(false);

@@ -28,7 +28,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Button } from "./ui/button";
-import { UploadSampleDrawer } from "./upload-sample-drawer";
+import UploadSampleWrapper from "./upload-sample-wrapper";
 
 export function NavMain() {
   const items = [
@@ -57,7 +57,7 @@ export function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenuItem className="flex items-center gap-2">
-        <UploadSampleDrawer />
+        <UploadSampleWrapper />
         <Button
           size="icon"
           className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
