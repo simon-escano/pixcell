@@ -37,10 +37,6 @@ export default async function PatientPage({
             <CardHeader className="relative">
               <CardDescription>{patientData.id}</CardDescription>
               <Avatar className="h-40 w-40 rounded-lg">
-                {/* <AvatarImage
-                  src={patientData.avatar}
-                  alt={patientData.firstName + patientData.lastName}
-                /> */}
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
