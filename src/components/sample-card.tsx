@@ -1,0 +1,98 @@
+"use client";
+import React from "react";
+
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Patient, Profile, Role, Sample } from "@/db/schema";
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatTime } from "@/lib/utils";
+import { Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import UserButton from "./user-button";
+
+function SampleCard({
+  patient,
+  sample,
+  profile,
+  role,
+}: {
+  patient: Patient;
+  sample: Sample;
+  profile: Profile;
+  role: Role;
+}) {
+  const router = useRouter();
+  return (
+    <Card
+      key={sample.id}
+      className="relative cursor-pointer gap-0 overflow-hidden p-0"
+      onClick={() => {
+        router.push(`/samples/${sample.id}`);
+      }}
+    >
+      <CardHeader className="overflow-hidden p-0">
+        <Avatar className="h-40 w-full rounded-none">
+          <AvatarImage
+            src={sample.imageUrl || ""}
+            className="h-full w-full object-cover"
+          />
+        </Avatar>
+      </CardHeader>
+      <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
+        <div className="text-muted-foreground border-muted-foreground/20 bg-background absolute top-2 right-2 flex items-center justify-center gap-2 rounded-md border p-1.5 text-sm">
+          <Clock className="h-3 w-3" />
+          {sample.capturedAt
+            ? formatTime(sample.capturedAt.toISOString())
+            : "N/A"}
+        </div>
+        <div className="flex w-full flex-1 gap-2 overflow-hidden">
+          <UserButton
+            imageUrl={patient.imageUrl || ""}
+            firstName={patient.firstName}
+            lastName={patient.lastName}
+            small={true}
+          />
+          <UserButton
+            imageUrl={profile.imageUrl || ""}
+            firstName={profile.firstName}
+            lastName={profile.lastName}
+            small={true}
+          />
+        </div>
+        <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
+          {Object.entries(
+            (sample.metadata as Record<string, unknown>) || {},
+          ).map(([key, value]) => (
+            <Card
+              key={key}
+              className="m-0 flex flex-1 justify-center gap-0 border-none p-0 shadow-none"
+            >
+              <CardHeader className="m-0 flex flex-row items-center justify-center gap-0 p-0">
+                <CardTitle className="text-muted-foreground text-center text-[9px]">
+                  {key
+                    .replace(/([A-Z])/g, " $1")
+                    .trim()
+                    .toUpperCase()}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="m-0 gap-0 p-0">
+                <p className="truncate text-center text-xs font-medium">
+                  {String(value)}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
+
+export default SampleCard;

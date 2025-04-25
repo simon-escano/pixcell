@@ -2,13 +2,13 @@ import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pg
 
 const authSchema = pgSchema('auth');
 
-const user = authSchema.table('users', {
+export const user = authSchema.table('users', {
 	id: uuid('id').primaryKey(),
 });
 
 export const role = pgTable("role", {
   id: uuid("id").primaryKey().defaultRandom(),
-  roleName: varchar("role_name").notNull(),
+  name: varchar("name").notNull(),
 });
 
 export const profile = pgTable("profile", {

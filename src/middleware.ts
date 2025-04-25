@@ -2,16 +2,20 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  if (/^\/samples\/[^\/]+$/.test(path)) {
+    return NextResponse.redirect(new URL(`${path}/view`, request.url));
+  }
+
   const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  const path = new URL(request.url).pathname;
-
   const unprotectedPaths = ["/login", "/signup"];
-
   const user = await getUser(request, response);
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
@@ -38,44 +42,23 @@ async function getUser(request: NextRequest, response: NextResponse) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          request.cookies.set({ name, value, ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          request.cookies.set({ name, value: "", ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
-    },
+    }
   );
 
   const user = (await supabaseClient.auth.getUser()).data.user;
-
   return user;
 }

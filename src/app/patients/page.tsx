@@ -1,7 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import Base from "@/components/base";
 import { DataTable } from "@/components/data-table";
-import Header from "@/components/header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import db from "@/db";
 import { patient } from "@/db/schema";
 
@@ -27,15 +25,11 @@ export default async function PatientsPage() {
   }));
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <div className="p-4">
-          <DataTable data={transformedPatients} />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <Base>
+      <div className="h-full overflow-y-auto p-4">
+        <DataTable data={transformedPatients} />
+      </div>
+    </Base>
   );
 }
 

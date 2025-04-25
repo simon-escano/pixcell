@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronsUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -78,7 +78,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        First Name <ArrowUpDown className="ml-2 h-4 w-4" />
+        First Name <ChevronsUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
@@ -90,7 +90,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Last Name <ArrowUpDown className="ml-2 h-4 w-4" />
+        Last Name <ChevronsUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
@@ -102,7 +102,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Sex <ArrowUpDown className="ml-2 h-4 w-4" />
+        Sex <ChevronsUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="capitalize">{row.getValue("sex")}</div>,
@@ -114,7 +114,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Birth Date <ArrowUpDown className="ml-2 h-4 w-4" />
+        Birth Date <ChevronsUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div>{row.getValue("birthDate")}</div>,
@@ -126,7 +126,7 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Created At <ArrowUpDown className="ml-2 h-4 w-4" />
+        Created At <ChevronsUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (

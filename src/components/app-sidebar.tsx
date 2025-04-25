@@ -16,16 +16,29 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
+import { getUser } from "@/lib/auth";
+import db from "@/db";
+import { profile, role } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-};
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const user = await getUser();
+  const userProfile = await db
+    .select()
+    .from(profile)
+    .where(eq(profile.userId, user.id))
+    .limit(1);
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const profileData = userProfile[0] || null;
+  const profileRoleData = await db
+    .select()
+    .from(role)
+    .where(eq(role.id, profileData.roleId))
+    .limit(1);
+
+  const profileRole = profileRoleData[0]?.name || null;
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -52,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavTertiary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} profile={profileData} role={profileRole} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,22 +1,16 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import Header from "@/components/header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import Base from "@/components/base";
+import SampleWrapper from "@/components/sample-wrapper";
+import { getSamples } from "@/db/queries/select";
 
-export default function SamplesPage() {
+export default async function SamplesPage() {
+  const samples = await getSamples();
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <Base>
+      <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {samples.map(async (sample) => (
+          <SampleWrapper key={sample.id} sample={sample} />
+        ))}
+      </div>
+    </Base>
   );
 }

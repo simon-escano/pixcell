@@ -1,33 +1,14 @@
-import {
-  ChevronRight,
-  ContactRound,
-  FileText,
-  House,
-  Images,
-  ImageUp,
-  Info,
-  MailIcon,
-  PlusCircleIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { ContactRound, FileText, House, Images, Info } from "lucide-react";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Button } from "./ui/button";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import UploadSampleWrapper from "./upload-sample-wrapper";
 
 export function NavMain() {
@@ -58,14 +39,18 @@ export function NavMain() {
     <SidebarGroup>
       <SidebarMenuItem className="flex items-center gap-2">
         <UploadSampleWrapper />
-        <Button
-          size="icon"
-          className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-          variant="outline"
-        >
-          <Info />
-          <span className="sr-only">Help</span>
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger className="h-full">
+            <div className="cn-div aspect-square h-full">
+              <Info />
+              <span className="sr-only">Help</span>
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent>
+            Click the button to upload a sample image for collaboration and
+            analysis; ensure it's in JPEG, PNG, or GIF format and under 5MB.
+          </HoverCardContent>
+        </HoverCard>
       </SidebarMenuItem>
       <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>
