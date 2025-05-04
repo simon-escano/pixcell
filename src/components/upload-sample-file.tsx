@@ -34,6 +34,7 @@ const UploadSampleFile = ({
               src={preview}
               alt="Preview"
               className="absolute inset-0 h-full w-full rounded-3xl object-cover p-4"
+              fill
             />
           ) : (
             <ImageUp className="text-muted-foreground h-8 w-8" />
