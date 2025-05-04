@@ -14,6 +14,7 @@ import { Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import UserButton from "./user-button";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 function SampleCard({
   patient,
@@ -45,12 +46,13 @@ function SampleCard({
       }}
     >
       <CardHeader className="overflow-hidden p-0">
-        <Avatar className="h-40 w-full rounded-none">
-          <AvatarImage
+        <div className="relative h-40 w-full overflow-hidden">
+          <Image 
             src={sample.imageUrl || ""}
-            className="h-full w-full object-cover"
-          />
-        </Avatar>
+            alt="Sample Image"
+            fill
+            className="h-full w-full object-cover" />
+        </div>
       </CardHeader>
       <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
         <div className="text-muted-foreground border-muted-foreground/20 bg-background absolute top-2 right-2 flex items-center justify-center gap-2 rounded-md border p-1.5 text-sm">

@@ -1,8 +1,10 @@
 import Base from "@/components/base";
 import SampleArea from "@/components/sample-area";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -14,7 +16,7 @@ import {
   getRoleById,
   getSampleById,
 } from "@/db/queries/select";
-import { Clock } from "lucide-react";
+import { BrainCircuit, Clock } from "lucide-react";
 
 export default async function EditSamplePage({
   params,
@@ -30,11 +32,9 @@ export default async function EditSamplePage({
   return (
     <Base>
       <div className="flex h-full flex-1 gap-4 p-4">
-        <Card
-          key={sample.id}
-          className="h-full min-w-40 gap-0 overflow-hidden p-0"
+      <div className="h-full flex flex-col min-w-40 gap-4 overflow-hidden"
         >
-          <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
+          <Card className="flex flex-col gap-2 p-3">
             <div className="flex w-full justify-center gap-2 overflow-hidden">
               <UserButton
                 imageUrl={patient.imageUrl || ""}
@@ -80,8 +80,21 @@ export default async function EditSamplePage({
               <Clock className="h-3 w-3" />
               {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
             </div>
-          </CardFooter>
-        </Card>
+          </Card>
+          <Card className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
+            <CardTitle>AI Analysis</CardTitle>
+            <CardDescription>Powered by DeepSeek</CardDescription>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <p className="max-w-48 text-center text-muted-foreground">Sample must have detections before analyzing</p>
+            </CardContent>
+            <CardFooter className="p-0">
+              <Button className="w-full" disabled={true}>
+                <BrainCircuit />
+                Analyze
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
 
         <SampleArea sample={sample} />
       </div>
