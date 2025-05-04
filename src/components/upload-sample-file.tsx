@@ -1,6 +1,7 @@
 "use client";
 
 import { ImageUp } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 
 const UploadSampleFile = ({
@@ -29,7 +30,7 @@ const UploadSampleFile = ({
           className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center"
         >
           {preview ? (
-            <img
+            <Image
               src={preview}
               alt="Preview"
               className="absolute inset-0 h-full w-full rounded-3xl object-cover p-4"

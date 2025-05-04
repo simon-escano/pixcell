@@ -48,7 +48,7 @@ export function NavMain() {
           </HoverCardTrigger>
           <HoverCardContent>
             Click the button to upload a sample image for collaboration and
-            analysis; ensure it's in JPEG, PNG, or GIF format and under 5MB.
+            analysis; ensure it's in JPEG, PNG, or GIF format and under 10MB.
           </HoverCardContent>
         </HoverCard>
       </SidebarMenuItem>
