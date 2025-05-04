@@ -66,7 +66,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           className="flex-1 object-contain"
         />
       </div>
-      <Card className="flex w-full flex-row flex-wrap justify-between overflow-hidden rounded-lg p-2">
+      <Card className="flex w-full flex-row flex-wrap justify-between overflow-hidden rounded-lg p-2 gap-2">
         <div className="flex flex-wrap gap-2">
           <Button variant={"outline"} disabled={disabled}>
             <Sun></Sun>
