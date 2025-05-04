@@ -47,4 +47,4 @@ yarn-error.log*
 /backend/__pycache__/
 
 # large models
-/backend/models
+/backend/models/*
