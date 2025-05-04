@@ -1,6 +1,5 @@
 import Base from "@/components/base";
 import { ShareDialog } from "@/components/share-dialog";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,34 +15,31 @@ import {
   getRoleById,
   getSampleById,
 } from "@/db/queries/select";
-import { AvatarFallback } from "@radix-ui/react-avatar";
-import { Separator } from "@radix-ui/react-separator";
 import {
   CircleDashed,
   Clock,
   Contrast,
   Droplets,
-  Forward,
   MoveUpLeft,
   Pencil,
   Search,
   SquareDashed,
   Sun,
-  Type,
+  Type
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-export default async function EditSamplePage({
+export default async function ViewSamplePage({
   params,
 }: {
-  params: { "sample-id": string };
+  params: Promise<{ sampleId: string }>;
 }) {
-  const sample = (await getSampleById(params["sample-id"]))[0];
-  const patient = (await getPatientById(sample.patientId))[0];
-  const profile = (await getProfileByUserId(sample.uploadedBy))[0];
-  const role = (await getRoleById(profile.roleId))[0];
+  const sampleId = (await params).sampleId;
+  const sample = await getSampleById(sampleId);
+  const patient = await getPatientById(sample.patientId);
+  const profile = await getProfileByUserId(sample.uploadedBy);
+  const role = await getRoleById(profile.roleId);
 
-  // const router = useRouter();
   return (
     <Base>
       <div className="flex h-full flex-1 gap-4 p-4">
@@ -99,51 +95,51 @@ export default async function EditSamplePage({
         </Card>
 
         <div className="flex max-h-full flex-1 flex-col gap-4">
-          <div className="border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
-            <img
+          <div className="relative border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
+            <Image
               src={sample.imageUrl}
               alt={JSON.stringify(sample.metadata)}
+              fill
               className="flex-1 object-cover"
             />
           </div>
-          <Button
-            variant={"outline"}
-            className="hover:bg-background flex h-auto w-full flex-wrap justify-between overflow-hidden"
+          <Card
+            className="flex flex-row flex-wrap w-full justify-between overflow-hidden px-4 py-2 rounded-lg"
           >
             <div className="flex flex-wrap gap-2">
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <Sun></Sun>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <Contrast></Contrast>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <Droplets></Droplets>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <Pencil></Pencil>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <Type></Type>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <SquareDashed></SquareDashed>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <CircleDashed></CircleDashed>
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={true}>
                 <MoveUpLeft></MoveUpLeft>
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
               <ShareDialog />
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear" disabled={true}>
                 <Search></Search>
                 Detect
               </Button>
             </div>
-          </Button>
+          </Card>
         </div>
       </div>
     </Base>

@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import { DataTable } from "@/components/data-table";
-import db from "@/db";
+import { db } from "@/db";
 import { patient } from "@/db/schema";
 
 export default async function PatientsPage() {

@@ -1,6 +1,6 @@
 "use server";
 
-import db from "@/db";
+import { db } from "@/db";
 import { sample } from "@/db/schema";
 import { writeFile } from "fs/promises";
 import path from "path";

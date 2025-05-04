@@ -1,5 +1,6 @@
-import { Copy, Forward } from "lucide-react";
+"use client";
 
+import { Copy, Forward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,13 +14,29 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export function ShareDialog() {
+  const [currentUrl, setCurrentUrl] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      toast.success("Link copied to clipboard!");
+    }).catch(err => {
+      toast.error("Failed to copy the link.");
+    });
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant={"outline"}>
-          <Forward></Forward>
+          <Forward />
           Share
         </Button>
       </DialogTrigger>
@@ -37,11 +54,11 @@ export function ShareDialog() {
             </Label>
             <Input
               id="link"
-              defaultValue="https://ui.shadcn.com/docs/installation"
+              value={currentUrl}
               readOnly
             />
           </div>
-          <Button type="submit" size="sm" className="px-3">
+          <Button type="button" size="sm" className="px-3" onClick={handleCopy}>
             <span className="sr-only">Copy</span>
             <Copy />
           </Button>

@@ -1,18 +1,18 @@
 import Base from "@/components/base";
 import { PatientInfo } from "@/components/patient-info";
 import SampleWrapper from "@/components/sample-wrapper";
-import { Avatar } from "@/components/ui/avatar";
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardFooter, CardTitle } from "@/components/ui/card";
 import { getPatientById, getSamplesByPatientId } from "@/db/queries/select";
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 export default async function PatientPage({
   params,
 }: {
-  params: { "patient-id": string };
+  params: Promise<{ patientId: string }>;
 }) {
-  const patientData = (await getPatientById(params["patient-id"]))[0];
-  const samples = await getSamplesByPatientId(params["patient-id"]);
+  const patientId = (await params).patientId;
+  const patientData = await getPatientById(patientId);
+  const samples = await getSamplesByPatientId(patientId);
 
   return (
     <Base>

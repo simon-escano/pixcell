@@ -17,28 +17,16 @@ import {
 import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
 import { getUser } from "@/lib/auth";
-import db from "@/db";
-import { profile, role } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const user = await getUser();
-  const userProfile = await db
-    .select()
-    .from(profile)
-    .where(eq(profile.userId, user.id))
-    .limit(1);
+  const profileData = await getProfileByUserId(user.id);
+  const profileRoleData = await getRoleById(profileData.roleId);
 
-  const profileData = userProfile[0] || null;
-  const profileRoleData = await db
-    .select()
-    .from(role)
-    .where(eq(role.id, profileData.roleId))
-    .limit(1);
-
-  const profileRole = profileRoleData[0]?.name || null;
+  const profileRole = profileRoleData.name || null;
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>

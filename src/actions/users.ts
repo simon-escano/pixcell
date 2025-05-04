@@ -1,6 +1,6 @@
 'use server'
 
-import db from "@/db";
+import { db } from "@/db";
 import { profile } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/utils"

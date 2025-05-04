@@ -8,9 +8,9 @@ import { Sample } from "@/db/schema";
 import SampleCard from "./sample-card";
 
 async function SampleWrapper({ sample }: { sample: Sample }) {
-  const patient = (await getPatientById(sample.patientId))[0];
-  const profile = (await getProfileByUserId(sample.uploadedBy))[0];
-  const role = (await getRoleById(profile.roleId))[0];
+  const patient = await getPatientById(sample.patientId);
+  const profile = await getProfileByUserId(sample.uploadedBy);
+  const role = await getRoleById(profile.roleId);
   return (
     <SampleCard
       patient={patient}

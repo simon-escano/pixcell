@@ -1,6 +1,5 @@
 import Base from "@/components/base";
 import { ShareDialog } from "@/components/share-dialog";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,31 +15,31 @@ import {
   getRoleById,
   getSampleById,
 } from "@/db/queries/select";
-import { AvatarFallback } from "@radix-ui/react-avatar";
-import { Separator } from "@radix-ui/react-separator";
 import {
   CircleDashed,
   Clock,
   Contrast,
   Droplets,
-  Forward,
   MoveUpLeft,
   Pencil,
   Search,
   SquareDashed,
   Sun,
-  Type,
+  Type
 } from "lucide-react";
+import Image from "next/image";
 
-export default async function ViewSamplePage({
+export default async function EditSamplePage({
   params,
 }: {
-  params: { "sample-id": string };
+  params: Promise<{ sampleId: string }>;
 }) {
-  const sample = (await getSampleById(params["sample-id"]))[0];
-  const patient = (await getPatientById(sample.patientId))[0];
-  const profile = (await getProfileByUserId(sample.uploadedBy))[0];
-  const role = (await getRoleById(profile.roleId))[0];
+  const sampleId = (await params).sampleId;
+  const sample = await getSampleById(sampleId);
+  const patient = await getPatientById(sample.patientId);
+  const profile = await getProfileByUserId(sample.uploadedBy);
+  const role = await getRoleById(profile.roleId);
+
   return (
     <Base>
       <div className="flex h-full flex-1 gap-4 p-4">
@@ -63,6 +62,7 @@ export default async function ViewSamplePage({
                 redirectUrl={`/users/${profile.id}`}
               />
             </div>
+
             <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
               {Object.entries(
                 (sample.metadata as Record<string, unknown>) || {},
@@ -95,17 +95,16 @@ export default async function ViewSamplePage({
         </Card>
 
         <div className="flex max-h-full flex-1 flex-col gap-4">
-          <div className="border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
-            <img
+          <div className="relative border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
+            <Image
               src={sample.imageUrl}
               alt={JSON.stringify(sample.metadata)}
+              fill
               className="flex-1 object-cover"
             />
           </div>
-          <Button
-            variant={"outline"}
-            className="hover:bg-background flex h-auto w-full flex-wrap justify-between overflow-hidden"
-            disabled={true}
+          <Card
+            className="flex flex-row flex-wrap w-full justify-between overflow-hidden px-4 py-2 rounded-lg"
           >
             <div className="flex flex-wrap gap-2">
               <Button variant={"outline"}>
@@ -140,7 +139,7 @@ export default async function ViewSamplePage({
                 Detect
               </Button>
             </div>
-          </Button>
+          </Card>
         </div>
       </div>
     </Base>
