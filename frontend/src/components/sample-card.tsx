@@ -1,8 +1,6 @@
 "use client";
-import React from "react";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -11,11 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Patient, Profile, Role, Sample } from "@/db/schema";
-import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatTime } from "@/lib/utils";
 import { Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import UserButton from "./user-button";
+import { useEffect, useState } from "react";
 
 function SampleCard({
   patient,
@@ -29,6 +27,15 @@ function SampleCard({
   role: Role;
 }) {
   const router = useRouter();
+
+  const [formattedTime, setFormattedTime] = useState("");
+
+  useEffect(() => {
+    if (sample.capturedAt) {
+      setFormattedTime(formatTime(sample.capturedAt.toISOString()));
+    }
+  }, [sample.capturedAt]);
+
   return (
     <Card
       key={sample.id}
@@ -48,22 +55,20 @@ function SampleCard({
       <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
         <div className="text-muted-foreground border-muted-foreground/20 bg-background absolute top-2 right-2 flex items-center justify-center gap-2 rounded-md border p-1.5 text-sm">
           <Clock className="h-3 w-3" />
-          {sample.capturedAt
-            ? formatTime(sample.capturedAt.toISOString())
-            : "N/A"}
+          {formattedTime || "N/A"}
         </div>
         <div className="flex w-full flex-1 gap-2 overflow-hidden">
           <UserButton
             imageUrl={patient.imageUrl || ""}
             firstName={patient.firstName}
             lastName={patient.lastName}
-            small={true}
+            roleName={role.name}
           />
           <UserButton
             imageUrl={profile.imageUrl || ""}
             firstName={profile.firstName}
             lastName={profile.lastName}
-            small={true}
+            roleName={role.name}
           />
         </div>
         <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">

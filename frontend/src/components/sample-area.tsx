@@ -21,9 +21,10 @@ import toast from "react-hot-toast";
 
 type SampleAreaProps = {
   sample: Sample;
+  disabled?: boolean;
 };
 
-export default function SampleArea({ sample }: SampleAreaProps) {
+export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   const [processedImageUrl, setProcessedImageUrl] = useState<string>(
     sample.imageUrl,
   );
@@ -56,39 +57,39 @@ export default function SampleArea({ sample }: SampleAreaProps) {
   }
 
   return (
-    <div className="flex max-h-full flex-1 flex-col gap-4">
-      <div className="border-muted-foreground/20 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
+    <div className="flex max-h-full flex-1 flex-col gap-2">
+      <div className="border-muted-foreground/20 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border bg-muted-foreground/20 shadow-sm">
         <Image
           src={processedImageUrl}
           alt={JSON.stringify(sample.metadata)}
           fill
-          className="flex-1 object-cover"
+          className="flex-1 object-contain"
         />
       </div>
-      <Card className="flex w-full flex-row flex-wrap justify-between overflow-hidden rounded-lg px-4 py-2">
+      <Card className="flex w-full flex-row flex-wrap justify-between overflow-hidden rounded-lg p-2">
         <div className="flex flex-wrap gap-2">
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <Sun></Sun>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline" } disabled={disabled}>
             <Contrast></Contrast>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <Droplets></Droplets>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <Pencil></Pencil>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <Type></Type>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <SquareDashed></SquareDashed>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <CircleDashed></CircleDashed>
           </Button>
-          <Button variant={"outline"}>
+          <Button variant={"outline"} disabled={disabled}>
             <MoveUpLeft></MoveUpLeft>
           </Button>
         </div>
@@ -96,6 +97,7 @@ export default function SampleArea({ sample }: SampleAreaProps) {
           <ShareDialog />
           <Button
             onClick={handleProcessImage}
+            disabled={disabled}
             className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear"
           >
             <Search></Search>

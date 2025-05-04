@@ -41,12 +41,14 @@ export default async function EditSamplePage({
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 redirectUrl={`/patients/${patient.id}`}
+                roleName={role.name}
               />
               <UserButton
                 imageUrl={profile.imageUrl || ""}
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 redirectUrl={`/users/${profile.id}`}
+                roleName={role.name}
               />
             </div>
 

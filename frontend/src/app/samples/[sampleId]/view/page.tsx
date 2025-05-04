@@ -1,12 +1,13 @@
 import Base from "@/components/base";
-import { ShareDialog } from "@/components/share-dialog";
+import SampleArea from "@/components/sample-area";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import UserButton from "@/components/user-button";
 import {
@@ -16,18 +17,9 @@ import {
   getSampleById,
 } from "@/db/queries/select";
 import {
-  CircleDashed,
-  Clock,
-  Contrast,
-  Droplets,
-  MoveUpLeft,
-  Pencil,
-  Search,
-  SquareDashed,
-  Sun,
-  Type
+  BrainCircuit,
+  Clock
 } from "lucide-react";
-import Image from "next/image";
 
 export default async function ViewSamplePage({
   params,
@@ -43,23 +35,23 @@ export default async function ViewSamplePage({
   return (
     <Base>
       <div className="flex h-full flex-1 gap-4 p-4">
-        <Card
-          key={sample.id}
-          className="h-full min-w-40 gap-0 overflow-hidden p-0"
+        <div className="h-full flex flex-col min-w-40 gap-4 overflow-hidden"
         >
-          <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
+          <Card className="flex flex-col gap-2 p-3">
             <div className="flex w-full justify-center gap-2 overflow-hidden">
               <UserButton
                 imageUrl={patient.imageUrl || ""}
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 redirectUrl={`/patients/${patient.id}`}
+                roleName={role.name}
               />
               <UserButton
                 imageUrl={profile.imageUrl || ""}
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 redirectUrl={`/users/${profile.id}`}
+                roleName={role.name}
               />
             </div>
 
@@ -91,56 +83,23 @@ export default async function ViewSamplePage({
               <Clock className="h-3 w-3" />
               {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
             </div>
-          </CardFooter>
-        </Card>
-
-        <div className="flex max-h-full flex-1 flex-col gap-4">
-          <div className="relative border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
-            <Image
-              src={sample.imageUrl}
-              alt={JSON.stringify(sample.metadata)}
-              fill
-              className="flex-1 object-cover"
-            />
-          </div>
-          <Card
-            className="flex flex-row flex-wrap w-full justify-between overflow-hidden px-4 py-2 rounded-lg"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Button variant={"outline"} disabled={true}>
-                <Sun></Sun>
+          </Card>
+          <Card className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
+            <CardTitle>AI Analysis</CardTitle>
+            <CardDescription>Powered by DeepSeek</CardDescription>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <p className="max-w-48 text-center text-muted-foreground">Sample must have detections before analyzing</p>
+            </CardContent>
+            <CardFooter className="p-0">
+              <Button className="w-full" disabled={true}>
+                <BrainCircuit />
+                Analyze
               </Button>
-              <Button variant={"outline"} disabled={true}>
-                <Contrast></Contrast>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <Droplets></Droplets>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <Pencil></Pencil>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <Type></Type>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <SquareDashed></SquareDashed>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <CircleDashed></CircleDashed>
-              </Button>
-              <Button variant={"outline"} disabled={true}>
-                <MoveUpLeft></MoveUpLeft>
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <ShareDialog />
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear" disabled={true}>
-                <Search></Search>
-                Detect
-              </Button>
-            </div>
+            </CardFooter>
           </Card>
         </div>
+
+        <SampleArea sample={sample} disabled={true} />
       </div>
     </Base>
   );

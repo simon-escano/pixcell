@@ -5,5 +5,17 @@ import postgres from 'postgres'
 
 const connectionString = process.env.DATABASE_URL!
 
-export const client = postgres(connectionString, { prepare: false })
-export const db = drizzle(client);
+declare global {
+  var postgresClient: ReturnType<typeof postgres> | undefined
+  var drizzleDb: ReturnType<typeof drizzle> | undefined
+}
+
+const client =
+  globalThis.postgresClient ?? postgres(connectionString, { prepare: false })
+if (process.env.NODE_ENV !== 'production') globalThis.postgresClient = client
+
+const db =
+  globalThis.drizzleDb ?? drizzle(client)
+if (process.env.NODE_ENV !== 'production') globalThis.drizzleDb = db
+
+export { client, db }

@@ -10,43 +10,44 @@ const UserButton = ({
   firstName,
   lastName,
   redirectUrl,
-  small,
+  roleName,
 }: {
   imageUrl: string;
   firstName: string;
   lastName: string;
   redirectUrl?: string;
   small?: boolean;
+  roleName?: string;
 }) => {
   const router = useRouter();
 
   return (
     <Button
-      className={`bg-sidebar-accent text-sidebar-accent-foreground hover:bg-primary/5 flex h-min flex-1 ${small ? "w-full px-1 py-1" : "cursor-pointer px-3 py-2"}`}
+      className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-primary/5 flex h-min flex-1 overflow-hidden w-full p-1 pr-2"
       onClick={() => {
         if (redirectUrl) {
           router.push(redirectUrl);
         }
       }}
     >
-      <Avatar className="rounded-lg">
+      <Avatar className="rounded-none size-6">
         <AvatarImage
-          src={imageUrl || ""}
+          src={imageUrl || ""} 
           alt={firstName + lastName}
-          className={`flex items-center justify-center${small ? "h-full w-full rounded-md" : ""}`}
+          className="flex items-center justify-center h-full w-full rounded-sm"
         />
         <AvatarFallback className="rounded-lg">
           {firstName.charAt(0)}
           {lastName.charAt(0)}
         </AvatarFallback>
       </Avatar>
-      <div className="flex w-full flex-1 flex-col text-left text-sm leading-tight">
-        <div className="justiy-center flex w-full flex-1 items-end overflow-hidden">
-          <span className="mr-2 flex w-full min-w-0 flex-1 items-center truncate font-semibold">
-            {firstName} {lastName}
-          </span>
-        </div>
-        <span className="text-muted-foreground truncate text-xs">user</span>
+      <div className="flex w-full flex-1 flex-col text-left leading-tight overflow-hidden truncate">
+        <p className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-full font-semibold mr-2 text-[11px]">
+          {firstName} {lastName}
+        </p>
+        <p className="truncate whitespace-nowrap overflow-hidden text-ellipsis text-muted-foreground text-[9px] w-full">
+          {roleName}
+        </p>
       </div>
     </Button>
   );
