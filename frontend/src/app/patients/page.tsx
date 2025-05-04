@@ -1,10 +1,9 @@
 import Base from "@/components/base";
 import { DataTable } from "@/components/data-table";
-import { db } from "@/db";
-import { patient } from "@/db/schema";
+import { getAllPatients } from "@/db/queries/select";
 
 export default async function PatientsPage() {
-  const patients = await db.select().from(patient);
+  const patients = await getAllPatients();
 
   const transformedPatients: {
     id: string;

@@ -1,6 +1,5 @@
 import Base from "@/components/base";
-import { ShareDialog } from "@/components/share-dialog";
-import { Button } from "@/components/ui/button";
+import SampleArea from "@/components/sample-area";
 import {
   Card,
   CardContent,
@@ -15,19 +14,7 @@ import {
   getRoleById,
   getSampleById,
 } from "@/db/queries/select";
-import {
-  CircleDashed,
-  Clock,
-  Contrast,
-  Droplets,
-  MoveUpLeft,
-  Pencil,
-  Search,
-  SquareDashed,
-  Sun,
-  Type
-} from "lucide-react";
-import Image from "next/image";
+import { Clock } from "lucide-react";
 
 export default async function EditSamplePage({
   params,
@@ -94,53 +81,7 @@ export default async function EditSamplePage({
           </CardFooter>
         </Card>
 
-        <div className="flex max-h-full flex-1 flex-col gap-4">
-          <div className="relative border-muted-foreground/20 flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
-            <Image
-              src={sample.imageUrl}
-              alt={JSON.stringify(sample.metadata)}
-              fill
-              className="flex-1 object-cover"
-            />
-          </div>
-          <Card
-            className="flex flex-row flex-wrap w-full justify-between overflow-hidden px-4 py-2 rounded-lg"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Button variant={"outline"}>
-                <Sun></Sun>
-              </Button>
-              <Button variant={"outline"}>
-                <Contrast></Contrast>
-              </Button>
-              <Button variant={"outline"}>
-                <Droplets></Droplets>
-              </Button>
-              <Button variant={"outline"}>
-                <Pencil></Pencil>
-              </Button>
-              <Button variant={"outline"}>
-                <Type></Type>
-              </Button>
-              <Button variant={"outline"}>
-                <SquareDashed></SquareDashed>
-              </Button>
-              <Button variant={"outline"}>
-                <CircleDashed></CircleDashed>
-              </Button>
-              <Button variant={"outline"}>
-                <MoveUpLeft></MoveUpLeft>
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <ShareDialog />
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear">
-                <Search></Search>
-                Detect
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <SampleArea sample={sample} />
       </div>
     </Base>
   );
