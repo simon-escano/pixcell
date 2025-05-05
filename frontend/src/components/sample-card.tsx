@@ -64,7 +64,6 @@ function SampleCard({
             imageUrl={patient.imageUrl || ""}
             firstName={patient.firstName}
             lastName={patient.lastName}
-            roleName={role.name}
           />
           <UserButton
             imageUrl={profile.imageUrl || ""}

@@ -46,7 +46,7 @@ const UserButton = ({
           {firstName} {lastName}
         </p>
         <p className="truncate whitespace-nowrap overflow-hidden text-ellipsis text-muted-foreground text-[9px] w-full">
-          {roleName}
+          {roleName ? roleName : "Patient"}
         </p>
       </div>
     </Button>
