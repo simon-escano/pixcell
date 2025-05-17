@@ -24,6 +24,7 @@ export interface AvatarStackProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof avatarStackVariants> {
   avatars: { name: string; image: string }[];
+  currentUserFullName?: string;
   maxAvatarsAmount?: number;
 }
 
@@ -31,6 +32,7 @@ const AvatarStack = ({
   className,
   orientation,
   avatars,
+  currentUserFullName,
   maxAvatarsAmount = 3,
   ...props
 }: AvatarStackProps) => {
@@ -61,7 +63,11 @@ const AvatarStack = ({
             </Avatar>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>{name}</p>
+            <p>
+              {currentUserFullName && name === currentUserFullName
+                ? "You"
+                : name}
+            </p>
           </TooltipContent>
         </Tooltip>
       ))}

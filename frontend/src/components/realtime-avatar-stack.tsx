@@ -4,7 +4,13 @@ import { AvatarStack } from "@/components/avatar-stack";
 import { useRealtimePresenceRoom } from "@/hooks/use-realtime-presence-room";
 import { useMemo } from "react";
 
-export const RealtimeAvatarStack = ({ roomName }: { roomName: string }) => {
+export const RealtimeAvatarStack = ({
+  roomName,
+  currentUserFullName,
+}: {
+  roomName: string;
+  currentUserFullName?: string;
+}) => {
   const { users: usersMap } = useRealtimePresenceRoom(roomName);
   const avatars = useMemo(() => {
     return Object.values(usersMap).map((user) => ({
@@ -13,5 +19,11 @@ export const RealtimeAvatarStack = ({ roomName }: { roomName: string }) => {
     }));
   }, [usersMap]);
 
-  return <AvatarStack className="items-center" avatars={avatars} />;
+  return (
+    <AvatarStack
+      className="items-center"
+      currentUserFullName={currentUserFullName}
+      avatars={avatars}
+    />
+  );
 };

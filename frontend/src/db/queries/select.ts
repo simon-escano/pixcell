@@ -1,5 +1,5 @@
-import { patient, profile, role, sample, user } from "@/db/schema"
-import { eq } from "drizzle-orm"
+import { patient, profile, report, role, sample, user } from "@/db/schema"
+import { eq, sql } from "drizzle-orm"
 import { db } from "..";
 
 export async function getUserById(id: string) {
@@ -38,4 +38,29 @@ export async function getProfileByUserId(userId: string) {
 export async function getRoleById(id: string) {
   const result = await db.select().from(role).where(eq(role.id, id));
   return result[0];
+}
+
+export async function getReportsBySampleId(sampleId: string) {
+  return await db.select().from(report).where(eq(report.sampleId, sampleId));
+}
+
+export async function getReportById(reportId: string) {
+  const result = await db.select().from(report).where(eq(report.id, reportId));
+  return result[0];
+}
+
+export async function getReportsByGeneratedBy(userId: string) {
+  return await db.select().from(report).where(eq(report.generatedBy, userId));
+}
+
+export async function getReportCountByPatientId(patientId: string) {
+  const result = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(report)
+    .innerJoin(sample, eq(report.sampleId, sample.id))
+    .where(eq(sample.patientId, patientId));
+
+  return Number(result[0]?.count ?? 0);
 }

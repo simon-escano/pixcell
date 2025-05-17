@@ -23,29 +23,29 @@ const UserButton = ({
 
   return (
     <Button
-      className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-primary/5 flex h-min flex-1 overflow-hidden w-full p-1 pr-2"
+      className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-primary/5 flex h-min w-full flex-1 overflow-hidden p-1.5 pr-2"
       onClick={() => {
         if (redirectUrl) {
           router.push(redirectUrl);
         }
       }}
     >
-      <Avatar className="rounded-none size-6">
+      <Avatar className="size-6 rounded-none">
         <AvatarImage
-          src={imageUrl || ""} 
+          src={imageUrl || ""}
           alt={firstName + lastName}
-          className="flex items-center justify-center h-full w-full rounded-sm"
+          className="flex h-full w-full items-center justify-center rounded-sm"
         />
         <AvatarFallback className="rounded-lg">
           {firstName.charAt(0)}
           {lastName.charAt(0)}
         </AvatarFallback>
       </Avatar>
-      <div className="flex w-full flex-1 flex-col text-left leading-tight overflow-hidden truncate">
-        <p className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-full font-semibold mr-2 text-[11px]">
+      <div className="flex w-full flex-1 flex-col truncate overflow-hidden text-left leading-tight">
+        <p className="mr-2 w-full truncate overflow-hidden text-[11px] font-semibold text-ellipsis whitespace-nowrap">
           {firstName} {lastName}
         </p>
-        <p className="truncate whitespace-nowrap overflow-hidden text-ellipsis text-muted-foreground text-[9px] w-full">
+        <p className="text-muted-foreground w-full truncate overflow-hidden text-[9px] text-ellipsis whitespace-nowrap">
           {roleName ? roleName : "Patient"}
         </p>
       </div>

@@ -18,6 +18,7 @@ import {
   getRoleById,
   getSampleById,
 } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
 import { BrainCircuit, Clock } from "lucide-react";
 
 interface SamplePageProps {
@@ -29,6 +30,8 @@ export async function SamplePage({
   sampleId,
   disabled = false,
 }: SamplePageProps) {
+  const user = await getUser();
+  const userProfile = await getProfileByUserId(user.id);
   const sample = await getSampleById(sampleId);
   const patient = await getPatientById(sample.patientId);
   const profile = await getProfileByUserId(sample.uploadedBy);
@@ -40,7 +43,12 @@ export async function SamplePage({
         <SampleArea sample={sample} disabled={disabled} />
         <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
           <div className="flex flex-row justify-between gap-2">
-            <RealtimeAvatarStack roomName={sampleId}></RealtimeAvatarStack>
+            <RealtimeAvatarStack
+              roomName={sampleId}
+              currentUserFullName={
+                userProfile.firstName + " " + userProfile.lastName
+              }
+            ></RealtimeAvatarStack>
             <ShareDialog />
           </div>
           <Card className="flex flex-col gap-2 p-3">
