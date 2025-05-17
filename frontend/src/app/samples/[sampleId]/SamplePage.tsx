@@ -38,11 +38,11 @@ export async function SamplePage({
     <Base>
       <div className="flex h-full flex-1 gap-4">
         <SampleArea sample={sample} disabled={disabled} />
-        <div className="flex h-full min-w-40 flex-col gap-4 overflow-hidden">
-          <Card className="flex flex-row justify-between gap-2 p-3">
+        <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
+          <div className="flex flex-row justify-between gap-2">
             <RealtimeAvatarStack roomName={sampleId}></RealtimeAvatarStack>
             <ShareDialog />
-          </Card>
+          </div>
           <Card className="flex flex-col gap-2 p-3">
             <div className="flex w-full justify-center gap-2 overflow-hidden">
               <UserButton

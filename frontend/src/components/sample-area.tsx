@@ -1,9 +1,9 @@
 "use client";
 
-import { ShareDialog } from "@/components/share-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sample } from "@/db/schema";
+import { useCurrentUserName } from "@/hooks/use-current-user-name";
 import {
   CircleDashed,
   Contrast,
@@ -19,7 +19,6 @@ import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { RealtimeCursors } from "./realtime-cursors";
-import { useCurrentUserName } from "@/hooks/use-current-user-name";
 import {
   Select,
   SelectContent,
@@ -34,6 +33,10 @@ type SampleAreaProps = {
 };
 
 export default function SampleArea({ sample, disabled }: SampleAreaProps) {
+  const [selectedModel, setSelectedModel] = useState(
+    "parasite_detection_yolov8",
+  );
+
   const [processedImageUrl, setProcessedImageUrl] = useState<string>(
     sample.imageUrl,
   );
@@ -110,14 +113,19 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
         </div>
         <div className="flex flex-wrap gap-2">
           <div className="flex gap-2">
-            <Select disabled={disabled}>
+            <Select
+              disabled={disabled}
+              onValueChange={setSelectedModel}
+              value={selectedModel}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Choose model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="parasite_detection_yolov8">
+                  Parasite Detection
+                </SelectItem>
+                <SelectItem value="another_model">Another Model</SelectItem>
               </SelectContent>
             </Select>
             <Button
