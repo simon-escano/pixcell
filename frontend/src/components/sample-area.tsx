@@ -18,6 +18,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { RealtimeCursors } from "./realtime-cursors";
+import { useCurrentUserName } from "@/hooks/use-current-user-name";
 
 type SampleAreaProps = {
   sample: Sample;
@@ -28,6 +30,11 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   const [processedImageUrl, setProcessedImageUrl] = useState<string>(
     sample.imageUrl,
   );
+
+  console.log(String(sample.id));
+
+  const username = useCurrentUserName();
+  const roomName = `sample_${String(sample.id)}`;
 
   async function handleProcessImage() {
     try {
@@ -65,6 +72,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           fill
           className="flex-1 object-contain"
         />
+        <RealtimeCursors roomName={roomName} username={username} />
       </div>
       <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg p-2">
         <div className="flex flex-wrap gap-2">
