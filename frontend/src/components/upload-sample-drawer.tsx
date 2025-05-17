@@ -16,7 +16,7 @@ import {
 import { PatientSearchCombobox } from "./patient-search-combobox";
 import UploadSampleFile from "./upload-sample-file";
 import toast from "react-hot-toast";
-import { uploadSampleAction } from "@/actions/upload-sample";
+import { uploadSampleAction } from "@/actions/samples";
 import { getErrorMessage } from "@/lib/utils";
 
 export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
