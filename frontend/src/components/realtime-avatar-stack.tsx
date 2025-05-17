@@ -13,5 +13,5 @@ export const RealtimeAvatarStack = ({ roomName }: { roomName: string }) => {
     }));
   }, [usersMap]);
 
-  return <AvatarStack avatars={avatars} />;
+  return <AvatarStack className="items-center" avatars={avatars} />;
 };

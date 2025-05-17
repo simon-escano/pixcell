@@ -20,6 +20,13 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { RealtimeCursors } from "./realtime-cursors";
 import { useCurrentUserName } from "@/hooks/use-current-user-name";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 type SampleAreaProps = {
   sample: Sample;
@@ -102,14 +109,26 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           </Button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={handleProcessImage}
-            disabled={disabled}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear"
-          >
-            <Search></Search>
-            Detect
-          </Button>
+          <div className="flex gap-2">
+            <Select disabled={disabled}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Choose model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleProcessImage}
+              disabled={disabled}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear"
+            >
+              <Search></Search>
+              Detect
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
