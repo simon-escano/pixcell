@@ -1,6 +1,5 @@
 import Base from "@/components/base";
-import { DataTable } from "@/components/data-table";
-import PatientTable from "@/components/patient-table";
+import PatientsTable from "@/components/patients-table";
 import { getAllPatients } from "@/db/queries/select";
 
 export default async function PatientsPage() {
@@ -9,7 +8,7 @@ export default async function PatientsPage() {
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4">
-        <PatientTable patients={patients} />
+        <PatientsTable patients={patients} />
       </div>
     </Base>
   );

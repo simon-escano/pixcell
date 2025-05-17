@@ -7,6 +7,29 @@ export async function getUserById(id: string) {
   return result[0];
 }
 
+export async function getAllUsers() {
+  return await db.select().from(user);
+}
+
+export async function getAllUsersWithProfiles() {
+  return await db
+    .select({
+      id: user.id,
+      email: user.email,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      imageUrl: profile.imageUrl,
+      roleId: profile.roleId,
+      roleName: role.name,
+    })
+    .from(user)
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(role, eq(profile.roleId, role.id));
+}
+
+export async function getAllProfiles() {
+  return await db.select().from(profile);
+}
 
 export async function getAllPatients() {
   return await db.select().from(patient);
@@ -19,6 +42,10 @@ export async function getPatientById(id: string) {
 
 export async function getSamplesByPatientId(id: string) {
   return await db.select().from(sample).where(eq(sample.patientId, id));
+}
+
+export async function getSamplesByUserId(userId: string) {
+  return await db.select().from(sample).where(eq(sample.uploadedBy, userId));
 }
 
 export async function getSampleById(id: string) {

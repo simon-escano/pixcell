@@ -32,14 +32,8 @@ export function NavSecondary() {
   const items = [
     {
       title: "Other users",
-      url: "/",
+      url: "/users",
       icon: UsersRound,
-    },
-    {
-      title: "Roles",
-      url: "/patients",
-      icon: UserCog,
-      isActive: true,
     },
     {
       title: "Settings",
@@ -70,7 +64,11 @@ export function NavSecondary() {
       <SidebarGroupLabel>Administration</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+          <Collapsible
+            key={item.title}
+            asChild
+            defaultOpen={item.items?.length ? false : true}
+          >
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
                 <a href={item.url}>

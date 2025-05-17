@@ -1,23 +1,19 @@
 import Base from "@/components/base";
-import { PatientInfo } from "@/components/patient-info";
 import SampleWrapper from "@/components/sample-wrapper";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import {
   getPatientById,
   getReportCountByPatientId,
   getSamplesByPatientId,
 } from "@/db/queries/select";
-import { patient } from "@/db/schema";
-import { get } from "http";
-import { Calendar, Clock, Link2, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 export default async function PatientPage({
   params,
@@ -40,6 +36,7 @@ export default async function PatientPage({
                     <AvatarImage
                       src={patientData.imageUrl || ""}
                       alt={patientData.firstName + patientData.lastName}
+                      className="object-cover"
                     />
                     <AvatarFallback>
                       {patientData.firstName[0]}

@@ -1,26 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { DataTable } from "./data-table";
-import { Patient } from "@/db/schema";
-import { PatientDialog } from "./patient-dialog";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { on } from "events";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
 import { deletePatient } from "@/actions/patients";
+import { Patient } from "@/db/schema";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { CustomAlertDialog } from "./custom-alert-dialog";
+import { DataTable } from "./data-table";
+import { PatientDialog } from "./patient-dialog";
 
-const PatientTable = ({ patients }: { patients: Patient[] }) => {
+const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -109,4 +98,4 @@ const PatientTable = ({ patients }: { patients: Patient[] }) => {
   );
 };
 
-export default PatientTable;
+export default PatientsTable;
