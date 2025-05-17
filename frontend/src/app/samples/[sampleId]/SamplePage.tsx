@@ -1,5 +1,7 @@
 import Base from "@/components/base";
+import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
 import SampleArea from "@/components/sample-area";
+import { ShareDialog } from "@/components/share-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,7 +25,10 @@ interface SamplePageProps {
   disabled?: boolean;
 }
 
-export async function SamplePage({ sampleId, disabled = false }: SamplePageProps) {
+export async function SamplePage({
+  sampleId,
+  disabled = false,
+}: SamplePageProps) {
   const sample = await getSampleById(sampleId);
   const patient = await getPatientById(sample.patientId);
   const profile = await getProfileByUserId(sample.uploadedBy);
@@ -31,9 +36,13 @@ export async function SamplePage({ sampleId, disabled = false }: SamplePageProps
 
   return (
     <Base>
-      <div className="flex h-full flex-1 gap-4 p-4">
+      <div className="flex h-full flex-1 gap-4">
         <SampleArea sample={sample} disabled={disabled} />
-        <div className="h-full flex flex-col min-w-40 gap-4 overflow-hidden">
+        <div className="flex h-full min-w-40 flex-col gap-4 overflow-hidden">
+          <Card className="flex flex-row justify-between gap-2 p-3">
+            <RealtimeAvatarStack roomName={sampleId}></RealtimeAvatarStack>
+            <ShareDialog />
+          </Card>
           <Card className="flex flex-col gap-2 p-3">
             <div className="flex w-full justify-center gap-2 overflow-hidden">
               <UserButton
@@ -84,8 +93,10 @@ export async function SamplePage({ sampleId, disabled = false }: SamplePageProps
           <Card className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
             <CardTitle>AI Analysis</CardTitle>
             <CardDescription>Powered by DeepSeek</CardDescription>
-            <CardContent className="flex-1 flex items-center justify-center">
-              <p className="max-w-48 text-center text-muted-foreground">Sample must have detections before analyzing</p>
+            <CardContent className="flex flex-1 items-center justify-center">
+              <p className="text-muted-foreground max-w-48 text-center">
+                Sample must have detections before analyzing
+              </p>
             </CardContent>
             <CardFooter className="p-0">
               <Button className="w-full" disabled={true}>
@@ -98,4 +109,4 @@ export async function SamplePage({ sampleId, disabled = false }: SamplePageProps
       </div>
     </Base>
   );
-} 
+}

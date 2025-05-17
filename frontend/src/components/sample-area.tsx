@@ -58,7 +58,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
 
   return (
     <div className="flex max-h-full flex-1 flex-col gap-2">
-      <div className="border-muted-foreground/20 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border bg-muted-foreground/20 shadow-sm">
+      <div className="border-muted-foreground/20 bg-muted-foreground/20 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
         <Image
           src={processedImageUrl}
           alt={JSON.stringify(sample.metadata)}
@@ -66,12 +66,12 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           className="flex-1 object-contain"
         />
       </div>
-      <Card className="flex w-full flex-row flex-wrap justify-between overflow-hidden rounded-lg p-2 gap-2">
+      <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg p-2">
         <div className="flex flex-wrap gap-2">
           <Button variant={"outline"} disabled={disabled}>
             <Sun></Sun>
           </Button>
-          <Button variant={"outline" } disabled={disabled}>
+          <Button variant={"outline"} disabled={disabled}>
             <Contrast></Contrast>
           </Button>
           <Button variant={"outline"} disabled={disabled}>
@@ -94,7 +94,6 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           </Button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <ShareDialog />
           <Button
             onClick={handleProcessImage}
             disabled={disabled}
