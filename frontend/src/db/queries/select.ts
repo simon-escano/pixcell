@@ -64,3 +64,17 @@ export async function getReportCountByPatientId(patientId: string) {
 
   return Number(result[0]?.count ?? 0);
 }
+
+export async function getReportsLast30Days() {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const result = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(report)
+    .where(sql`${report.createdAt} >= ${thirtyDaysAgo.toISOString()}`);
+
+  return Number(result[0]?.count ?? 0);
+}
