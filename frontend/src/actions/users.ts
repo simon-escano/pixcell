@@ -24,10 +24,13 @@ export const signupAction = async (formData: FormData) => {
 
     const userId = data.session.user.id;
 
+    const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
+
     await db.insert(profile).values({
       id: userId,
       userId,
       roleId: role,
+      imageUrl,
       firstName,
       lastName
     });
