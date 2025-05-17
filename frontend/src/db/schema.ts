@@ -45,6 +45,7 @@ export const sample = pgTable("sample", {
   metadata: json("metadata").notNull(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow(),
   imageUrl: text("image_url").notNull(),
+  sampleName: text("sample_name").notNull(),
 });
 
 export const aiAnalysis = pgTable("ai_analysis", {

@@ -78,3 +78,91 @@ export async function getReportsLast30Days() {
 
   return Number(result[0]?.count ?? 0);
 }
+
+export async function getPatientsWithLastReport() {
+  return await db
+    .select({
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      dateTaken: sample.capturedAt,
+      userId: user.id,
+      userName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+      userEmail: patient.email,
+      userImage: profile.imageUrl,
+      isAiGenerated: report.isAiGenerated,
+      reportCreatedAt: report.createdAt
+    })
+    .from(patient)
+    .leftJoin(sample, eq(patient.id, sample.patientId))
+    .innerJoin(report, eq(sample.id, report.sampleId))
+    .leftJoin(user, eq(report.generatedBy, user.id))
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .orderBy(report.createdAt)
+    .limit(5);
+}
+
+export async function getRecentUploads() {
+  return await db
+    .select({
+      id: sample.id,
+      sampleName: sample.sampleName,
+      capturedAt: sample.capturedAt,
+      imageUrl: sample.imageUrl,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      uploadedBy: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+    })
+    .from(sample)
+    .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(user, eq(sample.uploadedBy, user.id))
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .orderBy(sample.capturedAt)
+    .limit(5);
+}
+
+export async function getPatientGenderStats() {
+  const result = await db
+    .select({
+      gender: patient.sex,
+      count: sql<number>`count(*)`,
+      month: sql<string>`to_char(${patient.createdAt}, 'YYYY-MM')`,
+    })
+    .from(patient)
+    .groupBy(patient.sex, sql`to_char(${patient.createdAt}, 'YYYY-MM')`)
+    .orderBy(sql`to_char(${patient.createdAt}, 'YYYY-MM')`);
+
+  return result;
+}
+
+export async function getMonthlyStats() {
+  const currentMonth = new Date();
+  const lastMonth = new Date();
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+  const [currentMonthStats, lastMonthStats] = await Promise.all([
+    db
+      .select({
+        totalAppointments: sql<number>`count(*)`,
+        newPatients: sql<number>`count(distinct ${patient.id})`,
+      })
+      .from(report)
+      .leftJoin(sample, eq(report.sampleId, sample.id))
+      .leftJoin(patient, eq(sample.patientId, patient.id))
+      .where(sql`${report.createdAt} >= ${currentMonth.toISOString()}`),
+    db
+      .select({
+        totalAppointments: sql<number>`count(*)`,
+        newPatients: sql<number>`count(distinct ${patient.id})`,
+      })
+      .from(report)
+      .leftJoin(sample, eq(report.sampleId, sample.id))
+      .leftJoin(patient, eq(sample.patientId, patient.id))
+      .where(sql`${report.createdAt} >= ${lastMonth.toISOString()} and ${report.createdAt} < ${currentMonth.toISOString()}`),
+  ]);
+
+  return {
+    currentMonth: currentMonthStats[0],
+    lastMonth: lastMonthStats[0],
+  };
+}
