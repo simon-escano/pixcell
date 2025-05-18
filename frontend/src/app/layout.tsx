@@ -40,7 +40,7 @@ export default function RootLayout({
           <Toaster
             toastOptions={{
               style: {
-                textAlign: "center",
+                textAlign: "left",
               },
             }}
           />

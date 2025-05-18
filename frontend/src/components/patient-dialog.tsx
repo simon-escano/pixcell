@@ -25,6 +25,10 @@ import {
 import toast from "react-hot-toast";
 import { addPatient, updatePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Camera, CirclePlus } from "lucide-react";
+import { PhoneInput } from "./ui/phone-input";
 
 type Props = {
   open?: boolean;
@@ -44,6 +48,7 @@ export function PatientDialog({
   const isControlled =
     controlledOpen !== undefined && setControlledOpen !== undefined;
 
+  const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? setControlledOpen : setInternalOpen;
@@ -60,6 +65,8 @@ export function PatientDialog({
   const [weight, setWeight] = useState("");
   const [sex, setSex] = useState("");
   const [bloodType, setBloodType] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (existingPatient) {
@@ -79,6 +86,17 @@ export function PatientDialog({
       );
     }
   }, [existingPatient]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setFile(file);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,8 +119,10 @@ export function PatientDialog({
           sex,
           bloodType,
           birthDate: date?.toISOString().slice(0, 10) || "",
+          file: file ?? undefined,
         });
         toast.success("Patient updated", { id: toastId });
+        router.refresh();
       } else {
         await addPatient({
           firstName,
@@ -115,8 +135,10 @@ export function PatientDialog({
           sex,
           bloodType,
           birthDate: date?.toISOString().slice(0, 10) || "",
+          file: file ?? undefined,
         });
         toast.success("Patient added", { id: toastId });
+        router.refresh();
       }
 
       setOpen(false);
@@ -131,7 +153,10 @@ export function PatientDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {showTrigger && (
         <DialogTrigger asChild>
-          <Button className="ml-auto">Add Patient</Button>
+          <Button className="ml-auto">
+            <CirclePlus />
+            Add Patient
+          </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[425px]">
@@ -146,6 +171,31 @@ export function PatientDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="relative flex items-center justify-center">
+            <Label htmlFor="file-upload">
+              <div className="group relative cursor-pointer">
+                <Avatar className="size-24">
+                  <AvatarImage
+                    src={preview || existingPatient?.imageUrl || ""}
+                    className="object-cover"
+                  />
+                  <AvatarFallback>
+                    {existingPatient?.firstName[0]}
+                    {existingPatient?.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 rounded-full bg-black/0 transition-colors duration-200 group-hover:bg-black/40" />
+                <Camera className="absolute top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              </div>
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </Label>
+          </div>
           <div className="flex flex-col gap-2">
             <Label>Basic Info</Label>
             <div className="flex gap-2">
@@ -167,14 +217,13 @@ export function PatientDialog({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <div className="flex gap-2">
-              <Input
-                placeholder="Contact Number"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-              />
-              <DatePicker date={date} setDate={setDate} />
-            </div>
+            <PhoneInput
+              id="phone"
+              defaultCountry="PH"
+              value={contactNumber.replace(/\s+/g, "")}
+              onChange={(val) => setContactNumber(val)}
+            />
+            <DatePicker date={date} setDate={setDate} />
             <Textarea
               placeholder="Address"
               className="resize-none"

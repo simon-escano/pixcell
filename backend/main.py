@@ -20,7 +20,7 @@ def load_model(model_name: str):
     return YOLO(f"models/{model_name}")
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...), model_name: str = Query("parasite_detection_yolov8")):
+async def predict(file: UploadFile = File(...), model_name: str = Query("anemia_detection_yolov8")):
     full_model_name = model_name + ".onnx"
 
     image_bytes = await file.read()
