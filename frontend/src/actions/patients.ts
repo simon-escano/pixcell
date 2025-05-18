@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { patient } from "@/db/schema"
+import { patient, sample } from "@/db/schema"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm"
 
@@ -156,4 +156,3 @@ export async function addPatient(data: {
     return { success: false, error: "Failed to add patient" };
   }
 }
-

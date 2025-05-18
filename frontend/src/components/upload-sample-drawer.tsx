@@ -18,24 +18,27 @@ import UploadSampleFile from "./upload-sample-file";
 import toast from "react-hot-toast";
 import { uploadSampleAction } from "@/actions/samples";
 import { getErrorMessage } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { Input } from "./ui/input";
 
 export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
+  const router = useRouter();
   const [selectedPatient, setSelectedPatient] = React.useState<string>("");
   const [file, setFile] = React.useState<File | null>(null);
-  const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false); // State to control drawer visibility
+  const [sampleName, setSampleName] = React.useState<string>("");
+  const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
 
   const handleSubmit = async () => {
-    if (!selectedPatient || !file) {
-      toast.error("Select a patient and upload a sample.");
+    if (!selectedPatient || !file || !sampleName.trim()) {
+      toast.error("Select a patient, enter sample name, and upload a sample.");
       return;
     }
 
     try {
-      await uploadSampleAction(selectedPatient, file);
+      await uploadSampleAction(selectedPatient, file, sampleName.trim());
       toast.success("Sample uploaded successfully.");
-
-      // Close the drawer after successful upload
       setDrawerOpen(false);
+      router.refresh();
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
@@ -64,13 +67,26 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
                 value={selectedPatient}
                 onChange={setSelectedPatient}
               />
-              <UploadSampleFile onFileChange={setFile} />
+              <div className="flex flex-col">
+                <Input
+                  id="sampleName"
+                  className="rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
+                  placeholder="Sample name"
+                  value={sampleName}
+                  onChange={(e) => setSampleName(e.target.value)}
+                />
+                <UploadSampleFile onFileChange={setFile} />
+              </div>
             </div>
-            <DrawerFooter>
-              <Button onClick={handleSubmit}>Submit</Button>
+            <DrawerFooter className="flex w-full flex-row pt-0">
               <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" className="flex-1">
+                  Cancel
+                </Button>
               </DrawerClose>
+              <Button onClick={handleSubmit} className="flex-1">
+                Submit
+              </Button>
             </DrawerFooter>
           </>
         </div>

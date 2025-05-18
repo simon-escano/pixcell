@@ -24,7 +24,7 @@ const UploadSampleFile = ({
 
   return (
     <div className="flex flex-col">
-      <div className="border-border relative aspect-video overflow-hidden rounded-lg border-2 border-dashed">
+      <div className="border-border relative aspect-video overflow-hidden rounded-b-lg border-2 border-t-0 border-dashed">
         <label
           htmlFor="file-upload"
           className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center"

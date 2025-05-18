@@ -52,10 +52,13 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
       const formData = new FormData();
       formData.append("file", imageBlob, "image.jpg");
 
-      const response = await fetch("http://127.0.0.1:8000/predict", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/predict?model_name=${selectedModel}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (!response.ok) throw new Error("Prediction failed");
 
@@ -123,7 +126,12 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
                 <SelectItem value="parasite_detection_yolov8">
                   Parasite Detection
                 </SelectItem>
-                <SelectItem value="another_model">Another Model</SelectItem>
+                <SelectItem value="anemia_detection_yolov8">
+                  Anemia Detection
+                </SelectItem>
+                <SelectItem value="malaria_detection_yolov8">
+                  Malaria Detection
+                </SelectItem>
               </SelectContent>
             </Select>
             <Button

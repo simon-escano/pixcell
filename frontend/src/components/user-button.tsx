@@ -11,6 +11,7 @@ const UserButton = ({
   lastName,
   redirectUrl,
   roleName,
+  onClick,
 }: {
   imageUrl: string;
   firstName: string;
@@ -18,17 +19,26 @@ const UserButton = ({
   redirectUrl?: string;
   small?: boolean;
   roleName?: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) => {
   const router = useRouter();
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // Stop the event from bubbling up
+
+    if (onClick) {
+      // If a custom onClick handler is provided, use it
+      onClick(e);
+    } else if (redirectUrl) {
+      // Otherwise use the redirectUrl if provided
+      router.push(redirectUrl);
+    }
+  };
 
   return (
     <Button
       className="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-primary/5 flex h-min w-full flex-1 overflow-hidden p-1.5 pr-2"
-      onClick={() => {
-        if (redirectUrl) {
-          router.push(redirectUrl);
-        }
-      }}
+      onClick={handleClick}
     >
       <Avatar className="size-6 rounded-none">
         <AvatarImage

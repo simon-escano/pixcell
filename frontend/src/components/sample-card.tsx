@@ -21,6 +21,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import UserButton from "./user-button";
+import { toast } from "react-hot-toast";
+import { deleteSample } from "@/actions/samples";
 
 function SampleCard({
   patient,
@@ -42,6 +44,39 @@ function SampleCard({
       setFormattedTime(formatTime(sample.capturedAt.toISOString()));
     }
   }, [sample.capturedAt]);
+
+  const handleCopySampleId = () => {
+    navigator.clipboard.writeText(sample.id);
+    toast.success("Sample ID copied to clipboard");
+  };
+
+  const handleEditSample = () => {
+    router.push(`/samples/${sample.id}/edit`);
+  };
+
+  const handleDeleteSample = async () => {
+    const res = await deleteSample(sample.id);
+    if (res.success) {
+      toast.success("Sample deleted successfully");
+      router.refresh();
+    } else {
+      toast.error(res.error || "Failed to delete sample");
+    }
+  };
+
+  const handlePatientClick = async (e: React.MouseEvent) => {
+    // No need for e.stopPropagation() as it's handled in the UserButton component
+    router.push(`/patients/${patient.id}`);
+  };
+
+  const handleProfileClick = async (e: React.MouseEvent) => {
+    // No need for e.stopPropagation() as it's handled in the UserButton component
+    if (profile.userId) {
+      router.push(`/users/${profile.userId}`);
+    } else {
+      toast.error("User not found");
+    }
+  };
 
   return (
     <ContextMenu>
@@ -73,12 +108,18 @@ function SampleCard({
                 imageUrl={patient.imageUrl || ""}
                 firstName={patient.firstName}
                 lastName={patient.lastName}
+                onClick={handlePatientClick}
+                redirectUrl={`/patients/${patient.id}`}
               />
               <UserButton
                 imageUrl={profile.imageUrl || ""}
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 roleName={role.name}
+                onClick={handleProfileClick}
+                redirectUrl={
+                  profile.userId ? `/users/${profile.userId}` : undefined
+                }
               />
             </div>
             <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
@@ -109,10 +150,17 @@ function SampleCard({
         </Card>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem>Copy Sample ID</ContextMenuItem>
-        <ContextMenuItem>Edit Sample</ContextMenuItem>
+        <ContextMenuItem onClick={handleCopySampleId}>
+          Copy Sample ID
+        </ContextMenuItem>
+        <ContextMenuItem onClick={handleEditSample}>
+          Edit Sample
+        </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem className="text-red-500 hover:text-red-700">
+        <ContextMenuItem
+          className="text-red-500 hover:text-red-700"
+          onClick={handleDeleteSample}
+        >
           Delete Sample
         </ContextMenuItem>
       </ContextMenuContent>
