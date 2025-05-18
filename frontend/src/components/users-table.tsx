@@ -28,10 +28,12 @@ import {
 } from "./ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Camera } from "lucide-react";
+import { PhoneInput } from "./ui/phone-input";
 
 type CombinedUser = {
   id: User["id"];
   email: User["email"];
+  phone: User["phone"];
   firstName: Profile["firstName"];
   lastName: Profile["lastName"];
   imageUrl: Profile["imageUrl"];
@@ -75,6 +77,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     const lastName = (document.getElementById("lastName") as HTMLInputElement)
       ?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
+    const phone = (document.getElementById("phone") as HTMLInputElement)?.value;
     const roleId = roleValue;
 
     if (!firstName || !lastName || !email || !roleId) {
@@ -89,6 +92,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         lastName,
         email,
         roleId,
+        phone,
         file ?? undefined,
       );
       toast.success("User updated successfully.");
@@ -196,8 +200,21 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
               </Label>
               <Input
                 id="email"
+                placeholder="e.g. someone@example.com"
                 defaultValue={selectedUser?.email || ""}
                 className="col-span-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Phone
+              </Label>
+              <PhoneInput
+                id="phone"
+                defaultCountry="PH"
+                className="col-span-3"
+                value={selectedUser?.phone?.replace(/\s+/g, "")}
               />
             </div>
 

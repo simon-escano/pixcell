@@ -28,6 +28,7 @@ import { Patient } from "@/db/schema";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Camera } from "lucide-react";
+import { PhoneInput } from "./ui/phone-input";
 
 type Props = {
   open?: boolean;
@@ -213,14 +214,13 @@ export function PatientDialog({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <div className="flex gap-2">
-              <Input
-                placeholder="Contact Number"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-              />
-              <DatePicker date={date} setDate={setDate} />
-            </div>
+            <PhoneInput
+              id="phone"
+              defaultCountry="PH"
+              value={contactNumber}
+              onChange={(val) => setContactNumber(val)}
+            />
+            <DatePicker date={date} setDate={setDate} />
             <Textarea
               placeholder="Address"
               className="resize-none"

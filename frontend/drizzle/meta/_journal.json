@@ -8,6 +8,27 @@
       "when": 1746379432307,
       "tag": "0000_omniscient_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747524531163,
+      "tag": "0001_kind_romulus",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747524701393,
+      "tag": "0002_stormy_night_nurse",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747524861435,
+      "tag": "0003_volatile_wild_pack",
+      "breakpoints": true
     }
   ]
 }

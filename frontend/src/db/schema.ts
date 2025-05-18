@@ -5,6 +5,7 @@ const authSchema = pgSchema('auth');
 export const user = authSchema.table('users', {
 	id: uuid('id').primaryKey(),
   email: text('email').notNull(),
+  phone: varchar("phone"),
 });
 
 export const role = pgTable("role", {
@@ -45,12 +46,13 @@ export const sample = pgTable("sample", {
   uploadedBy: uuid("uploaded_by").notNull().references(() => user.id),
   metadata: json("metadata").notNull(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow(),
+  sampleName: text("sample_name"),
   imageUrl: text("image_url").notNull(),
 });
 
 export const aiAnalysis = pgTable("ai_analysis", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sampleId: uuid("sample_id").notNull().references(() => sample.id),
+  sampleId: uuid("sample_id").notNull().references(() => sample.id, { onDelete: 'cascade' }),
   generatedBy: uuid("generated_by").notNull().references(() => user.id),
   findings: json("findings"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -58,7 +60,7 @@ export const aiAnalysis = pgTable("ai_analysis", {
 
 export const annotation = pgTable("annotation", {
   annotationId: uuid("id").primaryKey().defaultRandom(),
-  sampleId: uuid("sample_id").notNull().references(() => sample.id),
+  sampleId: uuid("sample_id").notNull().references(() => sample.id, { onDelete: 'cascade' }),
   userId: uuid("user_id").notNull().references(() => user.id),
   content: jsonb("content").notNull(),
   drawingData: jsonb("drawing_data").notNull(),
@@ -69,7 +71,7 @@ export const annotation = pgTable("annotation", {
 
 export const report = pgTable("report", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sampleId: uuid("sample_id").notNull().references(() => sample.id),
+  sampleId: uuid("sample_id").notNull().references(() => sample.id, { onDelete: 'cascade' }),
   generatedBy: uuid("generated_by").notNull().references(() => user.id),
   isAiGenerated: boolean("is_ai_generated").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),

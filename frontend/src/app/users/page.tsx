@@ -13,6 +13,7 @@ export default async function OtherUsersPage() {
     lastName: user.lastName || "",
     imageUrl: user.imageUrl || "",
     roleId: user.roleId || "",
+    phone: user.phone || "",
     roleName: user.roleName || "",
   }));
 

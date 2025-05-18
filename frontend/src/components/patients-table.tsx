@@ -39,7 +39,9 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         setDeleteOpen(true);
       },
       customRender: () => (
-        <button className="text-red-500">Delete Patient</button>
+        <button className="text-red-500 hover:text-red-700">
+          Delete Patient
+        </button>
       ),
     },
   ];

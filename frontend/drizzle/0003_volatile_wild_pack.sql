@@ -1,0 +1,1 @@
+ALTER TABLE "profile" DROP COLUMN "contact_number";

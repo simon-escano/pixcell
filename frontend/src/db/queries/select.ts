@@ -16,6 +16,7 @@ export async function getAllUsersWithProfiles() {
     .select({
       id: user.id,
       email: user.email,
+      phone: user.phone,
       firstName: profile.firstName,
       lastName: profile.lastName,
       imageUrl: profile.imageUrl,

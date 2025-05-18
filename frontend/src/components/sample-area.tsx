@@ -41,8 +41,6 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
     sample.imageUrl,
   );
 
-  console.log(String(sample.id));
-
   const username = useCurrentUserName();
   const roomName = `sample_${String(sample.id)}`;
 

@@ -21,9 +21,10 @@ import {
 interface DatePickerProps {
   date: Date | undefined;
   setDate: (date: Date | undefined) => void;
+  endYear?: number;
 }
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({ date, setDate, endYear }: DatePickerProps) {
   const [month, setMonth] = React.useState<number>(
     date ? date.getMonth() : new Date().getMonth(),
   );
@@ -33,11 +34,12 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
 
   const years = React.useMemo(() => {
     const currentYear = new Date().getFullYear();
+    const finalEndYear = endYear ?? currentYear; // Use endYear prop or fallback to current year
     return Array.from(
-      { length: currentYear - 1900 + 1 },
-      (_, i) => currentYear - i,
+      { length: finalEndYear - 1950 + 1 },
+      (_, i) => finalEndYear - i,
     );
-  }, []);
+  }, [endYear]);
 
   const months = React.useMemo(() => {
     if (year) {
@@ -84,7 +86,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
         <Button
           variant={"outline"}
           className={cn(
-            "flex-1 justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground",
           )}
         >
@@ -94,18 +96,6 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex justify-between space-x-1 p-2">
-          <Select onValueChange={handleYearChange} value={year.toString()}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((y) => (
-                <SelectItem key={y} value={y.toString()}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select onValueChange={handleMonthChange} value={month.toString()}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Month" />
@@ -114,6 +104,18 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
               {months.map((m, index) => (
                 <SelectItem key={index} value={index.toString()}>
                   {format(m, "MMMM")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select onValueChange={handleYearChange} value={year.toString()}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((y) => (
+                <SelectItem key={y} value={y.toString()}>
+                  {y}
                 </SelectItem>
               ))}
             </SelectContent>

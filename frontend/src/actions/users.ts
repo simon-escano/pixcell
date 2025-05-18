@@ -111,7 +111,7 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function updateUser(userId: string, firstname: string, lastName: string, email: string, roleId: string, file?: File) {
+export async function updateUser(userId: string, firstname: string, lastName: string, email: string, roleId: string, phone?: string, file?: File) {
   let imageUrl: string | undefined;
 
   if (!userId || !firstname || !lastName || !email || !roleId) {
@@ -145,7 +145,7 @@ export async function updateUser(userId: string, firstname: string, lastName: st
 
   try {
     await db.transaction(async (tx) => {
-      await tx.update(user).set({ email }).where(eq(user.id, userId));
+      await tx.update(user).set({ email, ...(phone !== undefined ? { phone } : {}) }).where(eq(user.id, userId));
       await tx.update(profile).set({
         firstName: firstname,
         lastName,
@@ -160,3 +160,4 @@ export async function updateUser(userId: string, firstname: string, lastName: st
     return { success: false, error: "Failed to update user" };
   }
 }
+
