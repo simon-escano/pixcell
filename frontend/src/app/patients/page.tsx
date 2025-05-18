@@ -7,7 +7,7 @@ export default async function PatientsPage() {
 
   return (
     <Base>
-      <div className="h-full overflow-y-auto p-4">
+      <div className="h-full overflow-y-auto p-4 sm:p-8">
         <PatientsTable patients={patients} />
       </div>
     </Base>

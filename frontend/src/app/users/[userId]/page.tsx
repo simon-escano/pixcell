@@ -9,7 +9,7 @@ import {
   getSamplesByUserId,
   getUserById,
 } from "@/db/queries/select";
-import { Mail } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 
 export default async function UserPage({
   params,
@@ -25,7 +25,7 @@ export default async function UserPage({
 
   return (
     <Base>
-      <div className="grid gap-4 xl:grid-cols-4">
+      <div className="grid gap-4 p-4 sm:p-8 xl:grid-cols-4">
         <div className="space-y-4 xl:col-span-1">
           <Card className="bg-card text-card-foreground relative flex flex-col gap-6 rounded-xl border py-6 shadow-none">
             <CardContent className="px-6">
@@ -69,13 +69,18 @@ export default async function UserPage({
                   <div className="flex items-center gap-3">
                     <Mail className="size-4" /> {user.email}
                   </div>
+                  {user.phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="size-4" /> {user.phone}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
         <div className="space-y-4 xl:col-span-3">
-          <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {samples.map(async (sample) => (
               <SampleWrapper key={sample.id} sample={sample} />
             ))}

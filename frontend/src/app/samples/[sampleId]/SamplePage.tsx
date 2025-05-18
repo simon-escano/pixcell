@@ -39,7 +39,7 @@ export async function SamplePage({
 
   return (
     <Base>
-      <div className="flex h-full flex-1 gap-4">
+      <div className="flex h-full flex-1 gap-4 p-4 sm:p-8">
         <SampleArea sample={sample} disabled={disabled} />
         <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
           <div className="flex flex-row justify-between gap-2">

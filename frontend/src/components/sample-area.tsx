@@ -75,8 +75,8 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   }
 
   return (
-    <div className="flex max-h-full flex-1 flex-col gap-2">
-      <div className="border-muted-foreground/20 bg-muted-foreground/20 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md border shadow-sm">
+    <div className="flex max-h-full flex-1 flex-col gap-0">
+      <div className="border-muted-foreground/20 bg-muted-foreground/20 border-b-0.5 relative flex max-h-full flex-1 flex-col items-center justify-center overflow-hidden rounded-md rounded-b-none">
         <Image
           src={processedImageUrl}
           alt={JSON.stringify(sample.metadata)}
@@ -85,7 +85,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
         />
         <RealtimeCursors roomName={roomName} username={username} />
       </div>
-      <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg p-2">
+      <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg rounded-t-none border border-t-1 p-2">
         <div className="flex flex-wrap gap-2">
           <Button variant={"outline"} disabled={disabled}>
             <Sun></Sun>

@@ -19,7 +19,7 @@ export default async function OtherUsersPage() {
 
   return (
     <Base>
-      <div className="h-full overflow-y-auto p-4">
+      <div className="h-full overflow-y-auto p-4 sm:p-8">
         <UsersTable users={users} />
       </div>
     </Base>
