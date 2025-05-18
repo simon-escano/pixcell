@@ -17,7 +17,11 @@ import {
 import Link from "next/link";
 import { NavSecondary } from "./nav-secondary";
 import { getUser } from "@/lib/auth";
-import { getProfileByUserId, getRoleById } from "@/db/queries/select";
+import {
+  getProfileByUserId,
+  getRecentUploads,
+  getRoleById,
+} from "@/db/queries/select";
 
 export async function AppSidebar({
   ...props
@@ -25,6 +29,7 @@ export async function AppSidebar({
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = await getRoleById(profileData.roleId);
+  const recentSamples = await getRecentUploads();
 
   const profileRole = profileRoleData.name || null;
   return (
@@ -48,7 +53,7 @@ export async function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavRecents />
+        <NavRecents recentSamples={recentSamples} />
         <NavSecondary />
         <NavTertiary className="mt-auto" />
       </SidebarContent>
