@@ -217,7 +217,7 @@ export function PatientDialog({
             <PhoneInput
               id="phone"
               defaultCountry="PH"
-              value={contactNumber}
+              value={contactNumber.replace(/\s+/g, "")}
               onChange={(val) => setContactNumber(val)}
             />
             <DatePicker date={date} setDate={setDate} />
