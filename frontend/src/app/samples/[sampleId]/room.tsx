@@ -24,7 +24,13 @@ import {
   useStorage,
 } from "@liveblocks/react/suspense";
 import { nanoid } from "nanoid";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import LayerComponent from "./components/LayerComponent";
 import MultiplayerGuides from "./components/MultiplayerGuides";
 import Path from "./components/Path";
@@ -42,14 +48,17 @@ import {
   pointerEventToCanvasPoint,
   resizeBounds,
 } from "./utils";
+import { Sample } from "@/db/schema";
 
 const MAX_LAYERS = 100;
 
 type RoomProps = {
   roomName: string;
+  username: string;
+  sample: Sample;
 };
 
-export default function Room({ roomName }: RoomProps) {
+export default function Room({ roomName, username, sample }: RoomProps) {
   return (
     <RoomProvider
       id={roomName}
@@ -66,7 +75,7 @@ export default function Room({ roomName }: RoomProps) {
     >
       <div className="text-foreground-500 shadow-popup flex h-full w-full flex-1 flex-col overflow-hidden rounded-lg shadow-sm">
         <ClientSideSuspense fallback={<Loading />}>
-          <Canvas />
+          <Canvas roomName={roomName} username={username} sample={sample} />
         </ClientSideSuspense>
       </div>
     </RoomProvider>
@@ -77,8 +86,12 @@ function Loading() {
   return <Spinner>Loading...</Spinner>;
 }
 
-function Canvas() {
+function Canvas({ roomName, username, sample }: RoomProps) {
   const layerIds = useStorage((root) => root.layerIds);
+  const [isMiddleButtonDown, setIsMiddleButtonDown] = useState(false);
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const canvasRef = useRef<SVGSVGElement>(null);
 
   const pencilDraft = useSelf((me) => me.presence.pencilDraft);
   const [canvasState, setState] = useState<CanvasState>({
@@ -127,6 +140,56 @@ function Canvas() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [deleteLayers, history]);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    setCamera({
+      x: rect.width / 2,
+      y: rect.height / 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!sample?.imageUrl) return;
+
+    const img = new Image();
+    img.onload = () => {
+      setImageSize({
+        width: img.width,
+        height: img.height,
+      });
+    };
+    img.src = sample.imageUrl;
+  }, [sample]);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    setCamera({
+      x: rect.width / 2,
+      y: rect.height / 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const updateSize = () => {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        setCanvasSize({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, [canvasRef]);
+
+  // Add this SVG image element inside the canvas, before the layerIds.map
 
   /**
    * Select the layer if not already selected and start translating the selection
@@ -238,15 +301,20 @@ function Canvas() {
         return;
       }
 
+      // Calculate offset from the previous position
       const offset = {
         x: point.x - canvasState.current.x,
         y: point.y - canvasState.current.y,
       };
 
+      // Get the live layers
       const liveLayers = storage.get("layers");
+
+      // Update each selected layer
       for (const id of self.presence.selection) {
         const layer = liveLayers.get(id);
         if (layer) {
+          // Apply offset directly to layer position
           layer.update({
             x: layer.get("x") + offset.x,
             y: layer.get("y") + offset.y,
@@ -254,11 +322,11 @@ function Canvas() {
         }
       }
 
+      // Update the current position for the next calculation
       setState({ mode: CanvasMode.Translating, current: point });
     },
     [canvasState],
   );
-
   /**
    * Resize selected layer. Only resizing a single layer is allowed.
    */
@@ -397,6 +465,13 @@ function Canvas() {
     (e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera);
 
+      // Handle middle mouse button
+      if (e.button === 1) {
+        setIsMiddleButtonDown(true);
+        setState({ mode: CanvasMode.None });
+        return;
+      }
+
       if (canvasState.mode === CanvasMode.Inserting) {
         return;
       }
@@ -411,10 +486,22 @@ function Canvas() {
     [camera, canvasState.mode, setState, startDrawing],
   );
 
+  // Modify onPointerMove to handle panning with middle mouse
   const onPointerMove = useMutation(
     ({ setMyPresence }, e: React.PointerEvent) => {
       e.preventDefault();
       const current = pointerEventToCanvasPoint(e, camera);
+
+      // Handle middle mouse button drag
+      if (isMiddleButtonDown) {
+        setCamera((camera) => ({
+          x: camera.x + e.movementX,
+          y: camera.y + e.movementY,
+        }));
+        setMyPresence({ cursor: current });
+        return;
+      }
+
       if (canvasState.mode === CanvasMode.Pressing) {
         startMultiSelection(current, canvasState.origin);
       } else if (canvasState.mode === CanvasMode.SelectionNet) {
@@ -436,16 +523,19 @@ function Canvas() {
       startMultiSelection,
       translateSelectedLayers,
       updateSelectionNet,
+      isMiddleButtonDown, // Add this dependency
     ],
   );
 
-  const onPointerLeave = useMutation(
-    ({ setMyPresence }) => setMyPresence({ cursor: null }),
-    [],
-  );
-
+  // Modify onPointerUp to handle middle mouse button release
   const onPointerUp = useMutation(
     ({}, e) => {
+      // Reset middle mouse button state
+      if (e.button === 1) {
+        setIsMiddleButtonDown(false);
+        return;
+      }
+
       const point = pointerEventToCanvasPoint(e, camera);
 
       if (
@@ -478,6 +568,11 @@ function Canvas() {
     ],
   );
 
+  const onPointerLeave = useMutation(
+    ({ setMyPresence }) => setMyPresence({ cursor: null }),
+    [],
+  );
+
   return (
     <div className="flex w-full flex-1 flex-col overflow-hidden">
       <div className="flex flex-1 overflow-hidden">
@@ -490,18 +585,30 @@ function Canvas() {
           setLastUsedColor={setLastUsedColor}
         />
         <svg
-          className="bg-muted-foreground/20 flex-1 rounded-lg rounded-b-none"
+          ref={canvasRef}
+          className="bg-background relative inset-0 h-full w-full flex-1 rounded-lg rounded-b-none border border-b-0 [background-image:radial-gradient(var(--border)_1px,transparent_1px)] [background-size:16px_16px]"
           onWheel={onWheel}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerLeave={onPointerLeave}
           onPointerUp={onPointerUp}
+          style={{ cursor: isMiddleButtonDown ? "grabbing" : "default" }}
         >
           <g
             style={{
               transform: `translate(${camera.x}px, ${camera.y}px)`,
             }}
           >
+            {sample?.imageUrl && (
+              <image
+                href={sample.imageUrl}
+                x={-imageSize.width / 2}
+                y={-imageSize.height / 2}
+                width={imageSize.width}
+                height={imageSize.height}
+                style={{ pointerEvents: "none" }}
+              />
+            )}
             {layerIds.map((layerId) => (
               <LayerComponent
                 key={layerId}

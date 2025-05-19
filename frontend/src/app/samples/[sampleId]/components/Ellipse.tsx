@@ -19,7 +19,7 @@ export default function Ellipse({
       onPointerDown={(e) => onPointerDown(e, id)}
       style={{
         transform: `translate(${layer.x}px, ${layer.y}px)`,
-        strokeDasharray: "4 2",
+        strokeDasharray: "10 10",
       }}
       cx={layer.width / 2}
       cy={layer.height / 2}
@@ -27,7 +27,7 @@ export default function Ellipse({
       ry={layer.height / 2}
       fill="transparent"
       stroke={layer.fill ? colorToCss(layer.fill) : "#CCC"}
-      strokeWidth="1"
+      strokeWidth="3"
     />
   );
 }

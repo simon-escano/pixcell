@@ -22,6 +22,7 @@ import { LiveblocksProvider } from "@liveblocks/react";
 import { BrainCircuit, Clock } from "lucide-react";
 import Room from "./room";
 import LiveblocksWrapper from "@/components/liveblocks-wrapper";
+import { RealtimeCursors } from "@/components/realtime-cursors";
 
 interface SamplePageProps {
   sampleId: string;
@@ -38,16 +39,18 @@ export async function SamplePage({
   const patient = await getPatientById(sample.patientId);
   const profile = await getProfileByUserId(sample.uploadedBy);
   const role = await getRoleById(profile.roleId);
+  const roomName = `sample_${sampleId}`;
+  const username = userProfile.firstName + " " + userProfile.lastName;
 
   return (
     <LiveblocksWrapper>
       <Base>
         <div className="flex h-full flex-1 gap-4 p-4 sm:p-8">
-          <Room roomName={`sample_${sample.id}`}></Room>
+          <Room roomName={roomName} username={username} sample={sample}></Room>
           <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
             <div className="flex flex-row justify-between gap-2">
               <RealtimeAvatarStack
-                roomName={sampleId}
+                roomName={roomName}
                 currentUserFullName={
                   userProfile.firstName + " " + userProfile.lastName
                 }

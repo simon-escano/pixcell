@@ -1,14 +1,11 @@
+import { Button } from "@/components/ui/button";
+import { useMutation, useSelf } from "@liveblocks/react/suspense";
+import { BringToFront, SendToBack, Trash } from "lucide-react";
 import { memo } from "react";
-import ColorPicker from "./ColorPicker";
-import IconButton from "./IconButton";
 import { Camera, Color } from "../../../../types";
-import styles from "./SelectionTools.module.css";
 import useDeleteLayers from "../hooks/useDeleteLayers";
 import useSelectionBounds from "../hooks/useSelectionBounds";
-import { useSelf, useMutation } from "@liveblocks/react/suspense";
-import { Button } from "@/components/ui/button";
-import { BringToFront, SendToBack, Trash } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import ColorPicker from "./ColorPicker";
 
 type SelectionToolsProps = {
   isAnimated: boolean;
@@ -97,7 +94,7 @@ function SelectionTools({
   const y = selectionBounds.y + camera.y;
   return (
     <div
-      className="bg-background user-select-none absolute flex flex-row items-center gap-2 rounded-md p-3 shadow-md"
+      className="bg-card user-select-none absolute z-100 flex flex-row items-center gap-2 rounded-md border p-3 shadow-md"
       style={{
         transform: `translate(calc(${x}px - 50%), calc(${y - 16}px - 100%))`,
       }}

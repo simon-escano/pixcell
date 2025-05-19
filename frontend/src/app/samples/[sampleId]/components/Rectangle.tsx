@@ -21,14 +21,14 @@ export default function Rectangle({
       onPointerDown={(e) => onPointerDown(e, id)}
       style={{
         transform: `translate(${x}px, ${y}px)`,
-        strokeDasharray: "4 2",
+        strokeDasharray: "10 10",
       }}
       x={0}
       y={0}
       width={width}
       height={height}
       fill="transparent"
-      strokeWidth={1}
+      strokeWidth={3}
       stroke={layer.fill ? colorToCss(layer.fill) : "#CCC"}
     />
   );

@@ -34,11 +34,11 @@ function ColorButton({
 }) {
   return (
     <button
-      className={styles.color_swatch_button}
+      className="flex h-7 w-7 items-center justify-center rounded-full transition-all hover:opacity-80"
       onClick={() => onClick(color)}
     >
       <div
-        className={styles.color_swatch}
+        className="border-muted-foreground/20 h-5 w-5 rounded-full border"
         style={{ background: colorToCss(color) }}
       />
     </button>
