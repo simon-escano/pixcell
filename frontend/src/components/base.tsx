@@ -13,7 +13,7 @@ const Base = ({
       <AppSidebar />
       <SidebarInset className="flex flex-col overflow-hidden">
         <Header />
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="-mt-4 flex-1 overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

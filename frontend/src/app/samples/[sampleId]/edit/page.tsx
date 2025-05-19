@@ -1,4 +1,4 @@
-import { SamplePage } from "../SamplePage";
+import { SamplePage } from "../sample-page";
 
 export default async function EditSamplePage({
   params,
