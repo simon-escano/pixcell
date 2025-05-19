@@ -1,11 +1,25 @@
-"use client";
+"use client"
 
-import { getDashboardStats } from "@/actions/dashoard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { Calendar, FileText, Microscope, UserCheck, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { 
+  Users, 
+  Microscope, 
+  FileText, 
+  UserCheck,
+  BarChart3,
+  Activity,
+  TrendingUp,
+  UserPlus,
+  Calendar,
+  Mail,
+  Phone,
+  Award
+} from "lucide-react"
+import { useEffect, useState } from "react"
+import { getDashboardStats } from "@/app/actions"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { format } from "date-fns"
 import {
   CartesianGrid,
   Line,
@@ -14,7 +28,11 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts'
+import { Badge } from "@/components/ui/badge"
 
 interface DashboardStats {
   totalPatients: number;
@@ -50,11 +68,24 @@ interface DashboardStats {
     month: string;
   }[];
   monthlyStats: {
-    totalAppointments: number;
-    newPatients: number;
-    appointmentsChange?: number;
-    newPatientsChange?: number;
-  };
+    totalAppointments: number
+    newPatients: number
+    appointmentsChange?: number
+    newPatientsChange?: number
+  }
+}
+
+interface UserProfile {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string | null
+  imageUrl: string | null
+  role: string
+}
+
+interface DashboardProps {
+  userProfile: UserProfile | null;
 }
 
 function formatDate(date: Date | null) {
@@ -62,31 +93,87 @@ function formatDate(date: Date | null) {
   return format(new Date(date), "MMM d, yyyy");
 }
 
-export function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+// Helper function to transform gender stats data for recharts
+function transformGenderStats(data: DashboardStats['genderStats']) {
+  const transformedData: Record<string, any> = {};
+
+  data.forEach(item => {
+    if (!transformedData[item.month]) {
+      transformedData[item.month] = { month: item.month };
+    }
+    transformedData[item.month][item.gender] = item.count;
+  });
+
+  // Convert object back to array
+  return Object.values(transformedData).sort((a, b) => a.month.localeCompare(b.month));
+}
+
+export function Dashboard({ userProfile }: DashboardProps) {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
         const data = await getDashboardStats();
         setStats(data);
       } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
+        console.error('Error fetching dashboard data:', error)
       } finally {
         setLoading(false);
       }
     }
 
-    fetchStats();
-  }, []);
+    fetchData()
+  }, [])
 
   if (loading) {
     return <DashboardSkeleton />;
   }
 
+  const transformedGenderStats = stats?.genderStats ? transformGenderStats(stats.genderStats) : [];
+
   return (
-    <>
+    <div className="space-y-8 p-8">
+      {/* Profile Section */}
+      {userProfile && (
+        <div className="grid gap-4 md:grid-cols-4 mb-9">
+          {/* Main Profile Card */}
+          <Card className="md:col-span-4 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="p-5">
+              <div className="flex flex-col items-center space-y-3.5">
+                <div className="relative">
+                  <Avatar className="size-24 rounded-full border-3 border-background shadow-md">
+                    <AvatarImage
+                      src={userProfile.imageUrl || ""}
+                      alt={`${userProfile.firstName} ${userProfile.lastName}`}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-lg">
+                      {userProfile.firstName[0]}
+                      {userProfile.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 text-xs font-medium"
+                  >
+                    {userProfile.role}
+                  </Badge>
+                </div>
+                <div className="text-center space-y-0.5">
+                  <h2 className="text-xl font-semibold tracking-tight">
+                    {userProfile.firstName} {userProfile.lastName}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">Welcome back!</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Removed: Info Cards */}
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Patients"
@@ -175,16 +262,15 @@ export function Dashboard() {
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats?.genderStats}>
+                <LineChart data={transformedGenderStats}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    stroke="var(--primary)"
-                  />
+                  {/* Line for Male */}
+                  <Line type="monotone" dataKey="Male" stroke="#8884d8" name="Male" />
+                  {/* Line for Female */}
+                  <Line type="monotone" dataKey="Female" stroke="#82ca9d" name="Female" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
