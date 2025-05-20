@@ -17,7 +17,7 @@ import { PatientSearchCombobox } from "@/components/patients/patient-search-comb
 import UploadSampleFile from "./upload-sample-file";
 import toast from "react-hot-toast";
 import { uploadSampleAction } from "@/actions/samples";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage } from "@/utils";
 import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
 
