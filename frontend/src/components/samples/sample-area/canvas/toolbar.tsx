@@ -48,7 +48,7 @@ export const Toolbar = ({
   disabled,
 }: ToolbarProps) => {
   return (
-    <div className="bg-background border-muted-foreground/20 pointer-events-auto flex items-center flex-wrap justify-between gap-4 rounded-lg rounded-t-none border p-2">
+    <div className="bg-background border-muted-foreground/20 pointer-events-auto flex items-center flex-wrap justify-between gap-2 rounded-lg rounded-t-none border p-2">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap items-center">
           <ToggleGroup
