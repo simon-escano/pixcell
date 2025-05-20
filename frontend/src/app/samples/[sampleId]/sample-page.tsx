@@ -1,4 +1,5 @@
 import Base from "@/components/base";
+import LiveblocksWrapper from "@/components/liveblocks-wrapper";
 import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
 import { ShareDialog } from "@/components/share-dialog";
 import { Button } from "@/components/ui/button";
@@ -18,11 +19,8 @@ import {
   getSampleById,
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
-import { LiveblocksProvider } from "@liveblocks/react";
 import { BrainCircuit, Clock } from "lucide-react";
 import Room from "./room";
-import LiveblocksWrapper from "@/components/liveblocks-wrapper";
-import { RealtimeCursors } from "@/components/realtime-cursors";
 
 interface SamplePageProps {
   sampleId: string;
@@ -46,7 +44,7 @@ export async function SamplePage({
     <LiveblocksWrapper>
       <Base>
         <div className="flex h-full flex-1 gap-4 p-4 sm:p-8">
-          <Room roomName={roomName} username={username} sample={sample}></Room>
+          <Room roomName={roomName} username={username} sample={sample} disabled={disabled}></Room>
           <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
             <div className="flex flex-row justify-between gap-2">
               <RealtimeAvatarStack

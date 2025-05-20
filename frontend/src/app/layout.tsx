@@ -39,9 +39,7 @@ export default function RootLayout({
           {children}
           <Toaster
             toastOptions={{
-              style: {
-                textAlign: "left",
-              },
+              className: "bg-black text-foreground shadow-md rounded-md p-4 text-left",
             }}
           />
         </ThemeProvider>

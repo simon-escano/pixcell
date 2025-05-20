@@ -1,6 +1,5 @@
 import { Color } from "../../../../types";
 import { colorToCss } from "../utils";
-import styles from "./ColorPicker.module.css";
 
 type Props = {
   onChange: (color: Color) => void;
