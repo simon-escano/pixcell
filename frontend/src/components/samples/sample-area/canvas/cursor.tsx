@@ -1,12 +1,13 @@
-import { memo } from "react";
 import { useOther } from "@liveblocks/react/suspense";
-import { connectionIdToColor } from "../../../../utils";
+import { memo } from "react";
+import { connectionIdToColor } from "@/utils";
 
 type Props = {
   connectionId: number;
+  name: string;
 };
 
-function Cursor({ connectionId }: Props) {
+function Cursor({ connectionId, name }: Props) {
   //
   // RATIONALE:
   // Each cursor itself subscribes to _just_ the change for the user. This
@@ -22,9 +23,9 @@ function Cursor({ connectionId }: Props) {
   return (
     <path
       style={{
-        transform: `translateX(${x}px) translateY(${y}px)`,
+        transform: `translateX(${x}px) translateY(${y}px) scale(1.25)`,
       }}
-      d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z"
+      d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
       fill={connectionIdToColor(connectionId)}
     />
   );
