@@ -1,6 +1,6 @@
 import React from "react";
 import { SidebarInset, SidebarProvider } from "./ui/sidebar";
-import { AppSidebar } from "./app-sidebar";
+import { AppSidebar } from "./nav/app-sidebar";
 import Header from "./header";
 
 const Base = ({

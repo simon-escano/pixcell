@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import PatientsTable from "@/components/patients-table";
+import PatientsTable from "@/components/patients/patients-table";
 import { getAllPatients } from "@/db/queries/select";
 
 export default async function PatientsPage() {

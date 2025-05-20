@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import SampleWrapper from "@/components/sample-wrapper";
+import SampleWrapper from "@/components/samples/sample-wrapper";
 import { getAllSamples } from "@/db/queries/select";
 
 export default async function SamplesPage() {
