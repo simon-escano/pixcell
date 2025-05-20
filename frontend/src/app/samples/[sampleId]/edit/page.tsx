@@ -1,4 +1,4 @@
-import { SamplePage } from "../sample-page";
+import { SamplePage } from "../../../../components/samples/sample-area/sample-page";
 
 export default async function EditSamplePage({
   params,

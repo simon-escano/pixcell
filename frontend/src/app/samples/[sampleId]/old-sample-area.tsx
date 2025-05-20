@@ -90,15 +90,6 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
       <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg rounded-t-none border border-t-1 p-2">
         <div className="flex flex-wrap gap-2">
           <Button variant={"outline"} disabled={disabled}>
-            <Sun></Sun>
-          </Button>
-          <Button variant={"outline"} disabled={disabled}>
-            <Contrast></Contrast>
-          </Button>
-          <Button variant={"outline"} disabled={disabled}>
-            <Droplets></Droplets>
-          </Button>
-          <Button variant={"outline"} disabled={disabled}>
             <Pencil></Pencil>
           </Button>
           <Button variant={"outline"} disabled={disabled}>

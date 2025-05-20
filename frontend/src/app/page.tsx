@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { Dashboard } from "@/components/dashboard";
+import { Dashboard } from "@/components/dashboard/dashboard";
 
 export default function Page() {
   return (
