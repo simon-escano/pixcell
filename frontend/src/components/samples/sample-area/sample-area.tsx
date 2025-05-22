@@ -1,3 +1,5 @@
+"use client";
+
 import { Sample } from "@/db/schema";
 import {
   CanvasMode,
@@ -41,15 +43,11 @@ import {
 const MAX_LAYERS = 100;
 
 type SampleAreaProps = {
-  roomName: string;
-  username: string;
   sample: Sample;
   disabled?: boolean;
 };
 
 export default function SampleArea({
-  roomName,
-  username,
   sample,
   disabled,
 }: SampleAreaProps) {

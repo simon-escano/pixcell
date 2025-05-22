@@ -1,3 +1,4 @@
+import { Profile } from "@/db/schema";
 import { Color, Layer, Point } from "@/types";
 import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 
@@ -5,6 +6,7 @@ declare global {
   interface Liveblocks {
     // Each user's Presence, for useMyPresence, useOthers, etc.
     Presence: {
+      profile: Profile
       selection: string[];
       cursor: Point | null;
       pencilDraft: [x: number, y: number, pressure: number][] | null;

@@ -1,6 +1,6 @@
 import { useOther } from "@liveblocks/react/suspense";
-import { memo } from "react";
-import { connectionIdToColor } from "@/utils";
+import { memo, useEffect } from "react";
+import { connectionIdToColor, userIdToColor } from "@/utils";
 
 type Props = {
   connectionId: number;
@@ -14,7 +14,9 @@ function Cursor({ connectionId, name }: Props) {
   // means that if only one user's cursor is moving, only one <Cursor />
   // component has to re-render. All the others can remain idle.
   //
-  const cursor = useOther(connectionId, (user) => user.presence.cursor);
+  const user = useOther(connectionId, (u) => u);
+
+  const cursor = user?.presence?.cursor;
   if (!cursor) {
     return null;
   }
@@ -26,7 +28,7 @@ function Cursor({ connectionId, name }: Props) {
         transform: `translateX(${x}px) translateY(${y}px) scale(1.25)`,
       }}
       d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
-      fill={connectionIdToColor(connectionId)}
+      fill={userIdToColor(user.presence.profile.userId)}
     />
   );
 }

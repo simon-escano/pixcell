@@ -1,4 +1,4 @@
-import { SamplePage } from "../../../../components/samples/sample-area/sample-page";
+import { SamplePageWrapper } from "@/components/samples/sample-area/sample-page-wrapper";
 
 export default async function ViewSamplePage({
   params,
@@ -6,5 +6,5 @@ export default async function ViewSamplePage({
   params: Promise<{ sampleId: string }>;
 }) {
   const sampleId = (await params).sampleId;
-  return <SamplePage sampleId={sampleId} disabled={true} />;
+  return <SamplePageWrapper sampleId={sampleId} disabled={true} />;
 }

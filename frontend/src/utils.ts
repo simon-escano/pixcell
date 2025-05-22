@@ -24,6 +24,19 @@ export function connectionIdToColor(connectionId: number): string {
   return COLORS[connectionId % COLORS.length];
 }
 
+export function userIdToColor(userId: string): string {
+  const hash = [...userId].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hue = hash % 360, s = 70, l = 50;
+  const a = s / 100 * Math.min(l / 100, 1 - l / 100);
+  const f = (n: number) => {
+    const k = (n + hue / 30) % 12;
+    const color = l / 100 - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  const color = `#${f(0)}${f(8)}${f(4)}`;
+  return color;
+}
+
 export function resizeBounds(bounds: XYWH, corner: Side, point: Point): XYWH {
   const result = {
     x: bounds.x,
