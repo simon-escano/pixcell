@@ -4,7 +4,7 @@ import { getDashboardStats } from "@/actions/dashoard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Calendar, FileText, Microscope, UserCheck, Users } from "lucide-react";
+import { Calendar, FileText, Microscope, UserCheck, Users, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -14,13 +14,15 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Legend,
 } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DashboardStats {
   totalPatients: number;
   totalSamples: number;
   totalReports: number;
-  activeUsers: number;
   reportsLast30Days: number;
   reportsPerPatient: number;
   patientsWithLastReport: {
@@ -57,14 +59,19 @@ interface DashboardStats {
   };
 }
 
-function formatDate(date: Date | null) {
-  if (!date) return "N/A";
-  return format(new Date(date), "MMM d, yyyy");
+interface DashboardProps {
+  userProfile: {
+    firstName: string;
+    lastName: string;
+    imageUrl: string | null;
+  };
+  userRole: string;
 }
 
-export function Dashboard() {
+export function Dashboard({ userProfile, userRole }: DashboardProps) {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [genderFilter, setGenderFilter] = useState<string>("all");
 
   useEffect(() => {
     async function fetchStats() {
@@ -85,8 +92,48 @@ export function Dashboard() {
     return <DashboardSkeleton />;
   }
 
+  // Transform data for the line chart
+  const transformedData = stats?.genderStats.reduce((acc: any[], curr) => {
+    const existingMonth = acc.find(item => item.month === curr.month);
+    if (existingMonth) {
+      existingMonth[curr.gender.toLowerCase()] = curr.count;
+    } else {
+      acc.push({
+        month: curr.month,
+        [curr.gender.toLowerCase()]: curr.count,
+        male: curr.gender.toLowerCase() === 'male' ? curr.count : 0,
+        female: curr.gender.toLowerCase() === 'female' ? curr.count : 0,
+      });
+    }
+    return acc;
+  }, []).sort((a, b) => a.month.localeCompare(b.month));
+
   return (
-    <>
+    <div className="space-y-6">
+      <Card className="bg-sidebar-accent border-none">
+        <CardContent className="">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-14 w-14 rounded-lg">
+              <AvatarImage 
+                src={userProfile?.imageUrl || ""} 
+                alt={`${userProfile?.firstName} ${userProfile?.lastName}`}
+                className="rounded-lg" 
+              />
+              <AvatarFallback className="bg-primary/10 rounded-lg">
+                {userProfile?.firstName?.[0]}
+                {userProfile?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-lg font-semibold">
+                {userProfile?.firstName} {userProfile?.lastName}
+              </p>
+              <p className="text-muted-foreground text-sm">{userRole}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Patients"
@@ -104,86 +151,71 @@ export function Dashboard() {
           icon={<FileText className="text-muted-foreground h-4 w-4" />}
         />
         <StatCard
-          title="Active Users"
-          value={stats?.activeUsers ?? 0}
-          icon={<UserCheck className="text-muted-foreground h-4 w-4" />}
+          title="New Patients"
+          value={stats?.monthlyStats.newPatients ?? 0}
+          icon={<Users className="text-muted-foreground h-4 w-4" />}
+          subtitle={
+            <p className="text-muted-foreground mt-1.5 text-xs">
+              <span
+                className={stats?.monthlyStats?.newPatientsChange && stats.monthlyStats.newPatientsChange > 0 ? "text-green-500" : "text-red-500"}
+              >
+                {stats?.monthlyStats?.newPatientsChange && stats.monthlyStats.newPatientsChange > 0 ? "+" : ""}
+                {stats?.monthlyStats?.newPatientsChange?.toFixed(1) ?? 0}%
+              </span>
+              {" from last month"}
+            </p>
+          }
         />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="leading-none font-semibold">
-              Total Appointments
-            </CardTitle>
-            <Calendar className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl leading-none font-bold">
-              {stats?.monthlyStats.totalAppointments}
-            </div>
-            {(() => {
-              const change = stats?.monthlyStats?.appointmentsChange ?? 0;
-              return (
-                <p className="text-muted-foreground mt-1.5 text-xs">
-                  <span
-                    className={change > 0 ? "text-green-500" : "text-red-500"}
-                  >
-                    {change > 0 ? "+" : ""}
-                    {change.toFixed(1)}%
-                  </span>
-                  {" from last month"}
-                </p>
-              );
-            })()}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="leading-none font-semibold">
-              New Patients
-            </CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl leading-none font-bold">
-              {stats?.monthlyStats.newPatients}
-            </div>
-            {(() => {
-              const change = stats?.monthlyStats?.appointmentsChange ?? 0;
-              return (
-                <p className="text-muted-foreground mt-1.5 text-xs">
-                  <span
-                    className={change > 0 ? "text-green-500" : "text-red-500"}
-                  >
-                    {change > 0 ? "+" : ""}
-                    {change.toFixed(1)}%
-                  </span>
-                  {" from last month"}
-                </p>
-              );
-            })()}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-2">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Patient Visits by Gender</CardTitle>
+            <Select value={genderFilter} onValueChange={setGenderFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Genders</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+              </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats?.genderStats}>
+                <LineChart data={transformedData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
+                  <XAxis 
+                    dataKey="month" 
+                    tickFormatter={(value) => format(new Date(value + '-01'), 'MMM yyyy')}
+                  />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip 
+                    formatter={(value: number) => [value, 'Patients']}
+                    labelFormatter={(label) => format(new Date(label + '-01'), 'MMMM yyyy')}
+                  />
                   <Line
                     type="monotone"
-                    dataKey="count"
-                    stroke="var(--primary)"
+                    dataKey="male"
+                    name="Male"
+                    stroke="#3b82f6"
+                    strokeWidth={genderFilter === "male" ? 3 : 2}
+                    opacity={genderFilter === "all" || genderFilter === "male" ? 1 : 0.3}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="female"
+                    name="Female"
+                    stroke="#ec4899"
+                    strokeWidth={genderFilter === "female" ? 3 : 2}
+                    opacity={genderFilter === "all" || genderFilter === "female" ? 1 : 0.3}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -211,10 +243,10 @@ export function Dashboard() {
                           <img
                             src={report.userImage}
                             alt={report.userName}
-                            className="h-8 w-8 rounded-full"
+                            className="h-8 w-8 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="bg-sidebar-accent flex h-8 w-8 items-center justify-center rounded-full">
+                          <div className="bg-sidebar-accent flex h-8 w-8 items-center justify-center rounded-lg">
                             <span className="text-muted-foreground text-sm font-medium">
                               {report.userName
                                 .split(" ")
@@ -271,7 +303,7 @@ export function Dashboard() {
                         <img
                           src={upload.imageUrl}
                           alt="Sample"
-                          className="h-8 w-8 rounded object-cover"
+                          className="h-8 w-8 rounded-lg object-cover"
                         />
                       </div>
                       <div>
@@ -294,18 +326,25 @@ export function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
+}
+
+function formatDate(date: Date | null) {
+  if (!date) return "N/A";
+  return format(new Date(date), "MMM d, yyyy");
 }
 
 function StatCard({
   title,
   value,
   icon,
+  subtitle,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
+  subtitle?: React.ReactNode;
 }) {
   return (
     <Card>
@@ -315,6 +354,7 @@ function StatCard({
       </CardHeader>
       <CardContent>
         <div className="text-3xl leading-6 font-bold">{value}</div>
+        {subtitle}
       </CardContent>
     </Card>
   );
