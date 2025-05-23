@@ -1,9 +1,11 @@
 import Base from "@/components/base";
 import SampleWrapper from "@/components/sample-wrapper";
-import { getAllSamples } from "@/db/queries/select";
+import { getSamplesByUserId } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
 
 export default async function SamplesPage() {
-  const samples = await getAllSamples();
+  const user = await getUser();
+  const samples = await getSamplesByUserId(user.id);
   return (
     <Base>
       <div className="grid w-full grid-cols-2 gap-4 p-4 sm:grid-cols-3 sm:p-8 md:grid-cols-4 lg:grid-cols-5">

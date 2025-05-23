@@ -78,7 +78,32 @@ export async function getReportById(reportId: string) {
 }
 
 export async function getReportsByGeneratedBy(userId: string) {
-  return await db.select().from(report).where(eq(report.generatedBy, userId));
+  return await db
+    .select({
+      id: report.id,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      patientImage: patient.imageUrl,
+      generatedById: user.id,
+      generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+      generatedByImage: profile.imageUrl,
+      generatedByRole: role.name
+    })
+    .from(report)
+    .leftJoin(sample, eq(report.sampleId, sample.id))
+    .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(user, eq(report.generatedBy, user.id))
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(role, eq(profile.roleId, role.id))
+    .where(eq(report.generatedBy, userId))
+    .orderBy(report.createdAt);
 }
 
 export async function getReportCountByPatientId(patientId: string) {
@@ -193,4 +218,32 @@ export async function getMonthlyStats() {
     currentMonth: currentMonthStats[0],
     lastMonth: lastMonthStats[0],
   };
+}
+
+export async function getAllReports() {
+  return await db
+    .select({
+      id: report.id,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      patientImage: patient.imageUrl,
+      generatedById: user.id,
+      generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+      generatedByImage: profile.imageUrl,
+      generatedByRole: role.name
+    })
+    .from(report)
+    .leftJoin(sample, eq(report.sampleId, sample.id))
+    .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(user, eq(report.generatedBy, user.id))
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(role, eq(profile.roleId, role.id))
+    .orderBy(report.createdAt);
 }
