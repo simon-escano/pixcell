@@ -14,7 +14,7 @@ export default function Avatars() {
 
   return (
     <div
-      className="-space-x-0"
+      className="-space-x-4 flex flex-row"
     >
       {shownAvatars.map(({userId, firstName, lastName, imageUrl}, index) => (
         <Tooltip key={`${firstName + " " + lastName}-${imageUrl}-${index}`}>
