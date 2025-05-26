@@ -29,6 +29,27 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Camera } from "lucide-react";
 import { PhoneInput } from "./ui/phone-input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import {
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  FilterFn,
+  ColumnDef,
+} from "@tanstack/react-table";
 
 type CombinedUser = {
   id: User["id"];
@@ -41,7 +62,10 @@ type CombinedUser = {
   roleName: Role["name"];
 };
 
-export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
+export const UsersTable = ({
+  users,
+  roles,
+}: { users: CombinedUser[]; roles: Role[] }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -49,10 +73,12 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [roleValue, setRoleValue] = useState<string>("");
+  const [rowSelection, setRowSelection] = React.useState({});
 
   useEffect(() => {
     if (selectedUser) {
       setRoleValue(selectedUser.roleId);
+      setPreview(selectedUser.imageUrl);
     }
   }, [selectedUser]);
 
@@ -103,30 +129,73 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     }
   };
 
-  const actionItems = [
+  const columns: ColumnDef<CombinedUser>[] = [
     {
-      label: "Copy User ID",
-      onClick: (user: CombinedUser) => {
-        navigator.clipboard.writeText(user.id);
-        toast.success("User ID copied to clipboard");
-      },
+      accessorKey: "lastName",
+      header: "Last Name",
     },
     {
-      label: "Edit User",
-      onClick: (user: CombinedUser) => {
-        setSelectedUser(user);
-        setEditOpen(true);
-      },
+      accessorKey: "firstName",
+      header: "First Name",
     },
     {
-      label: "Delete User",
-      onClick: (user: CombinedUser) => {
-        setSelectedUser(user);
-        setDeleteOpen(true);
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "phone",
+      header: "Phone",
+    },
+    {
+      accessorKey: "roleName",
+      header: "Role",
+    },
+    {
+      accessorKey: "id",
+      header: "ID",
+      enableHiding: true,
+    },
+    {
+      accessorKey: "imageUrl",
+      header: "Image",
+      enableHiding: true,
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }: { row: { original: CombinedUser } }) => {
+        const user = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
+                Copy User ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => {
+                setSelectedUser(user);
+                setEditOpen(true);
+              }}>
+                Edit user
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-red-500" onClick={() => {
+                setSelectedUser(user);
+                setDeleteOpen(true);
+              }}>
+                Delete user
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
       },
-      customRender: () => (
-        <button className="text-red-500 hover:text-red-700">Delete User</button>
-      ),
     },
   ];
 
@@ -134,9 +203,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     <div>
       <DataTable
         data={users}
-        excludeColumns={["roleId"]}
-        columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
-        actionItems={actionItems}
+        customColumns={columns}
         onRowClick={(user: CombinedUser) => {
           router.push(`/users/${user.id}`);
         }}
@@ -232,21 +299,11 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="41ae0f54-b306-4ae2-9bb6-c33776fae906">
-                    Pathologist
-                  </SelectItem>
-                  <SelectItem value="7e12a5bb-597c-4d69-8e2e-90666c08d6f7">
-                    Hematologist
-                  </SelectItem>
-                  <SelectItem value="f080882b-2922-42a3-800b-50a65e2c4822">
-                    Medical Technologist
-                  </SelectItem>
-                  <SelectItem
-                    value="c404ee51-8979-48d9-bf24-38d071dd6b37"
-                    className="text-primary"
-                  >
-                    Administrator
-                  </SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

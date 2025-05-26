@@ -15,7 +15,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { NavSecondary } from "./nav-secondary";
+import { NavSecondaryWrapper } from "./nav-secondary-wrapper";
 import { getUser } from "@/lib/auth";
 import {
   getProfileByUserId,
@@ -54,7 +54,7 @@ export async function AppSidebar({
       <SidebarContent>
         <NavMain />
         <NavRecents recentSamples={recentSamples} />
-        <NavSecondary />
+        <NavSecondaryWrapper />
         <NavTertiary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

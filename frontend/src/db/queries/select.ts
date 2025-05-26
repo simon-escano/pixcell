@@ -25,7 +25,8 @@ export async function getAllUsersWithProfiles() {
     })
     .from(user)
     .leftJoin(profile, eq(user.id, profile.userId))
-    .leftJoin(role, eq(profile.roleId, role.id));
+    .leftJoin(role, eq(profile.roleId, role.id))
+    .orderBy(profile.lastName);
 }
 
 export async function getAllProfiles() {
@@ -66,6 +67,10 @@ export async function getProfileByUserId(userId: string) {
 export async function getRoleById(id: string) {
   const result = await db.select().from(role).where(eq(role.id, id));
   return result[0];
+}
+
+export async function getAllRoles() {
+  return await db.select().from(role);
 }
 
 export async function getReportsBySampleId(sampleId: string) {

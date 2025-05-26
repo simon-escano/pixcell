@@ -1,15 +1,22 @@
 import Base from "@/components/base";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getReportsByGeneratedBy } from "@/db/queries/select";
+import { getAllReports, getReportsByGeneratedBy } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { format } from "date-fns";
 import { FileText, User } from "lucide-react";
 import Link from "next/link";
+import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 
 export default async function ReportsPage() {
   const user = await getUser();
-  const reports = await getReportsByGeneratedBy(user.id);
+  const profile = await getProfileByUserId(user.id);
+  const role = await getRoleById(profile.roleId);
+  
+  // If user is admin, show all reports, otherwise show only user's reports
+  const reports = role.name === "Administrator"
+    ? await getAllReports()
+    : await getReportsByGeneratedBy(user.id);
 
   return (
     <Base>
