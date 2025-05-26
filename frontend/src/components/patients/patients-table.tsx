@@ -5,9 +5,9 @@ import { Patient } from "@/db/schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { CustomAlertDialog } from "./custom-alert-dialog";
-import { DataTable } from "./data-table";
 import { PatientDialog } from "./patient-dialog";
+import { DataTable } from "../data-table";
+import { CustomAlertDialog } from "../custom-alert-dialog";
 
 const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const router = useRouter();
