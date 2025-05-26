@@ -22,7 +22,7 @@ function Cursors() {
   return (
     <>
       {ids.map((connectionId) => (
-        <Cursor key={connectionId} connectionId={connectionId} />
+        <Cursor key={connectionId} connectionId={connectionId} name="Bruh" />
       ))}
     </>
   );

@@ -17,13 +17,14 @@ import {
   Search,
   SquareDashed,
   Sun,
+  Type,
   Undo
 } from "lucide-react";
 
 interface ToolbarProps {
   canvasMode: CanvasMode;
   setCanvasMode: (mode: CanvasMode) => void;
-  setInsertingMode: (layerType: LayerType.Rectangle | LayerType.Ellipse) => void;
+  setInsertingMode: (layerType: LayerType.Rectangle | LayerType.Ellipse | LayerType.Text) => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -112,6 +113,14 @@ export const Toolbar = ({
               onClick={() => setInsertingMode(LayerType.Ellipse)}
             >
               <CircleDashed />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              variant={"outline"}
+              value="text"
+              disabled={disabled}
+              onClick={() => setInsertingMode(LayerType.Text)}
+            >
+              <Type />
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

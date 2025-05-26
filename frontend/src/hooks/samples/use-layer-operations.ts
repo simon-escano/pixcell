@@ -16,7 +16,7 @@ export const useLayerOperations = (
   const insertLayer = useMutation(
     (
       { storage, setMyPresence },
-      layerType: LayerType.Ellipse | LayerType.Rectangle,
+      layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Text,
       position: Point,
     ) => {
       const liveLayers = storage.get("layers");
@@ -31,6 +31,12 @@ export const useLayerOperations = (
         height: 100,
         width: 100,
         fill: lastUsedColor,
+        ...(layerType === LayerType.Text && {
+          value: "Double click to edit",
+          fontSize: 24,
+          fontFamily: "Arial",
+          fontWeight: "bold",
+        }),
       });
       liveLayerIds.push(layerId);
       liveLayers.set(layerId, layer);

@@ -8,6 +8,7 @@ export enum LayerType {
   Rectangle,
   Ellipse,
   Path,
+  Text,
 }
 
 export type Camera = {
@@ -15,7 +16,7 @@ export type Camera = {
   y: number;
 };
 
-export type Layer = RectangleLayer | EllipseLayer | PathLayer;
+export type Layer = RectangleLayer | EllipseLayer | PathLayer | TextLayer;
 
 export type RectangleLayer = {
   type: LayerType.Rectangle;
@@ -45,6 +46,18 @@ export type PathLayer = {
   width: number;
   fill: Color;
   points: number[][];
+};
+
+export type TextLayer = {
+  type: LayerType.Text;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  value: string;
+  fontSize: number;
+  fontFamily: string;
 };
 
 export type Point = {

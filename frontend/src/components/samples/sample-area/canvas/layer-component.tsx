@@ -5,6 +5,7 @@ import { colorToCss } from "../../../../utils";
 import Ellipse from "./ellipse";
 import Path from "./path";
 import Rectangle from "./rectangle";
+import { TextLayerComponent } from "./text-layer";
 
 type Props = {
   id: string;
@@ -48,6 +49,15 @@ const LayerComponent = memo(
       case LayerType.Rectangle:
         return (
           <Rectangle
+            id={id}
+            layer={layer}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
+          />
+        );
+      case LayerType.Text:
+        return (
+          <TextLayerComponent
             id={id}
             layer={layer}
             onPointerDown={onLayerPointerDown}
