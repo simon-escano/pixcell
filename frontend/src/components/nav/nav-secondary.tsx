@@ -28,13 +28,13 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-export function NavSecondary() {
+export function NavSecondary({ isAdmin }: { isAdmin: boolean }) {
   const items = [
-    {
+    ...(isAdmin ? [{
       title: "Other users",
       url: "/users",
       icon: UsersRound,
-    },
+    }] : []),
     {
       title: "Settings",
       url: "#",
@@ -59,6 +59,7 @@ export function NavSecondary() {
       ],
     },
   ];
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Administration</SidebarGroupLabel>
