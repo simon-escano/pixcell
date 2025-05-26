@@ -1,4 +1,4 @@
-import { SamplePage } from "../SamplePage";
+import { SamplePageWrapper } from "@/components/samples/sample-area/sample-page-wrapper";
 
 export default async function EditSamplePage({
   params,
@@ -6,5 +6,5 @@ export default async function EditSamplePage({
   params: Promise<{ sampleId: string }>;
 }) {
   const sampleId = (await params).sampleId;
-  return <SamplePage sampleId={sampleId} />;
+  return <SamplePageWrapper sampleId={sampleId} />;
 }

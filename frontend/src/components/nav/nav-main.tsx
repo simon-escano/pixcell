@@ -8,8 +8,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import UploadSampleWrapper from "./upload-sample-wrapper";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
+import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 
 export function NavMain() {
   const items = [

@@ -15,12 +15,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Patient, Profile, Role, Sample } from "@/db/schema";
-import { formatTime } from "@/lib/utils";
+import { formatTime } from "@/utils";
 import { Clock } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import UserButton from "./user-button";
+import UserButton from "../users/user-button";
 import { toast } from "react-hot-toast";
 import { deleteSample } from "@/actions/samples";
 

@@ -6,8 +6,8 @@ import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { CustomAlertDialog } from "./custom-alert-dialog";
-import { DataTable } from "./data-table";
+import { CustomAlertDialog } from "../custom-alert-dialog";
+import { DataTable } from "../data-table";
 import {
   Dialog,
   DialogContent,
@@ -15,20 +15,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+} from "../ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Camera } from "lucide-react";
-import { PhoneInput } from "./ui/phone-input";
+import { PhoneInput } from "../ui/phone-input";
 
 type CombinedUser = {
   id: User["id"];

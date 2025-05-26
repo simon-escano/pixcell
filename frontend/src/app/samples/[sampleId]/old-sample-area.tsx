@@ -1,9 +1,18 @@
 "use client";
 
+import { RealtimeCursors } from "@/components/realtime-cursors";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Sample } from "@/db/schema";
 import { useCurrentUserName } from "@/hooks/use-current-user-name";
+import { useOthers } from "@liveblocks/react";
 import {
   CircleDashed,
   Contrast,
@@ -18,14 +27,6 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { RealtimeCursors } from "./realtime-cursors";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 type SampleAreaProps = {
   sample: Sample;
@@ -43,6 +44,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
 
   const username = useCurrentUserName();
   const roomName = `sample_${String(sample.id)}`;
+  const others = useOthers();
 
   async function handleProcessImage() {
     try {
@@ -87,15 +89,6 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
       </div>
       <Card className="flex w-full flex-row flex-wrap justify-between gap-2 overflow-hidden rounded-lg rounded-t-none border border-t-1 p-2">
         <div className="flex flex-wrap gap-2">
-          <Button variant={"outline"} disabled={disabled}>
-            <Sun></Sun>
-          </Button>
-          <Button variant={"outline"} disabled={disabled}>
-            <Contrast></Contrast>
-          </Button>
-          <Button variant={"outline"} disabled={disabled}>
-            <Droplets></Droplets>
-          </Button>
           <Button variant={"outline"} disabled={disabled}>
             <Pencil></Pencil>
           </Button>

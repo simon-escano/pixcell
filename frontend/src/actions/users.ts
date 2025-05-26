@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { profile, user } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
-import { getErrorMessage } from "@/lib/utils"
+import { getErrorMessage } from "@/utils"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm";
 

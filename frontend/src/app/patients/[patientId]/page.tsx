@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import SampleWrapper from "@/components/sample-wrapper";
+import SampleWrapper from "@/components/samples/sample-wrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

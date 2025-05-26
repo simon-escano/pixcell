@@ -29,7 +29,7 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { logoutAction } from "@/actions/users";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { User } from "@supabase/supabase-js";
 import { Profile } from "@/db/schema";
 

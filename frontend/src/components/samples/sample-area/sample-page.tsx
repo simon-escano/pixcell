@@ -1,54 +1,45 @@
-import Base from "@/components/base";
-import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
-import SampleArea from "@/components/sample-area";
-import { ShareDialog } from "@/components/share-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import UserButton from "@/components/user-button";
-import {
-  getPatientById,
-  getProfileByUserId,
-  getRoleById,
-  getSampleById,
-} from "@/db/queries/select";
-import { getUser } from "@/lib/auth";
-import { BrainCircuit, Clock } from "lucide-react";
+"use client";
 
-interface SamplePageProps {
-  sampleId: string;
-  disabled?: boolean;
-}
+import Avatars from '@/components/avatars';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import UserButton from '@/components/users/user-button';
+import { Patient, Profile, Role, Sample } from '@/db/schema';
+import { LiveList, LiveMap, LiveObject } from '@liveblocks/client';
+import { ClientSideSuspense, RoomProvider } from '@liveblocks/react';
+import { BrainCircuit, Clock } from 'lucide-react';
+import { ShareDialog } from '../share-dialog';
+import SampleArea from './sample-area';
 
-export async function SamplePage({
-  sampleId,
-  disabled = false,
-}: SamplePageProps) {
-  const user = await getUser();
-  const userProfile = await getProfileByUserId(user.id);
-  const sample = await getSampleById(sampleId);
-  const patient = await getPatientById(sample.patientId);
-  const profile = await getProfileByUserId(sample.uploadedBy);
-  const role = await getRoleById(profile.roleId);
-
+export function SamplePage({roomName, patient, profile, role, sample, disabled}: {roomName: string, patient: Patient, profile: Profile, role: Role, sample: Sample, disabled?: boolean}) {
   return (
-    <Base>
+    <RoomProvider
+      id={roomName}
+      initialPresence={{
+        profile: profile,
+        selection: [],
+        cursor: null,
+        pencilDraft: null,
+        penColor: null,
+      }}
+      initialStorage={{
+        layers: new LiveMap<string, LiveObject<any>>(),
+        layerIds: new LiveList([]),
+      }}
+      >
       <div className="flex h-full flex-1 gap-4 p-4 sm:p-8">
-        <SampleArea sample={sample} disabled={disabled} />
+        <ClientSideSuspense fallback={<Spinner />}>
+          <SampleArea
+            sample={sample}
+            disabled={disabled}
+          />
+        </ClientSideSuspense>
         <div className="flex h-full min-w-40 flex-col gap-3 overflow-hidden">
           <div className="flex flex-row justify-between gap-2">
-            <RealtimeAvatarStack
-              roomName={sampleId}
-              currentUserFullName={
-                userProfile.firstName + " " + userProfile.lastName
-              }
-            ></RealtimeAvatarStack>
+            <ClientSideSuspense fallback={<Spinner />}>
+              <Avatars />
+            </ClientSideSuspense>
             <ShareDialog />
           </div>
           <Card className="flex flex-col gap-2 p-3">
@@ -115,6 +106,6 @@ export async function SamplePage({
           </Card>
         </div>
       </div>
-    </Base>
-  );
+    </RoomProvider>
+  )
 }

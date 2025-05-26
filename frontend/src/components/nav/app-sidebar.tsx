@@ -1,10 +1,10 @@
 import type * as React from "react";
 import { Command, Worm } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavRecents } from "@/components/nav-recents";
-import { NavTertiary } from "@/components/nav-tertiary";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from "@/components/nav/nav-main";
+import { NavRecents } from "@/components/nav/nav-recents";
+import { NavTertiary } from "@/components/nav/nav-tertiary";
+import { NavUser } from "@/components/nav/nav-user";
 import {
   Sidebar,
   SidebarContent,

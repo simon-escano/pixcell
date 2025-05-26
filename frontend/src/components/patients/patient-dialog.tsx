@@ -26,9 +26,9 @@ import toast from "react-hot-toast";
 import { addPatient, updatePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, CirclePlus } from "lucide-react";
-import { PhoneInput } from "./ui/phone-input";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 type Props = {
   open?: boolean;

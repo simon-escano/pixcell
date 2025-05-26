@@ -13,13 +13,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PatientSearchCombobox } from "./patient-search-combobox";
+import { PatientSearchCombobox } from "@/components/patients/patient-search-combobox";
 import UploadSampleFile from "./upload-sample-file";
 import toast from "react-hot-toast";
 import { uploadSampleAction } from "@/actions/samples";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage } from "@/utils";
 import { useRouter } from "next/navigation";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 
 export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
   const router = useRouter();
