@@ -80,6 +80,22 @@ export const logoutAction = async () => {
   }
 };
 
+export const resetPasswordAction = async (formData: FormData) => {
+  try {
+    const email = formData.get("email") as string;
+    const auth = await getSupabaseAuth();
+
+    const { error } = await auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery`,
+    });
+    if (error) throw error;
+
+    return { errorMessage: null };
+  } catch (error) {
+    return { errorMessage: getErrorMessage(error) };
+  }
+};
+
 export async function deleteUser(userId: string) {
   try {
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);

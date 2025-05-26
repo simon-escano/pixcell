@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { loginAction } from "@/actions/users";
 import toast from "react-hot-toast";
+import { ForgotPasswordDialog } from "./forgot-password-dialog";
 
 export function LoginForm({
   className,
@@ -74,12 +75,7 @@ export function LoginForm({
                   <Button type="submit" className="w-full cursor-pointer">
                     Login
                   </Button>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
+                  <ForgotPasswordDialog />
                 </div>
               </div>
               <div className="text-center text-sm">

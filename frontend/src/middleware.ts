@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const unprotectedPaths = ["/login", "/signup"];
+  const unprotectedPaths = ["/login", "/signup", "/reset-password"];
   const user = await getUser(request, response);
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
