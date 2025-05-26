@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { validatePassword } from "@/utils/password";
 
 export function SignupForm({
   className,
@@ -32,6 +33,15 @@ export function SignupForm({
 
   const handleClickSignupButton = async (formData: FormData) => {
     startTransition(async () => {
+      const password = formData.get("password") as string;
+      
+      // Validate password strength
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        validation.errors.forEach(error => toast.error(error));
+        return;
+      }
+
       const { errorMessage } = await signupAction(formData);
       if (!errorMessage) {
         router.replace("/");
@@ -62,58 +72,60 @@ export function SignupForm({
                   Sign up to continue
                 </span>
               </div>
-              <div className="grid gap-6">
-                <div className="grid gap-4">
-                  <div className="flex w-full gap-2">
-                    <Input
-                      type="text"
-                      name="firstname"
-                      placeholder="First Name"
-                      required
-                      disabled={isPending}
-                    />
-                    <Input
-                      type="text"
-                      name="lastname"
-                      placeholder="Last Name"
-                      required
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <Select name="role" disabled={isPending} required>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="41ae0f54-b306-4ae2-9bb6-c33776fae906">
-                        Pathologist
-                      </SelectItem>
-                      <SelectItem value="7e12a5bb-597c-4d69-8e2e-90666c08d6f7">
-                        Hematologist
-                      </SelectItem>
-                      <SelectItem value="f080882b-2922-42a3-800b-50a65e2c4822">
-                        Medical Technologist
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="grid gap-4">
+                <div className="flex w-full gap-2">
                   <Input
-                    name="email"
-                    id="email"
-                    type="email"
-                    placeholder="Email"
+                    type="text"
+                    name="firstname"
+                    placeholder="First Name"
                     required
+                    disabled={isPending}
                   />
                   <Input
-                    name="password"
-                    id="password"
-                    type="password"
-                    placeholder="Password"
+                    type="text"
+                    name="lastname"
+                    placeholder="Last Name"
                     required
+                    disabled={isPending}
                   />
                 </div>
-                <Button type="submit" className="w-full cursor-pointer">
-                  Sign Up
+
+                <Select name="role" disabled={isPending} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="41ae0f54-b306-4ae2-9bb6-c33776fae906">
+                      Pathologist
+                    </SelectItem>
+                    <SelectItem value="7e12a5bb-597c-4d69-8e2e-90666c08d6f7">
+                      Hematologist
+                    </SelectItem>
+                    <SelectItem value="f080882b-2922-42a3-800b-50a65e2c4822">
+                      Medical Technologist
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  name="email"
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  required
+                />
+                <Input
+                  name="password"
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  minLength={8}
+                />
+                <div className="text-xs text-muted-foreground">
+                  Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.
+                </div>
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {isPending ? "Creating account..." : "Sign Up"}
                 </Button>
               </div>
               <div className="text-center text-sm">

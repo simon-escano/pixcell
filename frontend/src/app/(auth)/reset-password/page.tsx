@@ -15,6 +15,7 @@ import { createClient } from "@/lib/client";
 import toast from "react-hot-toast";
 import { Worm } from "lucide-react";
 import Link from "next/link";
+import { validatePassword } from "@/utils/password";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -77,6 +78,13 @@ export default function ResetPasswordPage() {
 
         if (password !== confirmPassword) {
           toast.error("Passwords do not match");
+          return;
+        }
+
+        // Validate password strength
+        const validation = validatePassword(password);
+        if (!validation.isValid) {
+          validation.errors.forEach(error => toast.error(error));
           return;
         }
 
@@ -144,15 +152,18 @@ export default function ResetPasswordPage() {
                 type="password"
                 placeholder="New password"
                 required
-                minLength={6}
+                minLength={8}
               />
               <Input
                 name="confirmPassword"
                 type="password"
                 placeholder="Confirm new password"
                 required
-                minLength={6}
+                minLength={8}
               />
+              <div className="text-xs text-muted-foreground">
+                Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.
+              </div>
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? "Resetting..." : "Reset Password"}
               </Button>
