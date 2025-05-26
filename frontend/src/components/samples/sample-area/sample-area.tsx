@@ -299,7 +299,7 @@ export default function SampleArea({
         />
         <svg
           ref={canvasRef}
-          className="bg-background relative inset-0 h-full w-full flex-1 rounded-lg rounded-b-none border border-b-0 [background-image:radial-gradient(var(--border)_1px,transparent_1px)] [background-size:16px_16px]"
+          className="bg-background relative inset-0 h-full w-full flex-1 rounded-lg rounded-b-none border border-b-0 [background-image:radial-gradient(var(--border)_2px,transparent_2px)] [background-size:16px_16px]"
           onWheel={onWheel}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
