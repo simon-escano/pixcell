@@ -15,13 +15,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { NavSecondaryWrapper } from "./nav-secondary-wrapper";
 import { getUser } from "@/lib/auth";
 import {
   getProfileByUserId,
   getRecentUploads,
   getRoleById,
 } from "@/db/queries/select";
+import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
 
 export async function AppSidebar({
   ...props
