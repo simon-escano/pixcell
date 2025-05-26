@@ -44,10 +44,8 @@ export function SignupForm({
 
       const { errorMessage } = await signupAction(formData);
       if (!errorMessage) {
-        router.replace("/");
-        toast.success("Account successfully created\nYou are now logged in", {
-          duration: 5000,
-        });
+        toast.success("Account successfully created. Please log in to continue.");
+        router.replace("/login");
       } else {
         toast.error(errorMessage);
       }
@@ -76,21 +74,21 @@ export function SignupForm({
                 <div className="flex w-full gap-2">
                   <Input
                     type="text"
-                    name="firstname"
+                    name="firstName"
                     placeholder="First Name"
                     required
                     disabled={isPending}
                   />
                   <Input
                     type="text"
-                    name="lastname"
+                    name="lastName"
                     placeholder="Last Name"
                     required
                     disabled={isPending}
                   />
                 </div>
 
-                <Select name="role" disabled={isPending} required>
+                <Select name="roleId" disabled={isPending} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
@@ -112,6 +110,7 @@ export function SignupForm({
                   type="email"
                   placeholder="Email"
                   required
+                  disabled={isPending}
                 />
                 <Input
                   name="password"
@@ -120,6 +119,7 @@ export function SignupForm({
                   placeholder="Password"
                   required
                   minLength={8}
+                  disabled={isPending}
                 />
                 <div className="text-xs text-muted-foreground">
                   Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.

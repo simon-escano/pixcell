@@ -39,8 +39,8 @@ export function NavUser({
   role,
 }: {
   user: User;
-  profile: Profile;
-  role: any;
+  profile: Profile | null;
+  role: string | null;
 }) {
   const { isMobile } = useSidebar();
 
@@ -56,6 +56,11 @@ export function NavUser({
     router.push(`/users/${user.id}`);
   };
 
+  // Default values if profile is null
+  const firstName = profile?.firstName || "";
+  const lastName = profile?.lastName || "";
+  const imageUrl = profile?.imageUrl || "";
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -67,22 +72,24 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={profile.imageUrl || ""}
-                  alt={profile.firstName + profile.lastName}
+                  src={imageUrl}
+                  alt={`${firstName} ${lastName}`}
                 />
                 <AvatarFallback className="rounded-lg">
-                  {profile.firstName.charAt(0)}
-                  {profile.lastName.charAt(0)}
+                  {firstName.charAt(0)}
+                  {lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <div className="justiy-center flex items-end overflow-hidden">
                   <span className="mr-2 min-w-0 flex-1 items-center truncate font-semibold">
-                    {profile.firstName} {profile.lastName}
+                    {firstName} {lastName}
                   </span>
-                  <Badge className="mt-1 flex-shrink-0 px-1 py-0.5 text-[10px]">
-                    {role}
-                  </Badge>
+                  {role && (
+                    <Badge className="mt-1 flex-shrink-0 px-1 py-0.5 text-[10px]">
+                      {role}
+                    </Badge>
+                  )}
                 </div>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
@@ -99,22 +106,24 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={profile.imageUrl || ""}
-                    alt={profile.firstName + profile.lastName}
+                    src={imageUrl}
+                    alt={`${firstName} ${lastName}`}
                   />
                   <AvatarFallback className="rounded-lg">
-                    {profile.firstName.charAt(0)}
-                    {profile.lastName.charAt(0)}
+                    {firstName.charAt(0)}
+                    {lastName.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <div className="justiy-center flex w-full items-end overflow-hidden">
                     <span className="mr-2 min-w-0 items-center truncate font-semibold">
-                      {profile.firstName} {profile.lastName}
+                      {firstName} {lastName}
                     </span>
-                    <Badge className="mt-1 flex-shrink-0 px-1 py-0.5 text-[10px]">
-                      {role}
-                    </Badge>
+                    {role && (
+                      <Badge className="mt-1 flex-shrink-0 px-1 py-0.5 text-[10px]">
+                        {role}
+                      </Badge>
+                    )}
                   </div>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>

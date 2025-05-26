@@ -28,10 +28,10 @@ export async function AppSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
-  const profileRoleData = await getRoleById(profileData.roleId);
+  const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const recentSamples = await getRecentUploads();
 
-  const profileRole = profileRoleData.name || null;
+  const profileRole = profileRoleData?.name || null;
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
