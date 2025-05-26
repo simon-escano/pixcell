@@ -1,7 +1,7 @@
 import Base from "@/components/base";
-import { Dashboard } from "@/components/dashboard";
 import { getUser } from "@/lib/auth";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";
+import { Dashboard } from "@/components/dashboard/dashboard";
 
 export default async function Page() {
   const user = await getUser();
