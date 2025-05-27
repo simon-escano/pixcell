@@ -90,6 +90,16 @@ export const session = pgTable("session", {
   userAgent: text("user_agent"),
 });
 
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  subject: varchar("subject").notNull(),
+  message: text("message").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default('pending'),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
@@ -98,3 +108,4 @@ export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
+export type Feedback = typeof feedback.$inferSelect;
