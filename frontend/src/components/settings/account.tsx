@@ -14,14 +14,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, LogOut } from "lucide-react";
-import { logoutAction } from "@/actions/users";
+import { logoutAction, logoutAllDevicesAction, changePasswordAction } from "@/actions/users";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function SettingsAccount() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   const router = useRouter();
   const handleLogout = async () => {
@@ -29,6 +39,57 @@ export function SettingsAccount() {
     await logoutAction();
     router.replace("/login");
     toast.dismiss(toastId);
+  };
+
+  const handleLogoutAllDevices = async () => {
+    const toastId = toast.loading("Logging out from all devices...");
+    const { errorMessage } = await logoutAllDevicesAction();
+    if (errorMessage) {
+      toast.error(errorMessage);
+    } else {
+      router.replace("/login");
+      toast.success("Successfully logged out from all devices");
+    }
+    toast.dismiss(toastId);
+  };
+
+  const handlePasswordChange = async () => {
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (formData.newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters long");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading("Changing password...");
+
+    try {
+      const { errorMessage } = await changePasswordAction(
+        formData.currentPassword,
+        formData.newPassword
+      );
+
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.success("Password changed successfully");
+        setIsChangingPassword(false);
+        setFormData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to change password");
+    } finally {
+      setIsSubmitting(false);
+      toast.dismiss(toastId);
+    }
   };
   
   return (
@@ -55,22 +116,61 @@ export function SettingsAccount() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Current Password</Label>
-                <Input type="password" placeholder="Enter current password" />
+                <Input 
+                  type="password" 
+                  placeholder="Enter current password"
+                  value={formData.currentPassword}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    currentPassword: e.target.value
+                  }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>New Password</Label>
-                <Input type="password" placeholder="Enter new password" />
+                <Input 
+                  type="password" 
+                  placeholder="Enter new password"
+                  value={formData.newPassword}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    newPassword: e.target.value
+                  }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Confirm New Password</Label>
-                <Input type="password" placeholder="Confirm new password" />
+                <Input 
+                  type="password" 
+                  placeholder="Confirm new password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    confirmPassword: e.target.value
+                  }))}
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsChangingPassword(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsChangingPassword(false);
+                  setFormData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                  });
+                }}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button 
+                onClick={handlePasswordChange}
+                disabled={isSubmitting || !formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
+              >
+                Save Changes
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -84,7 +184,10 @@ export function SettingsAccount() {
             Manage your active sessions across all devices
           </p>
         </div>
-        <Button variant="outline">Logout from All Devices</Button>
+        <Button variant="outline" onClick={handleLogoutAllDevices}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout from All Devices
+        </Button>
       </div>
 
       {/* Logout from Current Device */}
@@ -96,7 +199,7 @@ export function SettingsAccount() {
           </p>
         </div>
         <Button variant="outline" onClick={handleLogout}>
-          <LogOut />
+          <LogOut className="mr-2 h-4 w-4" />
           Logout
         </Button>
       </div>
@@ -109,37 +212,18 @@ export function SettingsAccount() {
             Permanently delete your account and all associated data
           </p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="destructive">Delete Account</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="text-destructive flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Delete Account
-              </DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your
-                account and remove all associated data from our servers.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Confirm Password</Label>
-                <Input type="password" placeholder="Enter your password" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button variant="destructive" disabled>Delete Account</Button>
               </div>
-              <div className="space-y-2">
-                <Label>Type "DELETE" to confirm</Label>
-                <Input placeholder='Type "DELETE"' />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button variant="destructive">Delete Account</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Please contact a system administrator to delete your account.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
