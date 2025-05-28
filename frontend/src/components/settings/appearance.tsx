@@ -3,7 +3,6 @@
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,15 +10,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export function SettingsAppearance() {
   const { setTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [browserZoom, setBrowserZoom] = useState(100);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+    // Update zoom level
+    setBrowserZoom(Math.round(window.devicePixelRatio * 100));
+
+    // Update zoom when it changes
+    window.addEventListener('resize', () => {
+      setBrowserZoom(Math.round(window.devicePixelRatio * 100));
+    });
+  }, []);
+
+  if (!mounted) {
+    return null; // Return null on server-side and first render
+  }
 
   return (
     <div className="space-y-6">
@@ -30,46 +43,44 @@ export function SettingsAppearance() {
             Select your preferred theme for the application.
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Select value={theme} onValueChange={setTheme}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Select theme" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="light">
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4" />
+                Light
+              </div>
+            </SelectItem>
+            <SelectItem value="dark">
+              <div className="flex items-center gap-2">
+                <Moon className="h-4 w-4" />
+                Dark
+              </div>
+            </SelectItem>
+            <SelectItem value="system">
+              <div className="flex items-center gap-2">
+                <Sun className="h-4 w-4 dark:hidden" />
+                <Moon className="hidden h-4 w-4 dark:block" />
+                System
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <Label>Interface Zoom</Label>
+          <Label>Browser Zoom</Label>
           <p className="text-sm text-muted-foreground">
-            Adjust the size of the interface elements.
+            Use Ctrl then + or - to adjust browser zoom. (Use ⌘ then + or - for Mac)
           </p>
         </div>
-        <Select defaultValue="100">
-          <SelectTrigger className="w-[100px]">
-            <SelectValue placeholder="Zoom" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="90">90%</SelectItem>
-            <SelectItem value="100">100%</SelectItem>
-            <SelectItem value="110">110%</SelectItem>
-            <SelectItem value="120">120%</SelectItem>
-          </SelectContent>
-        </Select>
+        <Button variant="outline" className="w-[100px]" disabled>
+          {browserZoom}%
+        </Button>
       </div>
     </div>
   );

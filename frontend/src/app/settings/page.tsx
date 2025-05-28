@@ -6,7 +6,7 @@ import { SettingsAccount } from "@/components/settings/account";
 export default function SettingsPage() {
   return (
     <Base>
-      <div className="container mx-auto py-10">
+      <div className="container max-w-screen-lg mx-auto p-6 md:p-10">
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
