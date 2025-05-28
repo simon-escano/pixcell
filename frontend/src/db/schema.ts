@@ -93,9 +93,22 @@ export const session = pgTable("session", {
 export const feedback = pgTable("feedback", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => user.id),
-  subject: varchar("subject").notNull(),
-  message: text("message").notNull(),
-  status: varchar("status", { length: 20 }).notNull().default('pending'),
+  // Section 1: Overall Experience
+  overallExperience: integer("overall_experience"),
+  interfaceUsability: integer("interface_usability"),
+  // Section 2: AI Assistance & Accuracy
+  aiAccuracy: integer("ai_accuracy"),
+  aiUsability: integer("ai_usability"),
+  // Section 3: Collaboration Features
+  collaborationTools: integer("collaboration_tools"),
+  collaborationIssues: integer("collaboration_issues"),
+  // Section 4: Suggestions and Issues
+  featureSuggestions: text("feature_suggestions"),
+  technicalIssues: text("technical_issues"),
+  // Section 5: Final Thoughts
+  recommendation: integer("recommendation"),
+  additionalComments: text("additional_comments"),
+  // Metadata
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
