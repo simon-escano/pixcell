@@ -75,7 +75,7 @@ export function SettingsAppearance() {
         <div className="space-y-1">
           <Label>Browser Zoom</Label>
           <p className="text-sm text-muted-foreground">
-            Use Ctrl then + or - to adjust browser zoom. (Use ⌘ then + or - for Mac)
+            Hold Ctrl then + or - to adjust browser zoom. (Hold ⌘ then + or - for Mac)
           </p>
         </div>
         <Button variant="outline" className="w-[100px]" disabled>
