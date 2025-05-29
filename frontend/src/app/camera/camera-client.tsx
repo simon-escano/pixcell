@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, CircleDot, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -53,34 +53,41 @@ export default function CameraClient({ patients }: CameraClientProps) {
   const [selectedPatient, setSelectedPatient] = useState<string>("");
   const [sampleName, setSampleName] = useState<string>("");
 
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { 
-            facingMode: "user",
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false,
-        });
-        setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
-      } catch (err) {
-        setError("Could not access camera. Please make sure you have granted camera permissions.");
+  const startCamera = useCallback(async () => {
+    try {
+      // Stop any existing stream first
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
       }
-    };
 
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: "user",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: false,
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setError(""); // Clear any existing errors
+    } catch (err) {
+      setError("Could not access camera. Please make sure you have granted camera permissions.");
+      console.error('Camera error:', err);
+    }
+  }, [stream]);
+
+  useEffect(() => {
     startCamera();
-
+    
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, []); // Only run on mount
 
   const capturePhoto = () => {
     if (!videoRef.current) return;
@@ -111,22 +118,27 @@ export default function CameraClient({ patients }: CameraClientProps) {
       await uploadSampleAction(selectedPatient, file, sampleName.trim());
       toast.success("Sample uploaded successfully.");
       setIsUploadDrawerOpen(false);
-      router.refresh();
-      // Clean up
+      
+      // Clean up and reset
       URL.revokeObjectURL(capturedImage.previewUrl);
       setCapturedImage(null);
-      // Reset form
       setSelectedPatient("");
       setSampleName("");
+      
+      // Restart the camera
+      await startCamera();
+      
+      router.refresh();
     } catch (error: any) {
       toast.error(error.message || "Failed to upload sample");
     }
   };
 
-  const handleRetake = () => {
+  const handleRetake = async () => {
     if (capturedImage) {
       URL.revokeObjectURL(capturedImage.previewUrl);
       setCapturedImage(null);
+      await startCamera(); // Restart camera when retaking
     }
   };
 
