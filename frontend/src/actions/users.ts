@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db";
-import { profile, user } from "@/db/schema";
+import { profile, user, role, image } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/utils"
 import { createClient } from "@supabase/supabase-js";
@@ -20,7 +20,7 @@ export const signupAction = async (formData: FormData) => {
     const password = formData.get("password") as string;
     const firstName = formData.get("firstname") as string;
     const lastName = formData.get("lastname") as string;
-    const role = formData.get("role") as string;
+    const roleName = formData.get("role") as string;
 
     const auth = await getSupabaseAuth();
 
@@ -35,13 +35,29 @@ export const signupAction = async (formData: FormData) => {
 
     const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
 
+    const [imageInsert] = await db
+      .insert(image)
+      .values({
+        id: crypto.randomUUID(), // or use drizzle's uuid() if available
+        imageUrl,
+      })
+      .returning({ id: image.id });
+
+    const imageId = imageInsert.id;
+
+    const [result] = await db
+      .select()
+      .from(role)
+      .where(eq(role.name, roleName));
+    const roleId = result.id
+
     await db.insert(profile).values({
       id: userId,
       userId,
-      roleId: role,
-      imageUrl,
       firstName,
-      lastName
+      lastName,
+      roleId,
+      imageId,
     });
 
     return { errorMessage: null };
