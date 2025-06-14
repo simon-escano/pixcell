@@ -1,5 +1,5 @@
-import { patient, profile, report, role, sample, user } from "@/db/schema"
-import { eq, sql } from "drizzle-orm"
+import { patient, profile, report, role, sample, user, feedback } from "@/db/schema"
+import { eq, sql, desc } from "drizzle-orm"
 import { db } from "..";
 
 export async function getUserById(id: string) {
@@ -251,4 +251,12 @@ export async function getAllReports() {
     .leftJoin(profile, eq(user.id, profile.userId))
     .leftJoin(role, eq(profile.roleId, role.id))
     .orderBy(report.createdAt);
+}
+
+export async function getFeedbackByUser(userId: string) {
+  return await db
+    .select()
+    .from(feedback)
+    .where(eq(feedback.userId, userId))
+    .orderBy(desc(feedback.createdAt));
 }

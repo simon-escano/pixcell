@@ -80,6 +80,45 @@ export const logoutAction = async () => {
   }
 };
 
+export const logoutAllDevicesAction = async () => {
+  try {
+    const auth = await getSupabaseAuth();
+    
+    // This will invalidate all refresh tokens
+    const { error } = await auth.signOut({ scope: 'global' });
+    if (error) throw error;
+
+    return { errorMessage: null };
+  } catch (error) {
+    return { errorMessage: getErrorMessage(error) };
+  }
+};
+
+export const changePasswordAction = async (currentPassword: string, newPassword: string) => {
+  try {
+    const auth = await getSupabaseAuth();
+
+    // First verify the current password by attempting to sign in
+    const { data: { user } } = await auth.getUser();
+    if (!user?.email) throw new Error("No user found");
+
+    const { error: verifyError } = await auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (verifyError) throw new Error("Current password is incorrect");
+
+    // If verification successful, update to new password
+    const { error } = await auth.updateUser({ password: newPassword });
+    if (error) throw error;
+
+    return { errorMessage: null };
+  } catch (error) {
+    return { errorMessage: getErrorMessage(error) };
+  }
+};
+
 export async function deleteUser(userId: string) {
   try {
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { ImageUp } from "lucide-react";
+import { ImageUp, Camera } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,52 +45,64 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
   };
 
   return (
-    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-      <DrawerTrigger asChild>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 flex-1 justify-start duration-200 ease-linear">
-          <ImageUp />
-          <span>Upload sample</span>
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
-          <DrawerHeader>
-            <DrawerTitle>Upload sample</DrawerTitle>
-            <DrawerDescription>
-              Submit a sample to share or for analysis
-            </DrawerDescription>
-          </DrawerHeader>
-          <>
-            <div className="flex flex-col gap-4 p-4">
-              <PatientSearchCombobox
-                patients={patients}
-                value={selectedPatient}
-                onChange={setSelectedPatient}
-              />
-              <div className="flex flex-col">
-                <Input
-                  id="sampleName"
-                  className="rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
-                  placeholder="Sample name"
-                  value={sampleName}
-                  onChange={(e) => setSampleName(e.target.value)}
-                />
-                <UploadSampleFile onFileChange={setFile} />
-              </div>
+    <>
+      <div className="flex flex-col">
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerTrigger asChild>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 flex-1 justify-start duration-200 ease-linear">
+              <ImageUp />
+              <span>Upload sample</span>
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <div className="mx-auto w-full max-w-sm">
+              <DrawerHeader>
+                <DrawerTitle>Upload sample</DrawerTitle>
+                <DrawerDescription>
+                  Submit a sample to share or for analysis
+                </DrawerDescription>
+              </DrawerHeader>
+              <>
+                <div className="flex flex-col gap-4 p-4">
+                  <PatientSearchCombobox
+                    patients={patients}
+                    value={selectedPatient}
+                    onChange={setSelectedPatient}
+                  />
+                  <div className="flex flex-col">
+                    <Input
+                      id="sampleName"
+                      className="rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
+                      placeholder="Sample name"
+                      value={sampleName}
+                      onChange={(e) => setSampleName(e.target.value)}
+                    />
+                    <UploadSampleFile onFileChange={setFile} />
+                  </div>
+                </div>
+                <DrawerFooter className="flex w-full flex-row pt-0">
+                  <DrawerClose asChild>
+                    <Button variant="outline" className="flex-1">
+                      Cancel
+                    </Button>
+                  </DrawerClose>
+                  <Button onClick={handleSubmit} className="flex-1">
+                    Submit
+                  </Button>
+                </DrawerFooter>
+              </>
             </div>
-            <DrawerFooter className="flex w-full flex-row pt-0">
-              <DrawerClose asChild>
-                <Button variant="outline" className="flex-1">
-                  Cancel
-                </Button>
-              </DrawerClose>
-              <Button onClick={handleSubmit} className="flex-1">
-                Submit
-              </Button>
-            </DrawerFooter>
-          </>
-        </div>
-      </DrawerContent>
-    </Drawer>
+          </DrawerContent>
+        </Drawer>
+        <Button 
+          variant="outline"
+          className="border-2 hover:bg-secondary/80 min-w-8 flex-1 justify-start duration-200 ease-linear mt-2"
+          onClick={() => router.push('/camera')}
+        >
+          <Camera className="text-primary" />
+          <span>Camera</span>
+        </Button>
+      </div>
+    </>
   );
 }
