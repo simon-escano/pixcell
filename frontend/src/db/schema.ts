@@ -111,6 +111,30 @@ export const session = pgTable("session", {
   userAgent: text("user_agent"),
 });
 
+
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  // Section 1: Overall Experience
+  overallExperience: integer("overall_experience"),
+  interfaceUsability: integer("interface_usability"),
+  // Section 2: AI Assistance & Accuracy
+  aiAccuracy: integer("ai_accuracy"),
+  aiUsability: integer("ai_usability"),
+  // Section 3: Collaboration Features
+  collaborationTools: integer("collaboration_tools"),
+  collaborationIssues: integer("collaboration_issues"),
+  // Section 4: Suggestions and Issues
+  featureSuggestions: text("feature_suggestions"),
+  technicalIssues: text("technical_issues"),
+  // Section 5: Final Thoughts
+  recommendation: integer("recommendation"),
+  additionalComments: text("additional_comments"),
+  // Metadata
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
@@ -121,3 +145,4 @@ export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Note = typeof note.$inferSelect;
+export type Feedback = typeof feedback.$inferSelect;
