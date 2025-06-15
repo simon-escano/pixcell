@@ -67,6 +67,7 @@ export type DataTableProps<TData> = {
   customHeaderContent?: React.ReactNode;
   searchableColumns?: string[];
   separateLastAction?: boolean;
+  defaultHiddenColumns?: string[];
 };
 
 export function DataTable<TData extends Record<string, any>>({
@@ -85,15 +86,19 @@ export function DataTable<TData extends Record<string, any>>({
   customHeaderContent,
   searchableColumns,
   separateLastAction = false,
+  defaultHiddenColumns = [],
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(() => {
+    const initialVisibility: VisibilityState = {};
+    defaultHiddenColumns.forEach(column => {
+      initialVisibility[column] = false;
+    });
+    return initialVisibility;
+  });
   const [rowSelection, setRowSelection] = React.useState({});
 
   // Convert columnConfigs array to a map for easier access
@@ -337,6 +342,10 @@ export function DataTable<TData extends Record<string, any>>({
       pagination: {
         pageSize: maxRowsPerPage,
       },
+      columnVisibility: defaultHiddenColumns.reduce((acc, column) => {
+        acc[column] = false;
+        return acc;
+      }, {} as VisibilityState),
     },
     globalFilterFn: customGlobalFilterFn,
     onGlobalFilterChange: setGlobalFilter,
