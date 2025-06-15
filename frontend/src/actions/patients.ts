@@ -11,7 +11,8 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase URL or Key");
 }
 
-// Add timeout configuration
+// starte of timeoutt to fix database  timeout retrieval error
+
 const DB_TIMEOUT = 10000; // 10 seconds
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
@@ -24,13 +25,15 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-// Helper function to handle database timeouts
+//  handles database timeouts
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   const timeoutPromise = new Promise<T>((_, reject) => {
     setTimeout(() => reject(new Error('Database operation timed out')), timeoutMs);
   });
   return Promise.race([promise, timeoutPromise]);
 }
+
+// end of timeout
 
 export async function updatePatient(id: string, data: {
   firstName: string
@@ -48,7 +51,7 @@ export async function updatePatient(id: string, data: {
   try {
     let imageId: string | undefined;
 
-    // First get the current patient data to check for existing image
+    // get the current patient data to check for existing image
     const currentPatient = await withTimeout(
       db.select().from(patient).where(eq(patient.id, id)).limit(1),
       DB_TIMEOUT
@@ -60,7 +63,7 @@ export async function updatePatient(id: string, data: {
 
     if (data.file) {
       try {
-        // If there's an existing image, delete it from storage and the database
+        // if there's an existing image, delete it from storage and the database
         if (currentPatient[0].imageId) {
           const existingImage = await withTimeout(
             db.select().from(image).where(eq(image.id, currentPatient[0].imageId)).limit(1),
@@ -79,7 +82,7 @@ export async function updatePatient(id: string, data: {
           }
         }
 
-        // Upload new image
+        // upload new image
         const bytes = await data.file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const fileName = `${Date.now()}-${data.file.name}`;
@@ -98,7 +101,7 @@ export async function updatePatient(id: string, data: {
 
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${uploadData.path}`;
         
-        // Create new image record
+        // create new image record
         const [newImage] = await withTimeout(
           db.insert(image)
             .values({
@@ -141,14 +144,46 @@ export async function updatePatient(id: string, data: {
 
 export async function deletePatient(patientId: string) {
   try {
-    const patientData = await db.select().from(patient).where(eq(patient.id, patientId)).limit(1);
+    console.log("Starting patient deletion process for ID:", patientId);
+    
+    const patientData = await withTimeout(
+      db.select().from(patient).where(eq(patient.id, patientId)).limit(1),
+      DB_TIMEOUT
+    );
+
     if (patientData.length === 0) {
+      console.log("Patient not found with ID:", patientId);
       return { success: false, error: "Patient not found" };
     }
 
-    const imageUrl = patientData[0].imageUrl;
-    if (imageUrl) {
+    console.log("Found patient data:", patientData[0]);
+
+    const imageId = patientData[0].imageId;
+    const imageUrl = imageId ? (await withTimeout(
+      db.select().from(image).where(eq(image.id, imageId)).limit(1),
+      DB_TIMEOUT
+    ))[0]?.imageUrl : null;
+
+    // delete the patient first due to foreign key constraint
+    console.log("Attempting to delete patient record");
+    try {
+      await withTimeout(
+        db.delete(patient).where(eq(patient.id, patientId)),
+        DB_TIMEOUT
+      );
+      console.log("Successfully deleted patient record");
+    } catch (patientDeleteError) {
+      console.error("Error deleting patient record:", patientDeleteError);
+      throw new Error(`Failed to delete patient record: ${patientDeleteError}`);
+    }
+
+    // if patient has an image, delete it from storage and database
+    if (imageId && imageUrl) {
+      console.log("Patient had image ID:", imageId);
+      
       const path = imageUrl.split('/storage/v1/object/public/avatars/')[1];
+      console.log("Attempting to delete image from storage with path:", path);
+      
       if (path) {
         const { error: deleteError } = await supabase.storage
           .from('avatars')
@@ -158,13 +193,32 @@ export async function deletePatient(patientId: string) {
           console.error("Failed to delete image from storage:", deleteError);
           return { success: false, error: "Failed to delete image from storage" };
         }
+        console.log("Successfully deleted image from storage");
+      }
+
+      // delete the image record last forgot why
+      console.log("Attempting to delete image record from database");
+      try {
+        await withTimeout(
+          db.delete(image).where(eq(image.id, imageId)),
+          DB_TIMEOUT
+        );
+        console.log("Successfully deleted image record from database");
+      } catch (imageDeleteError) {
+        console.error("Error deleting image record:", imageDeleteError);
+        throw new Error(`Failed to delete image record: ${imageDeleteError}`);
       }
     }
 
-    await db.delete(patient).where(eq(patient.id, patientId));
     return { success: true };
   } catch (error) {
     console.error("Failed to delete patient:", error);
+    if (error instanceof Error) {
+      if (error.message === 'Database operation timed out') {
+        return { success: false, error: "Operation timed out. Please try again." };
+      }
+      return { success: false, error: error.message };
+    }
     return { success: false, error: "Something went wrong." };
   }
 }
