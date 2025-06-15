@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { patient, sample } from "@/db/schema"
+import { patient, image } from "@/db/schema"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm"
 
@@ -112,7 +112,7 @@ export async function addPatient(data: {
   birthDate: string;
   file?: File | null;
 }) {
-  let imageUrl: string | undefined;
+  let imageId: string | undefined;
 
   if (data.file) {
     try {
@@ -132,7 +132,17 @@ export async function addPatient(data: {
         throw new Error(`Failed to upload image: ${uploadError.message}`);
       }
 
-      imageUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${uploadData.path}`;
+      const imageUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${uploadData.path}`;
+      
+      // Create image record in the database
+      const [newImage] = await db.insert(image)
+        .values({
+          id: crypto.randomUUID(),
+          imageUrl: imageUrl
+        })
+        .returning();
+
+      imageId = newImage.id;
     } catch (error) {
       console.error("Error uploading file:", error);
       return { success: false, error: "Failed to upload image" };
@@ -141,8 +151,8 @@ export async function addPatient(data: {
 
   const insertData = { ...data };
   delete insertData.file;
-  if (imageUrl) {
-    Object.assign(insertData, { imageUrl });
+  if (imageId) {
+    Object.assign(insertData, { imageId });
   }
 
   try {
