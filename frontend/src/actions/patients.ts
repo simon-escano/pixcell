@@ -63,24 +63,6 @@ export async function updatePatient(id: string, data: {
 
     if (data.file) {
       try {
-        // if there's an existing image, delete it from storage and the database
-        if (currentPatient[0].imageId) {
-          const existingImage = await withTimeout(
-            db.select().from(image).where(eq(image.id, currentPatient[0].imageId)).limit(1),
-            DB_TIMEOUT
-          );
-          
-          if (existingImage.length > 0 && existingImage[0].imageUrl) {
-            const path = existingImage[0].imageUrl.split('/storage/v1/object/public/avatars/')[1];
-            if (path) {
-              await supabase.storage.from('avatars').remove([path]);
-            }
-            await withTimeout(
-              db.delete(image).where(eq(image.id, currentPatient[0].imageId)),
-              DB_TIMEOUT
-            );
-          }
-        }
 
         // upload new image
         const bytes = await data.file.arrayBuffer();
