@@ -135,7 +135,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     <div>
       <DataTable
         data={users}
-        excludeColumns={["roleId"]}
+        excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
         defaultHiddenColumns={["phone"]}
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
