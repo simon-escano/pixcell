@@ -51,7 +51,7 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
       <DataTable
         data={patients}
         excludeColumns={["id", "imageId", "birthDate", "createdAt", "noteId", "imageUrl"]}
-        defaultHiddenColumns={["contactNumber", "address", "height", "weight", "bloodType"g]}
+        defaultHiddenColumns={["contactNumber", "address", "height", "weight", "bloodType"]}
         searchPlaceholder="Search patients..."
         searchableColumns={["firstName", "lastName", "email", "bloodType"]}
         columnConfigs={[
