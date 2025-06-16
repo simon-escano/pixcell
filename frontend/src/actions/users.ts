@@ -20,6 +20,11 @@ function logServer(message: string, data?: any) {
   console.log(`[Server Action] ${message}`, data ? JSON.stringify(data, null, 2) : '');
 }
 
+// Helper function to convert null to undefined
+function toUndefined<T>(value: T | null): T | undefined {
+  return value === null ? undefined : value;
+}
+
 export const signupAction = async (formData: FormData) => {
   try {
     const email = formData.get("email") as string;
@@ -104,41 +109,63 @@ export const logoutAction = async () => {
 
 export async function deleteUser(userId: string) {
   try {
+    logServer("Starting user deletion process", { userId });
+
     // Get profile data to check for image
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);
     if (profileData.length === 0) {
+      logServer("Profile not found", { userId });
       return { success: false, error: "Profile not found" };
     }
 
-    // If profile has an image, delete it from storage and database
-    if (profileData[0].imageId) {
-      const imageData = await db.select().from(image).where(eq(image.id, profileData[0].imageId)).limit(1);
-      if (imageData.length > 0 && imageData[0].imageUrl) {
-        const path = imageData[0].imageUrl.split('/storage/v1/object/public/avatars/')[1];
-        if (path) {
-          const { error: deleteError } = await supabase.storage
-            .from('avatars')
-            .remove([path]);
+    logServer("Found profile data", profileData[0]);
 
-          if (deleteError) {
-            console.error("Failed to delete avatar from storage:", deleteError);
-            return { success: false, error: "Failed to delete avatar from storage" };
-          }
-        }
-        // Delete the image record
-        await db.delete(image).where(eq(image.id, profileData[0].imageId));
+    // Store imageId before deleting profile
+    const imageId = toUndefined(profileData[0].imageId as any) as string | undefined;
+    let imageUrl: string | undefined;
+
+    if (imageId) {
+      const imageData = await db.select().from(image).where(eq(image.id, imageId)).limit(1);
+      if (imageData.length > 0) {
+        imageUrl = imageData[0].imageUrl;
       }
     }
 
-    // Delete profile and user records
+    // Delete profile and user records first
+    logServer("Deleting profile and user records");
     await db.transaction(async (tx) => {
       await tx.delete(profile).where(eq(profile.userId, userId));
       await tx.delete(user).where(eq(user.id, userId));
     });
+    logServer("Successfully deleted profile and user records");
 
+    // If there was an image, delete it from database and storage
+    if (imageId && imageUrl) {
+      logServer("Deleting image record and storage", { imageId, imageUrl });
+      
+      // Delete image record first
+      await db.delete(image).where(eq(image.id, imageId));
+      logServer("Successfully deleted image record");
+
+      // Then delete from storage
+      const path = imageUrl.split('/storage/v1/object/public/avatars/')[1];
+      if (path) {
+        const { error: deleteError } = await supabase.storage
+          .from('avatars')
+          .remove([path]);
+
+        if (deleteError) {
+          logServer("Failed to delete image from storage", { error: deleteError });
+          return { success: false, error: "Failed to delete avatar from storage" };
+        }
+        logServer("Successfully deleted image from storage");
+      }
+    }
+
+    logServer("User deletion completed successfully");
     return { success: true };
   } catch (error) {
-    console.error("Failed to delete user:", error);
+    logServer("Failed to delete user", { error });
     return { success: false, error: "Something went wrong." };
   }
 }
