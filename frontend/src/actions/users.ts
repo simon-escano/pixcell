@@ -99,7 +99,12 @@ export const logoutAction = async () => {
 export async function deleteUser(userId: string) {
   try {
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);
-    const imageUrl = profileData[0]?.imageUrl;
+    const imageId = profileData[0]?.imageId;
+    let imageUrl: string | undefined = undefined;
+    if (imageId) {
+      const imageData = await db.select().from(image).where(eq(image.id, imageId)).limit(1);
+      imageUrl = imageData[0]?.imageUrl ?? undefined;
+    }
 
     if (imageUrl) {
       const path = imageUrl.split('/storage/v1/object/public/avatars/')[1];
