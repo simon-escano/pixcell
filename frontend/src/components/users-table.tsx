@@ -32,13 +32,14 @@ import { PhoneInput } from "./ui/phone-input";
 
 type CombinedUser = {
   id: User["id"];
-  email: User["email"];
-  phone: User["phone"];
   firstName: Profile["firstName"];
   lastName: Profile["lastName"];
-  imageUrl: Profile["imageUrl"];
-  roleId: Role["id"];
+  email: User["email"];
   roleName: Role["name"];
+  phone: User["phone"];
+  imageId: Profile["imageId"];
+  imageUrl: string | null;
+  roleId: Role["id"];
 };
 
 export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
@@ -134,8 +135,9 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     <div>
       <DataTable
         data={users}
-        excludeColumns={["roleId"]}
-        columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
+        excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
+        defaultHiddenColumns={["phone"]}
+        columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
           router.push(`/users/${user.id}`);

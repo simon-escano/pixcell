@@ -27,12 +27,14 @@ export async function getAllUsersWithProfiles() {
       firstName: profile.firstName,
       lastName: profile.lastName,
       imageId: profile.imageId,
+      imageUrl: image.imageUrl,
       roleId: profile.roleId,
       roleName: role.name,
     })
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
-    .innerJoin(role, eq(profile.roleId, role.id));
+    .innerJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(image, eq(profile.imageId, image.id));
 }
 
 export async function getAllProfiles() {
@@ -40,11 +42,48 @@ export async function getAllProfiles() {
 }
 
 export async function getAllPatients() {
-  return await db.select().from(patient);
+  return await db
+    .select({
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      contactNumber: patient.contactNumber,
+      address: patient.address,
+      height: patient.height,
+      weight: patient.weight,
+      sex: patient.sex,
+      bloodType: patient.bloodType,
+      birthDate: patient.birthDate,
+      createdAt: patient.createdAt,
+      imageId: patient.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(patient)
+    .leftJoin(image, eq(patient.imageId, image.id));
 }
 
 export async function getPatientById(id: string) {
-  const result = await db.select().from(patient).where(eq(patient.id, id));
+  const result = await db
+    .select({
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      contactNumber: patient.contactNumber,
+      address: patient.address,
+      height: patient.height,
+      weight: patient.weight,
+      sex: patient.sex,
+      bloodType: patient.bloodType,
+      birthDate: patient.birthDate,
+      createdAt: patient.createdAt,
+      imageId: patient.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(patient)
+    .leftJoin(image, eq(patient.imageId, image.id))
+    .where(eq(patient.id, id));
   return result[0];
 }
 
@@ -66,7 +105,19 @@ export async function getAllSamples() {
 }
 
 export async function getProfileByUserId(userId: string) {
-  const result = await db.select().from(profile).where(eq(profile.userId, userId));
+  const result = await db
+    .select({
+      id: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      userId: profile.userId,
+      roleId: profile.roleId,
+      imageId: profile.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(profile)
+    .leftJoin(image, eq(profile.imageId, image.id))
+    .where(eq(profile.userId, userId));
   return result[0];
 }
 
