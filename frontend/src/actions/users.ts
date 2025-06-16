@@ -263,25 +263,28 @@ export async function updateUser(userId: string, firstname: string, lastName: st
     try {
       logServer("Updating user and profile records");
       await db.transaction(async (tx) => {
-        // Update user table
+        // Update user table - only include phone if it has a value
+        const userUpdateData = {
+          email,
+          ...(phone && phone.trim() !== "" ? { phone } : {})
+        };
+        logServer("Updating user with data", userUpdateData);
+        
         await tx.update(user)
-          .set({ 
-            email, 
-            ...(phone !== undefined ? { phone } : {}) 
-          })
+          .set(userUpdateData)
           .where(eq(user.id, userId));
 
         // Update profile table
-        const updateData = {
+        const profileUpdateData = {
           firstName: firstname,
           lastName,
           roleId,
           ...(imageId ? { imageId } : {})
         };
-        logServer("Updating profile with data", updateData);
+        logServer("Updating profile with data", profileUpdateData);
         
         await tx.update(profile)
-          .set(updateData)
+          .set(profileUpdateData)
           .where(eq(profile.userId, userId));
       });
 
