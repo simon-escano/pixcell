@@ -27,12 +27,14 @@ export async function getAllUsersWithProfiles() {
       firstName: profile.firstName,
       lastName: profile.lastName,
       imageId: profile.imageId,
+      imageUrl: image.imageUrl,
       roleId: profile.roleId,
       roleName: role.name,
     })
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
-    .innerJoin(role, eq(profile.roleId, role.id));
+    .innerJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(image, eq(profile.imageId, image.id));
 }
 
 export async function getAllProfiles() {

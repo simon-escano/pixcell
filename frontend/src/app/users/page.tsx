@@ -16,6 +16,7 @@ export default async function OtherUsersPage() {
     phone: user.phone || "",
     id: user.id,
     imageId: user.imageId || null,
+    imageUrl: user.imageUrl || null,
   }));
 
   return (

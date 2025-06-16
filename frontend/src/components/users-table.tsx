@@ -38,6 +38,7 @@ type CombinedUser = {
   roleName: Role["name"];
   phone: User["phone"];
   imageId: Profile["imageId"];
+  imageUrl: string | null;
   roleId: Role["id"];
 };
 
@@ -134,7 +135,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     <div>
       <DataTable
         data={users}
-        excludeColumns={["roleId", "phone", "imageId", "imageUrl", "id"]}
+        excludeColumns={["roleId"]}
+        defaultHiddenColumns={["phone"]}
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
@@ -157,7 +159,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
                 <div className="group relative cursor-pointer">
                   <Avatar className="size-24">
                     <AvatarImage
-                      src={preview || selectedUser?.imageId || ""}
+                      src={preview || selectedUser?.imageUrl || ""}
                       className="object-cover"
                     />
                     <AvatarFallback>
