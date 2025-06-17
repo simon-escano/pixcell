@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sample } from "@/db/schema";
+import { SampleWithImage } from "@/db/schema";
 import { useCurrentUserName } from "@/hooks/use-current-user-name";
 import {
   CircleDashed,
@@ -28,7 +28,7 @@ import {
 } from "./ui/select";
 
 type SampleAreaProps = {
-  sample: Sample;
+  sample: SampleWithImage;
   disabled?: boolean;
 };
 
@@ -38,7 +38,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   );
 
   const [processedImageUrl, setProcessedImageUrl] = useState<string>(
-    sample.imageUrl,
+    sample.imageUrl || "",
   );
 
   const username = useCurrentUserName();
@@ -47,6 +47,10 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   async function handleProcessImage() {
     try {
       toast.loading("Sending image for prediction...");
+
+      if (!sample.imageUrl) {
+        throw new Error("No image URL available");
+      }
 
       const imageBlob = await fetch(sample.imageUrl).then((res) => res.blob());
       const formData = new FormData();

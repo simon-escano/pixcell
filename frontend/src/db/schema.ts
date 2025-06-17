@@ -139,6 +139,7 @@ export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
+export type SampleImage = typeof sample_image.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;
@@ -146,3 +147,22 @@ export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Note = typeof note.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
+
+// Combined type for sample with image data
+export type SampleWithImage = Sample & {
+  uploadedBy: string | null;
+  metadata: any | null;
+  capturedAt: Date | null;
+  imageId: string | null;
+  imageUrl: string | null;
+};
+
+// Type for patient data returned by getPatientById (includes imageUrl but not noteId)
+export type PatientWithImage = Omit<Patient, 'noteId'> & {
+  imageUrl: string | null;
+};
+
+// Type for profile data returned by getProfileByUserId (includes imageUrl)
+export type ProfileWithImage = Profile & {
+  imageUrl: string | null;
+};

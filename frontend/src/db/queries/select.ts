@@ -88,20 +88,83 @@ export async function getPatientById(id: string) {
 }
 
 export async function getSamplesByPatientId(id: string) {
-  return await db.select().from(sample).where(eq(sample.patientId, id));
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.patientId, id));
 }
 
 export async function getSamplesByUserId(userId: string) {
-  return await db.select().from(sample).where(eq(sample.createdBy, userId));
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.createdBy, userId));
 }
 
 export async function getSampleById(id: string) {
-  const result = await db.select().from(sample).where(eq(sample.id, id));
+  const result = await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.id, id));
   return result[0];
 }
 
 export async function getAllSamples() {
-  return await db.select().from(sample)
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id));
 }
 
 export async function getProfileByUserId(userId: string) {

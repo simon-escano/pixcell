@@ -20,6 +20,7 @@ import {
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { BrainCircuit, Clock } from "lucide-react";
+import { PatientWithImage, ProfileWithImage } from "@/db/schema";
 
 interface SamplePageProps {
   sampleId: string;
@@ -31,11 +32,15 @@ export async function SamplePage({
   disabled = false,
 }: SamplePageProps) {
   const user = await getUser();
-  const userProfile = await getProfileByUserId(user.id);
+  const userProfile = await getProfileByUserId(user.id) as ProfileWithImage;
   const sample = await getSampleById(sampleId);
-  const patient = await getPatientById(sample.patientId);
-  const profile = await getProfileByUserId(sample.uploadedBy);
-  const role = await getRoleById(profile.roleId);
+  const patient = await getPatientById(sample.patientId) as PatientWithImage;
+  
+  // Handle case where sample_image data might not exist
+  const profile = sample.uploadedBy 
+    ? (await getProfileByUserId(sample.uploadedBy)) as ProfileWithImage
+    : null;
+  const role = profile ? await getRoleById(profile.roleId) : null;
 
   return (
     <Base>
@@ -58,15 +63,17 @@ export async function SamplePage({
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 redirectUrl={`/patients/${patient.id}`}
-                roleName={role.name}
+                roleName={role?.name || "Unknown"}
               />
-              <UserButton
-                imageUrl={profile.imageUrl || ""}
-                firstName={profile.firstName}
-                lastName={profile.lastName}
-                redirectUrl={`/users/${profile.id}`}
-                roleName={role.name}
-              />
+              {profile && (
+                <UserButton
+                  imageUrl={profile.imageUrl || ""}
+                  firstName={profile.firstName}
+                  lastName={profile.lastName}
+                  redirectUrl={`/users/${profile.id}`}
+                  roleName={role?.name || "Unknown"}
+                />
+              )}
             </div>
 
             <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
