@@ -16,17 +16,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def load_model(model_name: str):
-    return YOLO(f"models/{model_name}")
+
+model = None
+
+@app.on_event("startup")
+def load_model():
+    global model
+    model = YOLO("models/PixCellv1.pt")
+    print("model successfully loaded")
+    
+
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), model_name: str = Query("anemia_detection_yolov8")):
-    full_model_name = model_name + ".onnx"
+    # full_model_name = model_name + ".onnx"
 
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-    model = load_model(full_model_name)
+    # model = load_model(full_model_name)
 
     results = model(image)[0]
 
