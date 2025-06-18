@@ -2,12 +2,9 @@ import Base from "@/components/base";
 import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
 import SampleArea from "@/components/sample-area";
 import { ShareDialog } from "@/components/share-dialog";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,7 +16,7 @@ import {
   getSampleById,
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
-import { BrainCircuit, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { PatientWithImage, ProfileWithImage } from "@/db/schema";
 
 interface SamplePageProps {
@@ -104,21 +101,6 @@ export async function SamplePage({
               <Clock className="h-3 w-3" />
               {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
             </div>
-          </Card>
-          <Card className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
-            <CardTitle>AI Analysis</CardTitle>
-            <CardDescription>Powered by DeepSeek</CardDescription>
-            <CardContent className="flex flex-1 items-center justify-center">
-              <p className="text-muted-foreground max-w-48 text-center">
-                Sample must have detections before analyzing
-              </p>
-            </CardContent>
-            <CardFooter className="p-0">
-              <Button className="w-full" disabled={true}>
-                <BrainCircuit />
-                Analyze
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>
