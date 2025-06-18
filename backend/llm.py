@@ -3,7 +3,7 @@ import google.generativeai as genai
 from typing import Dict, Any
 
 # Get API key from environment variable
-
+# Check GC LOL -molt
 def build_prompt_from_counts(class_counts: Dict[str, int], sample_type: str = "Blood smear", stain: str = "Giemsa", magnification: str = "1000x") -> str:
     """
     Build a prompt for AI analysis based on detection results.
