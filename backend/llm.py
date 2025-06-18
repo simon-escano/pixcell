@@ -3,7 +3,6 @@ import google.generativeai as genai
 from typing import Dict, Any
 
 # Get API key from environment variable
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCLeD1ROTLbVb8GUYCjEuF-yQe2HegW1mE')
 
 def build_prompt_from_counts(class_counts: Dict[str, int], sample_type: str = "Blood smear", stain: str = "Giemsa", magnification: str = "1000x") -> str:
     """
