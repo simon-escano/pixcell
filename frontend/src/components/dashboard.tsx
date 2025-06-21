@@ -171,7 +171,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Patient Visits by Gender</CardTitle>
+            <CardTitle>Patients by Gender</CardTitle>
             <Select value={genderFilter} onValueChange={setGenderFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select gender" />
