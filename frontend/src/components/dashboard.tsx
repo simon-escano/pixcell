@@ -110,7 +110,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-sidebar-accent border-none">
+      {/* <Card className="bg-sidebar-accent border-none">
         <CardContent className="">
           <div className="flex items-center space-x-4">
             <Avatar className="h-14 w-14 rounded-lg">
@@ -132,7 +132,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
