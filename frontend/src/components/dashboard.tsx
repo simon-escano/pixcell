@@ -57,6 +57,9 @@ interface DashboardStats {
     appointmentsChange?: number;
     newPatientsChange?: number;
   };
+  patientsChange: number;
+  samplesChange: number;
+  reportsChange: number;
 }
 
 interface DashboardProps {
@@ -109,7 +112,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
   }, []).sort((a, b) => a.month.localeCompare(b.month));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* <Card className="bg-sidebar-accent border-none">
         <CardContent className="">
           <div className="flex items-center space-x-4">
@@ -134,44 +137,31 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
         </CardContent>
       </Card> */}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Total Patients"
           value={stats?.totalPatients ?? 0}
           icon={<Users className="text-muted-foreground h-4 w-4" />}
+          change={stats?.patientsChange ?? 0}
         />
         <StatCard
           title="Total Samples"
           value={stats?.totalSamples ?? 0}
           icon={<Microscope className="text-muted-foreground h-4 w-4" />}
+          change={stats?.samplesChange ?? 0}
         />
         <StatCard
           title="Total Reports"
           value={stats?.totalReports ?? 0}
           icon={<FileText className="text-muted-foreground h-4 w-4" />}
-        />
-        <StatCard
-          title="New Patients"
-          value={stats?.monthlyStats.newPatients ?? 0}
-          icon={<Users className="text-muted-foreground h-4 w-4" />}
-          subtitle={
-            <p className="text-muted-foreground mt-1.5 text-xs">
-              <span
-                className={stats?.monthlyStats?.newPatientsChange && stats.monthlyStats.newPatientsChange > 0 ? "text-green-500" : "text-red-500"}
-              >
-                {stats?.monthlyStats?.newPatientsChange && stats.monthlyStats.newPatientsChange > 0 ? "+" : ""}
-                {stats?.monthlyStats?.newPatientsChange?.toFixed(1) ?? 0}%
-              </span>
-              {" from last month"}
-            </p>
-          }
+          change={stats?.reportsChange ?? 0}
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         <Card className="col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Patients by Gender</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between py-3 px-6">
+            <CardTitle className="text-sm font-semibold">Patients by Gender</CardTitle>
             <Select value={genderFilter} onValueChange={setGenderFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select gender" />
@@ -183,16 +173,20 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
               </SelectContent>
             </Select>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
+          <CardContent className="py-3 px-6">
+            <div className="h-[180px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={transformedData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
                     tickFormatter={(value) => format(new Date(value + '-01'), 'MMM yyyy')}
+                    tick={{ fontSize: 12, fontWeight: 500 }}
                   />
-                  <YAxis />
+                  <YAxis 
+                    tick={{ fontSize: 12, fontWeight: 500 }}
+                    allowDecimals={false}
+                  />
                   <Tooltip 
                     formatter={(value: number) => [value, 'Patients']}
                     labelFormatter={(label) => format(new Date(label + '-01'), 'MMMM yyyy')}
@@ -204,8 +198,8 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
                     stroke="#3b82f6"
                     strokeWidth={genderFilter === "male" ? 3 : 2}
                     opacity={genderFilter === "all" || genderFilter === "male" ? 1 : 0.3}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 4 }}
                   />
                   <Line
                     type="monotone"
@@ -214,8 +208,8 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
                     stroke="#ec4899"
                     strokeWidth={genderFilter === "female" ? 3 : 2}
                     opacity={genderFilter === "all" || genderFilter === "female" ? 1 : 0.3}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -224,18 +218,18 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Reports</CardTitle>
+          <CardHeader className="py-3 px-6">
+            <CardTitle className="text-sm font-semibold">Recent Reports</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="py-3 px-6">
+            <div className="space-y-2">
               <div className="space-y-2">
                 {stats?.patientsWithLastReport.map((report) => (
                   <div
                     key={`${report.patientId}-${report.sampleId || "no-sample"}-${report.reportCreatedAt || report.dateTaken}`}
-                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-3"
+                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
@@ -243,10 +237,10 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
                           <img
                             src={report.userImage}
                             alt={report.userName}
-                            className="h-8 w-8 rounded-lg object-cover"
+                            className="h-6 w-6 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="bg-sidebar-accent flex h-8 w-8 items-center justify-center rounded-lg">
+                          <div className="bg-sidebar-accent flex h-6 w-6 items-center justify-center rounded-lg">
                             <span className="text-muted-foreground text-sm font-medium">
                               {report.userName
                                 .split(" ")
@@ -287,23 +281,23 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Recently Uploaded Files</CardTitle>
+          <CardHeader className="py-3 px-6">
+            <CardTitle className="text-sm font-semibold">Recently Uploaded Files</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
+          <CardContent className="py-3 px-6">
+            <div className="space-y-1">
+              <div className="spstiace-y-2">
                 {stats?.recentUploads.map((upload) => (
                   <div
                     key={`${upload.id}-${upload.capturedAt}`}
-                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-3"
+                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
                         <img
                           src={upload.imageUrl || undefined}
                           alt="Sample"
-                          className="h-8 w-8 rounded-lg object-cover"
+                          className="h-6 w-6 rounded-lg object-cover"
                         />
                       </div>
                       <div>
@@ -340,21 +334,32 @@ function StatCard({
   value,
   icon,
   subtitle,
+  change,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
   subtitle?: React.ReactNode;
+  change: number;
 }) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="leading-none font-semibold">{title}</CardTitle>
-        {icon}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+        <span className="h-4 w-4">{icon}</span>
       </CardHeader>
-      <CardContent>
-        <div className="text-3xl leading-6 font-bold">{value}</div>
+      <CardContent className="px-6 pb-2 py-1.5">
+        <div className="text-2xl font-bold">{value}</div>
         {subtitle}
+        <p className="text-muted-foreground mt-1.5 text-xs">
+          <span
+            className={change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-muted-foreground"}
+          >
+            {change > 0 ? "+" : ""}
+            {change.toFixed(1)}%
+          </span>
+          {" from last month"}
+        </p>
       </CardContent>
     </Card>
   );
@@ -363,8 +368,8 @@ function StatCard({
 function DashboardSkeleton() {
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-4 w-[100px]" />
@@ -377,7 +382,7 @@ function DashboardSkeleton() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         {[...Array(2)].map((_, i) => (
           <Card key={i}>
             <CardHeader>
@@ -390,7 +395,7 @@ function DashboardSkeleton() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         <Card className="col-span-2">
           <CardHeader>
             <Skeleton className="h-4 w-[200px]" />
@@ -401,7 +406,7 @@ function DashboardSkeleton() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-2 md:grid-cols-2">
         {[...Array(2)].map((_, i) => (
           <Card key={i}>
             <CardHeader>

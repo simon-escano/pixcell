@@ -18,6 +18,7 @@ export default async function Page() {
             imageUrl: profile.imageUrl
           }}
           userRole={role.name}
+          userId={user.id}
         />
       </div>
     </Base>
