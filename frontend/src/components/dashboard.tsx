@@ -1,6 +1,6 @@
 "use client";
 
-import { getDashboardStats } from "@/actions/dashoard";
+import { getDashboardStats } from "@/actions/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -42,7 +42,7 @@ interface DashboardStats {
     id: string;
     sampleName: string | null;
     capturedAt: Date | null;
-    imageUrl: string;
+    imageUrl: string | null;
     patientName: string;
     uploadedBy: string;
   }[];
@@ -301,7 +301,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
                         <img
-                          src={upload.imageUrl}
+                          src={upload.imageUrl || undefined}
                           alt="Sample"
                           className="h-8 w-8 rounded-lg object-cover"
                         />
