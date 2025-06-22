@@ -5,6 +5,7 @@ import { Users, User, Image as ImageIcon, FileText, Database, PieChart as PieCha
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
 
 function StatCard({ title, value, icon }: { title: string; value: string | number; icon: React.ReactNode }) {
   return (
@@ -202,6 +203,13 @@ export default function AdminDashboardClient({
               </LineChart>
             </ResponsiveContainer>
           </div>
+          <div className="flex justify-end mt-4">
+            <Link href="/patients">
+              <button className="rounded-md bg-primary text-white px-3 py-1.5 text-sm font-semibold shadow hover:bg-primary/90 transition-colors">
+                Manage Patients
+              </button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
       <div className="grid gap-2 md:grid-cols-2">
@@ -250,6 +258,13 @@ export default function AdminDashboardClient({
               ))}
             </div>
           </CardContent>
+          <div className="flex justify-end w-full px-6 pb-4">
+            <Link href="/users">
+              <button className="rounded-md bg-primary text-white px-3 py-1.5 text-sm font-semibold shadow hover:bg-primary/90 transition-colors">
+                Manage Users
+              </button>
+            </Link>
+          </div>
         </Card>
       </div>
     </div>
