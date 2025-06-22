@@ -29,9 +29,9 @@ export const signupAction = async (formData: FormData) => {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const firstName = formData.get("firstname") as string;
-    const lastName = formData.get("lastname") as string;
-    const roleName = formData.get("role") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const roleId = formData.get("roleId") as string;
 
     const auth = await getSupabaseAuth();
 
@@ -59,8 +59,11 @@ export const signupAction = async (formData: FormData) => {
     const [result] = await db
       .select()
       .from(role)
-      .where(eq(role.name, roleName));
-    const roleId = result.id
+      .where(eq(role.id, roleId));
+
+      if (!result) {
+        throw new Error(`Role with id "${roleId}" not found in the database`);
+      }
 
     await db.insert(profile).values({
       id: userId,
@@ -70,6 +73,17 @@ export const signupAction = async (formData: FormData) => {
       roleId,
       imageId,
     });
+
+    console.log("Profile insert values:", {
+      id: userId,
+      firstName,
+      lastName,
+      userId,
+      roleId,
+      imageId,
+    });
+
+    console.log("Role query result:", result);
 
     return { errorMessage: null };
   } catch (error) {

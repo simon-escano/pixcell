@@ -93,13 +93,13 @@ export function SignupForm({
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="41ae0f54-b306-4ae2-9bb6-c33776fae906">
+                    <SelectItem value="fa32e38f-6461-4707-92ba-a366df7b3379">
                       Pathologist
                     </SelectItem>
-                    <SelectItem value="7e12a5bb-597c-4d69-8e2e-90666c08d6f7">
+                    <SelectItem value="1c045053-afcd-4337-8437-087406be7a91">
                       Hematologist
                     </SelectItem>
-                    <SelectItem value="f080882b-2922-42a3-800b-50a65e2c4822">
+                    <SelectItem value="d653129b-c014-4cc9-89e3-7cbf9fc91fbc">
                       Medical Technologist
                     </SelectItem>
                   </SelectContent>
