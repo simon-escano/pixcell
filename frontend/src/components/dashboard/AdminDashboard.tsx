@@ -188,9 +188,9 @@ export async function AdminDashboard() {
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-3 px-8">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Database className="text-muted-foreground h-5 w-5" /> Storage Used
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Database className="text-muted-foreground h-4 w-4" /> Storage Used
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-6">
@@ -215,24 +215,20 @@ export async function AdminDashboard() {
           </CardContent>
         </Card>
         <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-3 px-8">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <PieChartIcon className="text-muted-foreground h-5 w-5" /> Users per Role
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <PieChartIcon className="text-muted-foreground h-4 w-4" /> Users per Role
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-6">
-            <div className="flex flex-col md:flex-row items-center gap-8 w-full">
-              <div className="flex-1 flex flex-col items-center">
-                <UsersPerRolePieChart roleCounts={roleCounts} />
-                <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-muted-foreground text-xs">
-                  {roleCounts.map((r) => (
-                    <div key={r.role} className="flex items-center gap-1">
-                      <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: r.color }}></span>
-                      <span>{r.role}: {r.count}</span>
-                    </div>
-                  ))}
+          <CardContent className="flex flex-col md:flex-row items-center justify-center py-6 gap-6">
+            <UsersPerRolePieChart roleCounts={roleCounts} />
+            <div className="flex flex-col gap-2 items-start text-muted-foreground text-xs">
+              {roleCounts.map((r) => (
+                <div key={r.role} className="flex items-center gap-2">
+                  <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: r.color }}></span>
+                  <span>{r.role}: {r.count}</span>
                 </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
