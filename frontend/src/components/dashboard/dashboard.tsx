@@ -223,102 +223,97 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
 
       <div className="grid gap-2 md:grid-cols-2">
         <Card>
-          <CardHeader className="py-3 px-6">
+          <CardHeader className="py-3 px-6 pb-1">
             <CardTitle className="text-sm font-semibold">Recent Reports</CardTitle>
           </CardHeader>
-          <CardContent className="py-3 px-6">
-            <div className="space-y-2">
-              <div className="space-y-2">
-                {stats?.patientsWithLastReport.map((report) => (
-                  <div
-                    key={`${report.patientId}-${report.sampleId || "no-sample"}-${report.reportCreatedAt || report.dateTaken}`}
-                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        {report.userImage ? (
-                          <img
-                            src={report.userImage}
-                            alt={report.userName}
-                            className="h-6 w-6 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="bg-sidebar-accent flex h-6 w-6 items-center justify-center rounded-lg">
-                            <span className="text-muted-foreground text-sm font-medium">
-                              {report.userName
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-foreground text-sm font-medium">
-                          {report.patientName}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {report.sampleName || "Sample"} •{" "}
-                          {formatDate(
-                            report.reportCreatedAt || report.dateTaken,
-                          )}
-                        </p>
-                      </div>
+          <CardContent className="pt-1 pb-4 px-6">
+            <div className="flex flex-col gap-y-3">
+              {stats?.patientsWithLastReport.map((report) => (
+                <div
+                  key={`${report.patientId}-${report.sampleId || "no-sample"}-${report.reportCreatedAt || report.dateTaken}`}
+                  className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2 shadow-sm"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      {report.userImage ? (
+                        <img
+                          src={report.userImage}
+                          alt={report.userName}
+                          className="h-6 w-6 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="bg-sidebar-accent flex h-6 w-6 items-center justify-center rounded-lg">
+                          <span className="text-muted-foreground text-sm font-medium">
+                            {report.userName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs ${
-                          report.isAiGenerated
-                            ? "bg-blue-200 text-blue-800"
-                            : "bg-green-200 text-green-800"
-                        }`}
-                      >
-                        {report.isAiGenerated ? "AI Generated" : "Manual"}
-                      </span>
+                    <div>
+                      <p className="text-foreground text-sm font-medium">
+                        {report.patientName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {report.sampleName || "Sample"} •{" "}
+                        {formatDate(
+                          report.reportCreatedAt || report.dateTaken,
+                        )}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        report.isAiGenerated
+                          ? "bg-blue-200 text-blue-800"
+                          : "bg-green-200 text-green-800"
+                      }`}
+                    >
+                      {report.isAiGenerated ? "AI Generated" : "Manual"}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="py-3 px-6">
+          <CardHeader className="py-3 px-6 pb-1">
             <CardTitle className="text-sm font-semibold">Recently Uploaded Files</CardTitle>
           </CardHeader>
-          <CardContent className="py-3 px-6">
-            <div className="space-y-1">
-              <div className="spstiace-y-2">
-                {stats?.recentUploads.map((upload) => (
-                  <div
-                    key={`${upload.id}-${upload.capturedAt}`}
-                    className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        <img
-                          src={upload.imageUrl || undefined}
-                          alt="Sample"
-                          className="h-6 w-6 rounded-lg object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-foreground text-sm font-medium">
-                          {upload.patientName}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {upload.sampleName || "Sample"} •{" "}
-                          {formatDate(upload.capturedAt)}
-                        </p>
-                      </div>
+          <CardContent className="pb-4 px-6">
+            <div className="flex flex-col gap-y-3">
+              {stats?.recentUploads.map((upload) => (
+                <div
+                  key={`${upload.id}-${upload.capturedAt}`}
+                  className="bg-sidebar-accent flex items-center justify-between rounded-lg p-2 shadow-sm"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      <img
+                        src={upload.imageUrl || undefined}
+                        alt="Sample"
+                        className="h-6 w-6 rounded-lg object-cover"
+                      />
                     </div>
-                    <div className="text-muted-foreground text-xs">
-                      by {upload.uploadedBy}
+                    <div>
+                      <p className="text-foreground text-sm font-medium">
+                        {upload.patientName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {upload.sampleName || "Sample"} 
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="text-muted-foreground text-xs">
+                    {formatDate(upload.capturedAt)}
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
