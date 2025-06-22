@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { profile, user } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
-import { getErrorMessage } from "@/lib/utils"
+import { getErrorMessage } from "@/utils"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm";
 
@@ -18,9 +18,13 @@ export const signupAction = async (formData: FormData) => {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const firstName = formData.get("firstname") as string;
-    const lastName = formData.get("lastname") as string;
-    const role = formData.get("role") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const roleId = formData.get("roleId") as string;
+
+    if (!email || !password || !firstName || !lastName || !roleId) {
+      return { errorMessage: "All fields are required" };
+    }
 
     const auth = await getSupabaseAuth();
 
@@ -33,12 +37,54 @@ export const signupAction = async (formData: FormData) => {
 
     const userId = data.session.user.id;
 
+    // Always generate an image URL using DiceBear
     const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
 
     await db.insert(profile).values({
       id: userId,
       userId,
-      roleId: role,
+      roleId,
+      imageUrl,
+      firstName,
+      lastName
+    });
+
+    return { errorMessage: null };
+  } catch (error) {
+    return { errorMessage: getErrorMessage(error) };
+  }
+};
+
+export const createUserAction = async (formData: FormData) => {
+  try {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const roleId = formData.get("roleId") as string;
+
+    if (!email || !password || !firstName || !lastName || !roleId) {
+      return { errorMessage: "All fields are required" };
+    }
+
+    // Use the service role client for admin operations
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error("No user created");
+
+    const userId = data.user.id;
+
+    // Always generate an image URL using DiceBear
+    const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
+
+    await db.insert(profile).values({
+      id: userId,
+      userId,
+      roleId,
       imageUrl,
       firstName,
       lastName
@@ -72,6 +118,22 @@ export const logoutAction = async () => {
     const auth = await getSupabaseAuth();
 
     const { error } = await auth.signOut();
+    if (error) throw error;
+
+    return { errorMessage: null };
+  } catch (error) {
+    return { errorMessage: getErrorMessage(error) };
+  }
+};
+
+export const resetPasswordAction = async (formData: FormData) => {
+  try {
+    const email = formData.get("email") as string;
+    const auth = await getSupabaseAuth();
+
+    const { error } = await auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery`,
+    });
     if (error) throw error;
 
     return { errorMessage: null };

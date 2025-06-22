@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import { DataTable } from "@/components/data-table";
-import { UsersTable } from "@/components/users-table";
+import { UsersTable } from "@/components/users/users-table";
 import { getAllUsersWithProfiles, getAllRoles } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";

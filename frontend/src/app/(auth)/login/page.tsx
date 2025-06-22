@@ -1,6 +1,6 @@
 import { Worm } from "lucide-react";
 
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/components/auth/login-form";
 import Link from "next/link";
 
 export default function LoginPage() {

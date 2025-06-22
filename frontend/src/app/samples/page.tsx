@@ -1,8 +1,7 @@
 import Base from "@/components/base";
-import SampleWrapper from "@/components/sample-wrapper";
-import { getAllSamples, getSamplesByUserId } from "@/db/queries/select";
+import SampleWrapper from "@/components/samples/sample-wrapper";
+import { getAllSamples, getProfileByUserId, getRoleById, getSamplesByUserId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
-import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 
 export default async function SamplesPage() {
   const user = await getUser();

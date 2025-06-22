@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";
-import { NavSecondary } from "./nav-secondary";
+import { NavSecondary } from "./nav/nav-secondary";
 
 export async function NavSecondaryWrapper() {
   const user = await getUser();
