@@ -1,13 +1,19 @@
-import { patient, profile, report, role, sample, user, image, note, sample_image } from "@/db/schema"
+import { patient, profile, report, role, sample, user, image, note, sample_image, session } from "@/db/schema"
 import { eq, sql } from "drizzle-orm"
 import { db } from "..";
 
 import { alias } from 'drizzle-orm/pg-core';
+import { createClient } from '@supabase/supabase-js';
 
 const patientImage = alias(image, 'patientImage');
 const generatedByImage = alias(image, 'generatedByImage');
 const profileImage = alias(image, 'profileImage');
 const sampleImg = alias(image, 'sampleImg');
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Only use service role key on the server!
+);
 
 export async function getUserById(id: string) {
   const result = await db.select().from(user).where(eq(user.id, id));
@@ -388,4 +394,10 @@ export async function getImageURLFromImageId(imageId: string) {
     .where(eq(image.id, imageId));
   
   return result[0]?.imageUrl || null;
+}
+
+export async function getSupabaseUserCount() {
+  const { data, error } = await supabase.auth.admin.listUsers();
+  if (error) throw error;
+  return data.users.length;
 }
