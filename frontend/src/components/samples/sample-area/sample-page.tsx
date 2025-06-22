@@ -1,4 +1,5 @@
-import Base from "@/components/base";
+"use client";
+
 import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
 import {
   Card,
@@ -6,15 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  getPatientById,
-  getProfileByUserId,
-  getRoleById,
-  getSampleById,
-} from "@/db/queries/select";
-import { getUser } from "@/lib/auth";
 import { Clock } from "lucide-react";
-import { PatientWithImage, ProfileWithImage } from "@/db/schema";
+import { PatientWithImage, ProfileWithImage, SampleWithImage } from "@/db/schema";
 import { ClientSideSuspense, RoomProvider } from "@liveblocks/react";
 import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,28 +18,25 @@ import { ShareDialog } from "../share-dialog";
 import UserButton from "@/components/users/user-button";
 
 interface SamplePageProps {
-  sampleId: string;
+  roomName?: string;
+  sample: SampleWithImage;
+  patient: PatientWithImage;
+  profile: ProfileWithImage;
+  roleName: string | null;
   disabled?: boolean;
 }
 
-export async function SamplePage({
-  sampleId,
+export function SamplePage({
+  roomName,
+  sample,
+  patient,
+  profile,
+  roleName,
   disabled = false,
 }: SamplePageProps) {
-  const user = await getUser();
-  const userProfile = await getProfileByUserId(user.id) as ProfileWithImage;
-  const sample = await getSampleById(sampleId);
-  const patient = await getPatientById(sample.patientId) as PatientWithImage;
-  
-  // Handle case where sample_image data might not exist
-  const profile = sample.uploadedBy 
-    ? (await getProfileByUserId(sample.uploadedBy)) as ProfileWithImage
-    : null;
-  const role = profile ? await getRoleById(profile.roleId) : null;
-
   return (
     <RoomProvider
-      id={roomName}
+      id={roomName || `sample_${sample.id}`}
       initialPresence={{
         profile: profile,
         selection: [],
@@ -79,15 +70,15 @@ export async function SamplePage({
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 redirectUrl={`/patients/${patient.id}`}
-                roleName={role?.name || "Unknown"}
+                roleName={roleName || "Unknown"}
               />
               {profile && (
                 <UserButton
                   imageUrl={profile.imageUrl || ""}
                   firstName={profile.firstName}
                   lastName={profile.lastName}
-                  redirectUrl={`/users/${profile.id}`}
-                  roleName={role?.name || "Unknown"}
+                  redirectUrl={`/users/${profile.userId}`}
+                  roleName={roleName || "Unknown"}
                 />
               )}
             </div>

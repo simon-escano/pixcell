@@ -1,33 +1,36 @@
-import Base from "@/components/base";
-import LiveblocksWrapper from "@/components/samples/liveblocks-wrapper";
-import {
-  getPatientById,
-  getProfileByUserId,
-  getRoleById,
-  getSampleById,
-} from "@/db/queries/select";
-import { SamplePage } from "./sample-page";
+"use client";
 
-interface SamplePageProps {
-  sampleId: string;
+import LiveblocksWrapper from "@/components/samples/liveblocks-wrapper";
+import { SamplePage } from "./sample-page";
+import { SampleWithImage, PatientWithImage, ProfileWithImage } from "@/db/schema";
+
+interface SamplePageWrapperProps {
+  sample: SampleWithImage;
+  patient: PatientWithImage;
+  profile: ProfileWithImage;
+  roleName: string | null;
   disabled?: boolean;
 }
 
-export async function SamplePageWrapper({
-  sampleId,
+export function SamplePageWrapper({
+  sample,
+  patient,
+  profile,
+  roleName,
   disabled = false,
-}: SamplePageProps) {
-  const sample = await getSampleById(sampleId);
-  const patient = await getPatientById(sample.patientId);
-  const profile = await getProfileByUserId(sample.uploadedBy);
-  const role = await getRoleById(profile.roleId);
-  const roomName = `sample_${sampleId}`;
+}: SamplePageWrapperProps) {
+  const roomName = `sample_${sample.id}`;
 
   return (
     <LiveblocksWrapper>
-      <Base>
-        <SamplePage roomName={roomName} sample={sample} patient={patient} profile={profile} role={role} disabled={disabled}/>
-      </Base>
+      <SamplePage 
+        roomName={roomName} 
+        sample={sample} 
+        patient={patient} 
+        profile={profile} 
+        roleName={roleName} 
+        disabled={disabled}
+      />
     </LiveblocksWrapper>
   );
 }

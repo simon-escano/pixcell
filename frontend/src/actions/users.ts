@@ -66,8 +66,7 @@ export const signupAction = async (formData: FormData) => {
       id: userId,
       userId,
       roleId,
-      imageUrl,
-      firstName,
+      firstName,  
       lastName,
       imageId,
     });
