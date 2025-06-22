@@ -44,7 +44,7 @@ export function SignupForm({
 
       const { errorMessage } = await signupAction(formData);
       if (!errorMessage) {
-        toast.success("Account successfully created. Please log in to continue.");
+        toast.success("Account created! Please check your email to confirm your account before logging in.");
         router.replace("/login");
       } else {
         toast.error(errorMessage);
@@ -63,7 +63,11 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleClickSignupButton}>
+          <form onSubmit={e => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleClickSignupButton(formData);
+          }}>
             <div className="grid gap-6">
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">

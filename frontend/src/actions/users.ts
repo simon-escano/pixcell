@@ -35,14 +35,24 @@ export const signupAction = async (formData: FormData) => {
 
     const auth = await getSupabaseAuth();
 
-    const { error } = await auth.signUp({ email, password });
+    const { data, error } = await auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`
+      }
+    });
     if (error) throw error;
 
-    const { data, error: loginError } = await auth.signInWithPassword({ email, password });
-    if (loginError) throw loginError;
-    if (!data.session) throw new Error("No session");
+    // Get the userId from the signUp response
+    const userId = data.user?.id;
+    if (!userId) throw new Error("User ID not returned from sign up");
 
-    const userId = data.session.user.id;
+    // const { data, error: loginError } = await auth.signInWithPassword({ email, password });
+    // if (loginError) throw loginError;
+    // if (!data.session) throw new Error("No session");
+
+    //const userId = data.session.user.id;
 
     const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
 
