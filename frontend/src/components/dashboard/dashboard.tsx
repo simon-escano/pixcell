@@ -95,21 +95,24 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
     return <DashboardSkeleton />;
   }
 
+  console.log('genderStats:', stats?.genderStats);
   // Transform data for the line chart
   const transformedData = stats?.genderStats.reduce((acc: any[], curr) => {
+    const genderKey = curr.gender === 'M' ? 'male' : curr.gender === 'F' ? 'female' : curr.gender.toLowerCase();
     const existingMonth = acc.find(item => item.month === curr.month);
     if (existingMonth) {
-      existingMonth[curr.gender.toLowerCase()] = curr.count;
+      existingMonth[genderKey] = curr.count;
     } else {
       acc.push({
         month: curr.month,
-        [curr.gender.toLowerCase()]: curr.count,
-        male: curr.gender.toLowerCase() === 'male' ? curr.count : 0,
-        female: curr.gender.toLowerCase() === 'female' ? curr.count : 0,
+        [genderKey]: curr.count,
+        male: curr.gender === 'M' ? curr.count : 0,
+        female: curr.gender === 'F' ? curr.count : 0,
       });
     }
     return acc;
   }, []).sort((a, b) => a.month.localeCompare(b.month));
+  console.log('transformedData:', transformedData);
 
   return (
     <div className="space-y-3">
@@ -340,7 +343,7 @@ function StatCard({
   value: number;
   icon: React.ReactNode;
   subtitle?: React.ReactNode;
-  change: number;
+  change: number | null;
 }) {
   return (
     <Card>
@@ -352,12 +355,16 @@ function StatCard({
         <div className="text-2xl font-bold">{value}</div>
         {subtitle}
         <p className="text-muted-foreground mt-1.5 text-xs">
-          <span
-            className={change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-muted-foreground"}
-          >
-            {change > 0 ? "+" : ""}
-            {change.toFixed(1)}%
-          </span>
+          {change === null ? (
+            <span className="text-muted-foreground">N/A</span>
+          ) : (
+            <span
+              className={change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-muted-foreground"}
+            >
+              {change > 0 ? "+" : ""}
+              {change.toFixed(1)}%
+            </span>
+          )}
           {" from last month"}
         </p>
       </CardContent>

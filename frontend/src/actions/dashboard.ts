@@ -16,9 +16,10 @@ import { sql } from "drizzle-orm"
 
 // Helper function to calculate monthly changes
 async function getMonthlyChange(table: any, dateColumn: any) {
-  const currentMonth = new Date();
-  const lastMonth = new Date();
-  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const now = new Date();
+  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = startOfCurrentMonth;
 
   const [currentMonthCount, lastMonthCount] = await Promise.all([
     db
@@ -26,27 +27,29 @@ async function getMonthlyChange(table: any, dateColumn: any) {
         count: sql<number>`count(*)`,
       })
       .from(table)
-      .where(sql`${dateColumn} >= ${currentMonth.toISOString()}`),
+      .where(sql`${dateColumn} >= ${startOfCurrentMonth.toISOString()}`),
     db
       .select({
         count: sql<number>`count(*)`,
       })
       .from(table)
-      .where(sql`${dateColumn} >= ${lastMonth.toISOString()} and ${dateColumn} < ${currentMonth.toISOString()}`),
+      .where(sql`${dateColumn} >= ${startOfLastMonth.toISOString()} and ${dateColumn} < ${endOfLastMonth.toISOString()}`),
   ]);
 
   const current = Number(currentMonthCount[0]?.count ?? 0);
   const last = Number(lastMonthCount[0]?.count ?? 0);
+  console.log('getMonthlyChange:', { current, last });
   
-  if (last === 0) return 0;
+  if (last === 0) return null;
   return ((current - last) / last) * 100;
 }
 
 // Simplified function to get sample changes
 async function getSampleMonthlyChange() {
-  const currentMonth = new Date();
-  const lastMonth = new Date();
-  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const now = new Date();
+  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = startOfCurrentMonth;
 
   const [currentMonthCount, lastMonthCount] = await Promise.all([
     db
@@ -55,20 +58,21 @@ async function getSampleMonthlyChange() {
       })
       .from(sample)
       .leftJoin(sample_image, sql`${sample.id} = ${sample_image.sampleId}`)
-      .where(sql`${sample_image.capturedAt} >= ${currentMonth.toISOString()}`),
+      .where(sql`${sample_image.capturedAt} >= ${startOfCurrentMonth.toISOString()}`),
     db
       .select({
         count: sql<number>`count(distinct ${sample.id})`,
       })
       .from(sample)
       .leftJoin(sample_image, sql`${sample.id} = ${sample_image.sampleId}`)
-      .where(sql`${sample_image.capturedAt} >= ${lastMonth.toISOString()} and ${sample_image.capturedAt} < ${currentMonth.toISOString()}`),
+      .where(sql`${sample_image.capturedAt} >= ${startOfLastMonth.toISOString()} and ${sample_image.capturedAt} < ${endOfLastMonth.toISOString()}`),
   ]);
 
   const current = Number(currentMonthCount[0]?.count ?? 0);
   const last = Number(lastMonthCount[0]?.count ?? 0);
+  console.log('getSampleMonthlyChange:', { current, last });
   
-  if (last === 0) return 0;
+  if (last === 0) return null;
   return ((current - last) / last) * 100;
 }
 
