@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllUsers, getAllSamples, getAllReports, getAllPatients, getAllUsersWithProfiles } from "@/db/queries/select";
+import { getAllUsers, getAllSamples, getAllReports, getAllPatients, getAllUsersWithProfiles, getPatientGenderStats } from "@/db/queries/select";
 import { createClient } from '@supabase/supabase-js';
 import { Users, User, Image as ImageIcon, FileText, Database, PieChart as PieChartIcon } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { format } from 'date-fns';
+import AdminDashboardClient from './AdminDashboardClient';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -149,6 +152,7 @@ export async function AdminDashboard() {
   const samples = await getAllSamples();
   const reports = await getAllReports();
   const usersWithProfiles = await getAllUsersWithProfiles();
+  const genderStats = await getPatientGenderStats();
   // Calculate storage used in the 'sample-images' bucket
   let storageUsed = 0;
   try {
@@ -180,59 +184,13 @@ export async function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-2">
-      <div className="grid gap-2 md:grid-cols-4">
-        {mainMetrics.map((metric) => (
-          <StatCard key={metric.title} title={metric.title} value={metric.value} icon={metric.icon} />
-        ))}
-      </div>
-      <div className="grid gap-2 md:grid-cols-2">
-        <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Database className="text-muted-foreground h-4 w-4" /> Storage Used
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-6">
-            <div className="flex flex-col md:flex-row items-center gap-8 w-full">
-              <div className="flex-1 flex flex-col items-center">
-                <StoragePieChart used={parseFloat(storageUsedMB)} total={storageCapacityMB} />
-                <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-muted-foreground text-xs">
-                  <div className="flex items-center gap-1">
-                    <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></span>
-                    <span>Used: <span className="text-2xl font-bold">{storageUsedMB} MB</span></span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: '#e5e7eb' }}></span>
-                    <span>Free: {storageFreeMB > 0 ? `${storageFreeMB.toFixed(2)} MB` : 'No free space'}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>Total: {storageCapacityMB} MB</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="w-full">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieChartIcon className="text-muted-foreground h-4 w-4" /> Users per Role
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col md:flex-row items-center justify-center py-6 gap-6">
-            <UsersPerRolePieChart roleCounts={roleCounts} />
-            <div className="flex flex-col gap-2 items-start text-muted-foreground text-xs">
-              {roleCounts.map((r) => (
-                <div key={r.role} className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: r.color }}></span>
-                  <span>{r.role}: {r.count}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <AdminDashboardClient
+      mainMetrics={mainMetrics}
+      storageUsedMB={storageUsedMB}
+      storageCapacityMB={storageCapacityMB}
+      storageFreeMB={storageFreeMB}
+      roleCounts={roleCounts}
+      genderStats={genderStats}
+    />
   );
 } 
