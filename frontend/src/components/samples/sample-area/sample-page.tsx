@@ -1,14 +1,11 @@
 import Base from "@/components/base";
 import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
-import SampleArea from "@/components/sample-area";
-import { ShareDialog } from "@/components/share-dialog";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import UserButton from "@/components/user-button";
 import {
   getPatientById,
   getProfileByUserId,
@@ -18,6 +15,13 @@ import {
 import { getUser } from "@/lib/auth";
 import { Clock } from "lucide-react";
 import { PatientWithImage, ProfileWithImage } from "@/db/schema";
+import { ClientSideSuspense, RoomProvider } from "@liveblocks/react";
+import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
+import { Spinner } from "@/components/ui/spinner";
+import SampleArea from "./sample-area";
+import Avatars from "@/components/avatars";
+import { ShareDialog } from "../share-dialog";
+import UserButton from "@/components/users/user-button";
 
 interface SamplePageProps {
   sampleId: string;

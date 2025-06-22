@@ -380,3 +380,12 @@ export async function getAllReports() {
     .leftJoin(role, eq(profile.roleId, role.id))
     .orderBy(report.createdAt);
 }
+
+export async function getImageURLFromImageId(imageId: string) {
+  const result = await db
+    .select({ imageUrl: image.imageUrl })
+    .from(image)
+    .where(eq(image.id, imageId));
+  
+  return result[0]?.imageUrl || null;
+}

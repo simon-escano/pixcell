@@ -69,68 +69,6 @@ export const signupAction = async (formData: FormData) => {
       imageUrl,
       firstName,
       lastName,
-      userId,
-      roleId,
-      imageId,
-    });
-
-    return { errorMessage: null };
-  } catch (error) {
-    return { errorMessage: getErrorMessage(error) };
-  }
-};
-
-export const createUserAction = async (formData: FormData) => {
-  try {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const roleId = formData.get("roleId") as string;
-
-    if (!email || !password || !firstName || !lastName || !roleId) {
-      return { errorMessage: "All fields are required" };
-    }
-
-    // Use the service role client for admin operations
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true
-    });
-    if (error) throw error;
-    if (!data.user) throw new Error("No user created");
-
-    const userId = data.user.id;
-
-    // Always generate an image URL using DiceBear
-    const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
-
-    const [imageInsert] = await db
-      .insert(image)
-      .values({
-        id: crypto.randomUUID(), // or use drizzle's uuid() if available
-        imageUrl,
-      })
-      .returning({ id: image.id });
-
-    const imageId = imageInsert.id;
-
-    const [result] = await db
-      .select()
-      .from(role)
-      .where(eq(role.name, roleName));
-    const roleId = result.id
-
-    await db.insert(profile).values({
-      id: userId,
-      userId,
-      roleId: role,
-      imageUrl,
-      firstName,
-      lastName,
-      userId,
-      roleId,
       imageId,
     });
 

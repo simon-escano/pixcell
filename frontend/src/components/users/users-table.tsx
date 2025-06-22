@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUser, updateUser, createUserAction } from "@/actions/users";
+import { deleteUser, updateUser, signupAction } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ type CombinedUser = {
   phone: User["phone"];
   firstName: Profile["firstName"];
   lastName: Profile["lastName"];
-  imageUrl: Profile["imageUrl"];
+  imageId: Profile["imageId"];
   roleId: Role["id"];
   roleName: Role["name"];
 };
@@ -74,7 +74,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     if (data.phone) formData.append("phone", data.phone);
     if (data.file) formData.append("file", data.file);
 
-    const res = await createUserAction(formData);
+    const res = await signupAction(formData);
     if (!res.errorMessage) {
       toast.success("User added successfully.");
       setAddOpen(false);

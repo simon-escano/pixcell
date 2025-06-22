@@ -33,7 +33,7 @@ type CombinedUser = {
   phone: User["phone"];
   firstName: Profile["firstName"];
   lastName: Profile["lastName"];
-  imageUrl: Profile["imageUrl"];
+  imageId: Profile["imageId"];
   roleId: Role["id"];
   roleName: Role["name"];
 };
@@ -83,7 +83,7 @@ export function UserDialog({
   useEffect(() => {
     if (user) {
       setRoleValue(user.roleId);
-      setPreview(user.imageUrl || null);
+      setPreview(user.imageId || null);
     } else {
       setRoleValue("");
       setPreview(null);
