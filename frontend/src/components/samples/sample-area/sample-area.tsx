@@ -1,9 +1,10 @@
 "use client";
 
-import { Sample } from "@/db/schema";
+import { SampleWithImage } from "@/db/schema";
 import {
   CanvasMode,
-  Color
+  Color,
+  LayerType
 } from "@/types";
 import {
   useCanRedo,
@@ -26,6 +27,7 @@ import Path from "./canvas/path";
 import SelectionBox from "./canvas/selection-box";
 import SelectionTools from "./canvas/selection-tools";
 import { Toolbar } from "./canvas/toolbar";
+import { AnalysisResults } from "../analysis-results";
 import { useCamera } from "../../../hooks/samples/use-camera";
 import { useCanvasState } from "../../../hooks/samples/use-canvas-state";
 import useDeleteLayers from "../../../hooks/samples/use-delete-layers";
@@ -43,7 +45,7 @@ import {
 const MAX_LAYERS = 100;
 
 type SampleAreaProps = {
-  sample: Sample;
+  sample: SampleWithImage;
   disabled?: boolean;
 };
 
@@ -79,7 +81,9 @@ export default function SampleArea({
     selectedModel,
     setSelectedModel,
     handleProcessImage,
-  } = useImageProcessing(sample.imageUrl);
+    detectionResults,
+    aiAnalysis,
+  } = useImageProcessing(sample.imageUrl || "");
 
   const pencilDraft = useSelf((me) => me.presence.pencilDraft);
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
@@ -370,6 +374,10 @@ export default function SampleArea({
         setSelectedModel={setSelectedModel}
         onProcessImage={handleProcessImage}
         disabled={disabled}
+      />
+      <AnalysisResults 
+        detectionResults={detectionResults}
+        aiAnalysis={aiAnalysis}
       />
     </div>
   );

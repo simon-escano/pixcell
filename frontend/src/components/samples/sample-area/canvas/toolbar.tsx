@@ -1,11 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CanvasMode, LayerType } from "@/types";
 import {
@@ -145,32 +138,12 @@ export const Toolbar = ({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Select
-          disabled={disabled}
-          onValueChange={setSelectedModel}
-          value={selectedModel}
-        >
-          <SelectTrigger className="h-full w-[180px]">
-            <SelectValue placeholder="Choose model" className="h-full" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="parasite_detection_yolov8">
-              Parasite Detection
-            </SelectItem>
-            <SelectItem value="anemia_detection_yolov8">
-              Anemia Detection
-            </SelectItem>
-            <SelectItem value="malaria_detection_yolov8">
-              Malaria Detection
-            </SelectItem>
-          </SelectContent>
-        </Select>
         <Button
           onClick={onProcessImage}
           disabled={disabled}
         >
           <Search />
-          Detect
+          Detect & Analyze
         </Button>
       </div>
     </div>

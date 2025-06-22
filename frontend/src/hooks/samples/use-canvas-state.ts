@@ -10,7 +10,7 @@ export const useCanvasState = () => {
     setState({ mode } as CanvasState);
   }, []);
 
-  const setInsertingMode = useCallback((layerType: LayerType.Rectangle | LayerType.Ellipse) => {
+  const setInsertingMode = useCallback((layerType: LayerType.Rectangle | LayerType.Ellipse | LayerType.Text) => {
     setState({
       mode: CanvasMode.Inserting,
       layerType,
