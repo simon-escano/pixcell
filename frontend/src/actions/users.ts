@@ -64,10 +64,10 @@ export const signupAction = async (formData: FormData) => {
 
     await db.insert(profile).values({
       id: userId,
+      firstName,
+      lastName,
       userId,
       roleId,
-      firstName,  
-      lastName,
       imageId,
     });
 
