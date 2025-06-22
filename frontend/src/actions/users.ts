@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db";
-import { profile, user } from "@/db/schema";
+import { profile, user, role, image } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/utils"
 import { createClient } from "@supabase/supabase-js";
@@ -14,17 +14,24 @@ if (!supabaseUrl || !supabaseKey) {
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Helper function for server-side logging
+function logServer(message: string, data?: any) {
+  // This will show up in your terminal where you run the Next.js server
+  console.log(`[Server Action] ${message}`, data ? JSON.stringify(data, null, 2) : '');
+}
+
+// Helper function to convert null to undefined
+function toUndefined<T>(value: T | null): T | undefined {
+  return value === null ? undefined : value;
+}
+
 export const signupAction = async (formData: FormData) => {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const roleId = formData.get("roleId") as string;
-
-    if (!email || !password || !firstName || !lastName || !roleId) {
-      return { errorMessage: "All fields are required" };
-    }
+    const firstName = formData.get("firstname") as string;
+    const lastName = formData.get("lastname") as string;
+    const roleName = formData.get("role") as string;
 
     const auth = await getSupabaseAuth();
 
@@ -37,8 +44,23 @@ export const signupAction = async (formData: FormData) => {
 
     const userId = data.session.user.id;
 
-    // Always generate an image URL using DiceBear
     const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
+
+    const [imageInsert] = await db
+      .insert(image)
+      .values({
+        id: crypto.randomUUID(), // or use drizzle's uuid() if available
+        imageUrl,
+      })
+      .returning({ id: image.id });
+
+    const imageId = imageInsert.id;
+
+    const [result] = await db
+      .select()
+      .from(role)
+      .where(eq(role.name, roleName));
+    const roleId = result.id
 
     await db.insert(profile).values({
       id: userId,
@@ -46,7 +68,10 @@ export const signupAction = async (formData: FormData) => {
       roleId,
       imageUrl,
       firstName,
-      lastName
+      lastName,
+      userId,
+      roleId,
+      imageId,
     });
 
     return { errorMessage: null };
@@ -81,13 +106,32 @@ export const createUserAction = async (formData: FormData) => {
     // Always generate an image URL using DiceBear
     const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
 
+    const [imageInsert] = await db
+      .insert(image)
+      .values({
+        id: crypto.randomUUID(), // or use drizzle's uuid() if available
+        imageUrl,
+      })
+      .returning({ id: image.id });
+
+    const imageId = imageInsert.id;
+
+    const [result] = await db
+      .select()
+      .from(role)
+      .where(eq(role.name, roleName));
+    const roleId = result.id
+
     await db.insert(profile).values({
       id: userId,
       userId,
-      roleId,
+      roleId: role,
       imageUrl,
       firstName,
-      lastName
+      lastName,
+      userId,
+      roleId,
+      imageId,
     });
 
     return { errorMessage: null };
@@ -144,8 +188,16 @@ export const resetPasswordAction = async (formData: FormData) => {
 
 export async function deleteUser(userId: string) {
   try {
+    logServer("Starting user deletion process", { userId });
+
+    // Get profile data to check for image
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);
-    const imageUrl = profileData[0]?.imageUrl;
+    const imageId = profileData[0]?.imageId;
+    let imageUrl: string | undefined = undefined;
+    if (imageId) {
+      const imageData = await db.select().from(image).where(eq(image.id, imageId)).limit(1);
+      imageUrl = imageData[0]?.imageUrl ?? undefined;
+    }
 
     if (imageUrl) {
       const path = imageUrl.split('/storage/v1/object/public/avatars/')[1];
@@ -155,71 +207,148 @@ export async function deleteUser(userId: string) {
           .remove([path]);
 
         if (deleteError) {
-          console.error("Failed to delete avatar from storage:", deleteError);
+          logServer("Failed to delete image from storage", { error: deleteError });
           return { success: false, error: "Failed to delete avatar from storage" };
         }
+        logServer("Successfully deleted image from storage");
       }
     }
 
-    await db.transaction(async (tx) => {
-      await tx.delete(profile).where(eq(profile.userId, userId));
-      await tx.delete(user).where(eq(user.id, userId));
-    });
-
+    logServer("User deletion completed successfully");
     return { success: true };
   } catch (error) {
-    console.error("Failed to delete user:", error);
+    logServer("Failed to delete user", { error });
     return { success: false, error: "Something went wrong." };
   }
 }
 
 export async function updateUser(userId: string, firstname: string, lastName: string, email: string, roleId: string, phone?: string, file?: File) {
-  let imageUrl: string | undefined;
-
-  if (!userId || !firstname || !lastName || !email || !roleId) {
-    throw new Error("Missing required fields: userId, firstname, lastName, email, and roleId are required.");
-  }
-
-  if (file) {
-    try {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const fileName = `${Date.now()}-${file.name}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, buffer, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("Supabase Storage upload failed:", uploadError);
-        throw new Error(`Failed to upload image: ${uploadError.message}`);
-      }
-
-      imageUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${data.path}`;
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      return { success: false, error: "Failed to upload image" };
-    }
-  }
-
   try {
-    await db.transaction(async (tx) => {
-      await tx.update(user).set({ email, ...(phone !== undefined ? { phone } : {}) }).where(eq(user.id, userId));
-      await tx.update(profile).set({
-        firstName: firstname,
-        lastName,
-        ...(imageUrl ? { imageUrl } : {}),
-        roleId,
-      }).where(eq(profile.userId, userId));
-    });
+    if (!userId || !firstname || !lastName || !email || !roleId) {
+      throw new Error("Missing required fields: userId, firstname, lastName, email, and roleId are required.");
+    }
 
-    return { success: true, imageUrl };
-  } catch (error: any) {
-    console.error("Database update failed:", error);
-    return { success: false, error: "Failed to update user" };
+    logServer("Starting user update process", { userId, firstname, lastName, email, roleId });
+
+    // Get current profile data to check for existing image
+    const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);
+    if (profileData.length === 0) {
+      logServer("Profile not found", { userId });
+      return { success: false, error: "Profile not found" };
+    }
+
+    logServer("Found profile data", profileData[0]);
+
+    let imageId: string | undefined;
+
+    if (file) {
+      try {
+        logServer("Processing new image upload", { fileName: file.name, fileType: file.type });
+        
+        // If there's an existing image, delete it from storage
+        if (profileData[0].imageId) {
+          logServer("Found existing image ID", { imageId: profileData[0].imageId });
+          
+          const existingImage = await db.select().from(image).where(eq(image.id, profileData[0].imageId)).limit(1);
+          logServer("Existing image data", existingImage[0]);
+
+          if (existingImage.length > 0) {
+            const imageUrl = existingImage[0].imageUrl;
+            if (imageUrl) {
+              logServer("Deleting existing image from storage", { imageUrl });
+              const path = imageUrl.split('/storage/v1/object/public/avatars/')[1];
+              if (path) {
+                const { error: deleteError } = await supabase.storage
+                  .from('avatars')
+                  .remove([path]);
+
+                if (deleteError) {
+                  logServer("Failed to delete image from storage", { error: deleteError });
+                  return { success: false, error: "Failed to delete old image from storage" };
+                }
+                logServer("Successfully deleted old image from storage");
+              }
+            }
+          }
+        }
+
+        // Upload new image
+        logServer("Uploading new image to storage");
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const fileName = `${Date.now()}-${file.name}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, buffer, {
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (uploadError) {
+          logServer("Supabase Storage upload failed", { error: uploadError });
+          throw new Error(`Failed to upload image: ${uploadError.message}`);
+        }
+
+        logServer("Successfully uploaded new image to storage", { uploadData });
+
+        const imageUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${uploadData.path}`;
+        logServer("Generated image URL", { imageUrl });
+        
+        // Create new image record
+        logServer("Creating new image record in database");
+        const [newImage] = await db.insert(image)
+          .values({
+            id: crypto.randomUUID(),
+            imageUrl: imageUrl
+          })
+          .returning();
+
+        logServer("Created new image record", newImage);
+        imageId = newImage.id;
+      } catch (error) {
+        logServer("Error handling image", { error });
+        return { success: false, error: "Failed to handle image" };
+      }
+    }
+
+    try {
+      logServer("Updating user and profile records");
+      await db.transaction(async (tx) => {
+        // Update user table - only include phone if it has a value
+        const userUpdateData = {
+          email,
+          ...(phone && phone.trim() !== "" ? { phone } : {})
+        };
+        logServer("Updating user with data", userUpdateData);
+        
+        await tx.update(user)
+          .set(userUpdateData)
+          .where(eq(user.id, userId));
+
+        // Update profile table
+        const profileUpdateData = {
+          firstName: firstname,
+          lastName,
+          roleId,
+          ...(imageId ? { imageId } : {})
+        };
+        logServer("Updating profile with data", profileUpdateData);
+        
+        await tx.update(profile)
+          .set(profileUpdateData)
+          .where(eq(profile.userId, userId));
+      });
+
+      logServer("Successfully updated user and profile");
+      return { success: true };
+    } catch (error) {
+      logServer("Database update failed", { error });
+      return { success: false, error: "Failed to update user" };
+    }
+  } catch (error) {
+    logServer("Update user failed", { error });
+    return { success: false, error: "Something went wrong" };
   }
 }
 

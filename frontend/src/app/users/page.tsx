@@ -21,13 +21,15 @@ export default async function OtherUsersPage() {
 
   // Transform the data to match CombinedUser type by providing default values for nullable fields
   const users = usersData.map((user) => ({
-    ...user,
     firstName: user.firstName || "",
     lastName: user.lastName || "",
-    imageUrl: user.imageUrl || "",
+    email: user.email || "",
+    roleName: user.roleName || "",
     roleId: user.roleId || "",
     phone: user.phone || "",
-    roleName: user.roleName || "",
+    id: user.id,
+    imageId: user.imageId || null,
+    imageUrl: user.imageUrl || null,
   }));
 
   return (

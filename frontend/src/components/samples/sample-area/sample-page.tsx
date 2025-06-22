@@ -1,18 +1,44 @@
-"use client";
+import Base from "@/components/base";
+import { RealtimeAvatarStack } from "@/components/realtime-avatar-stack";
+import SampleArea from "@/components/sample-area";
+import { ShareDialog } from "@/components/share-dialog";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import UserButton from "@/components/user-button";
+import {
+  getPatientById,
+  getProfileByUserId,
+  getRoleById,
+  getSampleById,
+} from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
+import { Clock } from "lucide-react";
+import { PatientWithImage, ProfileWithImage } from "@/db/schema";
 
-import Avatars from '@/components/avatars';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
-import UserButton from '@/components/users/user-button';
-import { Patient, Profile, Role, Sample } from '@/db/schema';
-import { LiveList, LiveMap, LiveObject } from '@liveblocks/client';
-import { ClientSideSuspense, RoomProvider } from '@liveblocks/react';
-import { BrainCircuit, Clock } from 'lucide-react';
-import { ShareDialog } from '../share-dialog';
-import SampleArea from './sample-area';
+interface SamplePageProps {
+  sampleId: string;
+  disabled?: boolean;
+}
 
-export function SamplePage({roomName, patient, profile, role, sample, disabled}: {roomName: string, patient: Patient, profile: Profile, role: Role, sample: Sample, disabled?: boolean}) {
+export async function SamplePage({
+  sampleId,
+  disabled = false,
+}: SamplePageProps) {
+  const user = await getUser();
+  const userProfile = await getProfileByUserId(user.id) as ProfileWithImage;
+  const sample = await getSampleById(sampleId);
+  const patient = await getPatientById(sample.patientId) as PatientWithImage;
+  
+  // Handle case where sample_image data might not exist
+  const profile = sample.uploadedBy 
+    ? (await getProfileByUserId(sample.uploadedBy)) as ProfileWithImage
+    : null;
+  const role = profile ? await getRoleById(profile.roleId) : null;
+
   return (
     <RoomProvider
       id={roomName}
@@ -49,15 +75,17 @@ export function SamplePage({roomName, patient, profile, role, sample, disabled}:
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 redirectUrl={`/patients/${patient.id}`}
-                roleName={role.name}
+                roleName={role?.name || "Unknown"}
               />
-              <UserButton
-                imageUrl={profile.imageUrl || ""}
-                firstName={profile.firstName}
-                lastName={profile.lastName}
-                redirectUrl={`/users/${profile.id}`}
-                roleName={role.name}
-              />
+              {profile && (
+                <UserButton
+                  imageUrl={profile.imageUrl || ""}
+                  firstName={profile.firstName}
+                  lastName={profile.lastName}
+                  redirectUrl={`/users/${profile.id}`}
+                  roleName={role?.name || "Unknown"}
+                />
+              )}
             </div>
 
             <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
@@ -88,21 +116,6 @@ export function SamplePage({roomName, patient, profile, role, sample, disabled}:
               <Clock className="h-3 w-3" />
               {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
             </div>
-          </Card>
-          <Card className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
-            <CardTitle>AI Analysis</CardTitle>
-            <CardDescription>Powered by DeepSeek</CardDescription>
-            <CardContent className="flex flex-1 items-center justify-center">
-              <p className="text-muted-foreground max-w-48 text-center">
-                Sample must have detections before analyzing
-              </p>
-            </CardContent>
-            <CardFooter className="p-0">
-              <Button className="w-full" disabled={true}>
-                <BrainCircuit />
-                Analyze
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>

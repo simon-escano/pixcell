@@ -3,14 +3,7 @@
 import { RealtimeCursors } from "@/components/realtime-cursors";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Sample } from "@/db/schema";
+import { SampleWithImage } from "@/db/schema";
 import { useCurrentUserName } from "@/hooks/use-current-user-name";
 import { useOthers } from "@liveblocks/react";
 import {
@@ -23,13 +16,14 @@ import {
   SquareDashed,
   Sun,
   Type,
+  BrainCircuit,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 type SampleAreaProps = {
-  sample: Sample;
+  sample: SampleWithImage;
   disabled?: boolean;
 };
 
@@ -39,8 +33,12 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
   );
 
   const [processedImageUrl, setProcessedImageUrl] = useState<string>(
-    sample.imageUrl,
+    sample.imageUrl || "",
   );
+
+  const [detectionResults, setDetectionResults] = useState<any>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);  
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const username = useCurrentUserName();
   const roomName = `sample_${String(sample.id)}`;
@@ -50,12 +48,17 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
     try {
       toast.loading("Sending image for prediction...");
 
+      if (!sample.imageUrl) {
+        throw new Error("No image URL available");
+      }
+
       const imageBlob = await fetch(sample.imageUrl).then((res) => res.blob());
       const formData = new FormData();
       formData.append("file", imageBlob, "image.jpg");
 
+      // Use the combined endpoint that runs detection once
       const response = await fetch(
-        `http://127.0.0.1:8000/predict?model_name=${selectedModel}`,
+        `http://127.0.0.1:8000/detect-and-analyze?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
         {
           method: "POST",
           body: formData,
@@ -64,16 +67,58 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
 
       if (!response.ok) throw new Error("Prediction failed");
 
-      const blob = await response.blob();
-      const resultUrl = URL.createObjectURL(blob);
-      setProcessedImageUrl(resultUrl);
+      const resultData = await response.json();
+      
+      if (resultData.success) {
+        setDetectionResults({
+          detections: resultData.detections,
+          total_detections: resultData.total_detections,
+          success: true
+        });
+        
+        // Set AI analysis if available
+        if (resultData.ai_analysis && resultData.ai_analysis.success) {
+          setAiAnalysis(resultData.ai_analysis);
+        }
+        
+        // Get the processed image from the original predict endpoint for display
+        const imageFormData = new FormData();
+        imageFormData.append("file", imageBlob, "image.jpg");
+        
+        const imageResponse = await fetch(
+          `http://127.0.0.1:8000/predict?model_name=${selectedModel}`,
+          {
+            method: "POST",
+            body: imageFormData,
+          },
+        );
 
-      toast.dismiss();
-      toast.success("Prediction complete!");
+        if (imageResponse.ok) {
+          const blob = await imageResponse.blob();
+          const resultUrl = URL.createObjectURL(blob);
+          setProcessedImageUrl(resultUrl);
+        }
+
+        toast.dismiss();
+        toast.success("Detection and analysis complete!");
+      } else {
+        throw new Error(resultData.error || "Prediction failed");
+      }
     } catch (error: any) {
       toast.dismiss();
       toast.error("Prediction failed: " + error.message);
     }
+  }
+
+  async function handleAiAnalysis() {
+    // This function is now redundant since AI analysis is done automatically
+    // But keeping it for backward compatibility
+    if (!sample.imageUrl || !detectionResults) {
+      toast.error("Please run detection first");
+      return;
+    }
+
+    toast.success("AI analysis is now performed automatically with detection!");
   }
 
   return (
@@ -133,11 +178,39 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 justify-start duration-200 ease-linear"
             >
               <Search></Search>
-              Detect
+              Detect & Analyze
             </Button>
           </div>
         </div>
       </Card>
+      
+      {/* Display detection results and AI analysis */}
+      {(detectionResults || aiAnalysis) && (
+        <Card className="mt-4 p-4">
+          {detectionResults && (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">Detection Results</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>Total Detections: {detectionResults.total_detections}</div>
+                {Object.entries(detectionResults.detections).map(([class_name, count]) => (
+                  <div key={class_name}>
+                    {class_name}: {String(count)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {aiAnalysis && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">AI Analysis</h3>
+              <div className="whitespace-pre-wrap text-sm bg-muted-foreground/20 p-3 rounded">
+                {String(aiAnalysis.analysis)}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

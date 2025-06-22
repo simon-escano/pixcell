@@ -14,8 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Patient, Profile, Role, Sample } from "@/db/schema";
-import { formatTime } from "@/utils";
+import { PatientWithImage, ProfileWithImage, Role, SampleWithImage } from "@/db/schema";
+import { formatTime } from "@/lib/utils";
 import { Clock } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,10 +30,10 @@ function SampleCard({
   profile,
   role,
 }: {
-  patient: Patient;
-  sample: Sample;
-  profile: Profile;
-  role: Role;
+  patient: PatientWithImage;
+  sample: SampleWithImage;
+  profile: ProfileWithImage | null;
+  role: Role | null;
 }) {
   const router = useRouter();
 
@@ -71,7 +71,7 @@ function SampleCard({
 
   const handleProfileClick = async (e: React.MouseEvent) => {
     // No need for e.stopPropagation() as it's handled in the UserButton component
-    if (profile.userId) {
+    if (profile?.userId) {
       router.push(`/users/${profile.userId}`);
     } else {
       toast.error("User not found");
@@ -111,16 +111,18 @@ function SampleCard({
                 onClick={handlePatientClick}
                 redirectUrl={`/patients/${patient.id}`}
               />
-              <UserButton
-                imageUrl={profile.imageUrl || ""}
-                firstName={profile.firstName}
-                lastName={profile.lastName}
-                roleName={role.name}
-                onClick={handleProfileClick}
-                redirectUrl={
-                  profile.userId ? `/users/${profile.userId}` : undefined
-                }
-              />
+              {profile && (
+                <UserButton
+                  imageUrl={profile.imageUrl || ""}
+                  firstName={profile.firstName}
+                  lastName={profile.lastName}
+                  roleName={role?.name || "Unknown"}
+                  onClick={handleProfileClick}
+                  redirectUrl={
+                    profile.userId ? `/users/${profile.userId}` : undefined
+                  }
+                />
+              )}
             </div>
             <div className="border-muted-foreground/20 flex w-full gap-1 rounded-md border p-1.5">
               {Object.entries(

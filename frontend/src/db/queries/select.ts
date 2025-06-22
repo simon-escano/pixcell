@@ -1,6 +1,13 @@
-import { patient, profile, report, role, sample, user } from "@/db/schema"
+import { patient, profile, report, role, sample, user, image, note, sample_image } from "@/db/schema"
 import { eq, sql } from "drizzle-orm"
 import { db } from "..";
+
+import { alias } from 'drizzle-orm/pg-core';
+
+const patientImage = alias(image, 'patientImage');
+const generatedByImage = alias(image, 'generatedByImage');
+const profileImage = alias(image, 'profileImage');
+const sampleImg = alias(image, 'sampleImg');
 
 export async function getUserById(id: string) {
   const result = await db.select().from(user).where(eq(user.id, id));
@@ -19,14 +26,15 @@ export async function getAllUsersWithProfiles() {
       phone: user.phone,
       firstName: profile.firstName,
       lastName: profile.lastName,
-      imageUrl: profile.imageUrl,
+      imageId: profile.imageId,
+      imageUrl: image.imageUrl,
       roleId: profile.roleId,
       roleName: role.name,
     })
     .from(user)
-    .leftJoin(profile, eq(user.id, profile.userId))
-    .leftJoin(role, eq(profile.roleId, role.id))
-    .orderBy(profile.lastName);
+    .innerJoin(profile, eq(user.id, profile.userId))
+    .innerJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(image, eq(profile.imageId, image.id));
 }
 
 export async function getAllProfiles() {
@@ -34,33 +42,145 @@ export async function getAllProfiles() {
 }
 
 export async function getAllPatients() {
-  return await db.select().from(patient);
+  return await db
+    .select({
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      contactNumber: patient.contactNumber,
+      address: patient.address,
+      height: patient.height,
+      weight: patient.weight,
+      sex: patient.sex,
+      bloodType: patient.bloodType,
+      birthDate: patient.birthDate,
+      createdAt: patient.createdAt,
+      imageId: patient.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(patient)
+    .leftJoin(image, eq(patient.imageId, image.id));
 }
 
 export async function getPatientById(id: string) {
-  const result = await db.select().from(patient).where(eq(patient.id, id));
+  const result = await db
+    .select({
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email,
+      contactNumber: patient.contactNumber,
+      address: patient.address,
+      height: patient.height,
+      weight: patient.weight,
+      sex: patient.sex,
+      bloodType: patient.bloodType,
+      birthDate: patient.birthDate,
+      createdAt: patient.createdAt,
+      imageId: patient.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(patient)
+    .leftJoin(image, eq(patient.imageId, image.id))
+    .where(eq(patient.id, id));
   return result[0];
 }
 
 export async function getSamplesByPatientId(id: string) {
-  return await db.select().from(sample).where(eq(sample.patientId, id));
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.patientId, id));
 }
 
 export async function getSamplesByUserId(userId: string) {
-  return await db.select().from(sample).where(eq(sample.uploadedBy, userId));
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.createdBy, userId));
 }
 
 export async function getSampleById(id: string) {
-  const result = await db.select().from(sample).where(eq(sample.id, id));
+  const result = await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .where(eq(sample.id, id));
   return result[0];
 }
 
 export async function getAllSamples() {
-  return await db.select().from(sample)
+  return await db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      // From sample_image table
+      uploadedBy: sample_image.uploadedBy,
+      metadata: sample_image.metadata,
+      capturedAt: sample_image.capturedAt,
+      imageId: sample_image.imageId,
+      imageUrl: sampleImg.imageUrl
+    })
+    .from(sample)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id));
 }
 
 export async function getProfileByUserId(userId: string) {
-  const result = await db.select().from(profile).where(eq(profile.userId, userId));
+  const result = await db
+    .select({
+      id: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      userId: profile.userId,
+      roleId: profile.roleId,
+      imageId: profile.imageId,
+      imageUrl: image.imageUrl
+    })
+    .from(profile)
+    .leftJoin(image, eq(profile.imageId, image.id))
+    .where(eq(profile.userId, userId));
   return result[0];
 }
 
@@ -95,17 +215,19 @@ export async function getReportsByGeneratedBy(userId: string) {
       sampleName: sample.sampleName,
       patientId: patient.id,
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
-      patientImage: patient.imageUrl,
+      patientImage: patientImage.imageUrl,
       generatedById: user.id,
       generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
-      generatedByImage: profile.imageUrl,
+      generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
     .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(patientImage, eq(patient.imageId, patientImage.id))
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
     .leftJoin(role, eq(profile.roleId, role.id))
     .where(eq(report.generatedBy, userId))
     .orderBy(report.createdAt);
@@ -144,19 +266,21 @@ export async function getPatientsWithLastReport() {
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
       sampleId: sample.id,
       sampleName: sample.sampleName,
-      dateTaken: sample.capturedAt,
+      dateTaken: sample_image.capturedAt,
       userId: user.id,
       userName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
       userEmail: patient.email,
-      userImage: profile.imageUrl,
+      userImage: profileImage.imageUrl,
       isAiGenerated: report.isAiGenerated,
       reportCreatedAt: report.createdAt
     })
     .from(patient)
     .leftJoin(sample, eq(patient.id, sample.patientId))
     .innerJoin(report, eq(sample.id, report.sampleId))
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(profileImage, eq(profile.imageId, profileImage.id))
     .orderBy(report.createdAt)
     .limit(5);
 }
@@ -166,16 +290,18 @@ export async function getRecentUploads() {
     .select({
       id: sample.id,
       sampleName: sample.sampleName,
-      capturedAt: sample.capturedAt,
-      imageUrl: sample.imageUrl,
+      capturedAt: sample_image.capturedAt,
+      imageUrl: sampleImg.imageUrl,
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
       uploadedBy: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
     })
     .from(sample)
     .leftJoin(patient, eq(sample.patientId, patient.id))
-    .leftJoin(user, eq(sample.uploadedBy, user.id))
-    .leftJoin(profile, eq(user.id, profile.userId))
-    .orderBy(sample.capturedAt)
+    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(profile, eq(sample_image.uploadedBy, profile.id))
+    .leftJoin(user, eq(profile.userId, user.id))
+    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .orderBy(sample_image.capturedAt)
     .limit(5);
 }
 
@@ -238,17 +364,19 @@ export async function getAllReports() {
       sampleName: sample.sampleName,
       patientId: patient.id,
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
-      patientImage: patient.imageUrl,
+      patientImage: patientImage.imageUrl,
       generatedById: user.id,
       generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
-      generatedByImage: profile.imageUrl,
+      generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
     .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(patientImage, eq(patient.imageId, patientImage.id))
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
     .leftJoin(role, eq(profile.roleId, role.id))
     .orderBy(report.createdAt);
 }
