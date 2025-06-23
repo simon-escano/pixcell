@@ -131,7 +131,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
 
       <DataTable
         data={users}
-        excludeColumns={["roleId"]}
+        excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
+        defaultHiddenColumns={["phone"]}
         columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
