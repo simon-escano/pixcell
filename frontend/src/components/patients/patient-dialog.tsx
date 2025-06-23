@@ -254,8 +254,8 @@ export function PatientDialog({
                   <SelectValue placeholder="Sex" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="M">Male</SelectItem>
+                  <SelectItem value="F">Female</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
