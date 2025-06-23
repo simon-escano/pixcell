@@ -132,7 +132,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       </div>
 
       <DataTable
-        data={users}
+        data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
         excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
         defaultHiddenColumns={["phone"]}
         columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
