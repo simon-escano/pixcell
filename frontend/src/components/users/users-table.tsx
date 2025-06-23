@@ -49,6 +49,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       data.file
     );
     toast.success("User updated successfully.");
+    setEditOpen(false);
+    router.refresh();
   };
 
   const handleAddSubmit = async (data: {
