@@ -1,5 +1,5 @@
-import { patient, profile, report, role, sample, user, image, note, sample_image, session } from "@/db/schema"
-import { eq, sql } from "drizzle-orm"
+import { patient, profile, report, role, sample, user, image, note, sample_image, session, feedback } from "@/db/schema"
+import { eq, sql, desc } from "drizzle-orm"
 import { db } from "..";
 
 import { alias } from 'drizzle-orm/pg-core';
@@ -400,4 +400,12 @@ export async function getSupabaseUserCount() {
   const { data, error } = await supabase.auth.admin.listUsers();
   if (error) throw error;
   return data.users.length;
+}
+
+export async function getFeedbackByUser(userId: string) {
+  return await db
+    .select()
+    .from(feedback)
+    .where(eq(feedback.userId, userId))
+    .orderBy(desc(feedback.createdAt));
 }

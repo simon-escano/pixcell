@@ -37,7 +37,7 @@ export function NavSecondary({ isAdmin }: { isAdmin: boolean }) {
     }] : []),
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Settings,
       items: [
         {

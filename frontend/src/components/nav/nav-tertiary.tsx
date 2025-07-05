@@ -18,7 +18,7 @@ export function NavTertiary({ ...props }) {
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/feedback",
       icon: Send,
     },
   ];

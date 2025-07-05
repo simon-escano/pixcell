@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { ImageUp } from "lucide-react";
+import { ImageUp,Camera } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +45,7 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
   };
 
   return (
+    <div>
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       <DrawerTrigger asChild>
         <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 flex-1 justify-start duration-200 ease-linear">
@@ -91,6 +92,16 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
           </>
         </div>
       </DrawerContent>
+      
     </Drawer>
+    <Button 
+          variant="outline"
+          className="border-2 hover:bg-secondary/80 min-w-8 flex-1 justify-start duration-200 ease-linear mt-2"
+          onClick={() => router.push('/camera')}
+        >
+          <Camera className="text-primary" />
+          <span>Camera</span>
+        </Button>
+    </div>
   );
 }
