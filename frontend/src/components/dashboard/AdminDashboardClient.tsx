@@ -100,7 +100,7 @@ function ProfessionalUserDistribution({
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                 <div
-                  className="h-1.5 rounded-full transition-all duration-500 ease-out"
+                  className="h-1.5 rounded-full transition-all duration-300 ease-out hover:scale-y-110 hover:scale-x-105 hover:shadow-md cursor-pointer"
                   style={{
                     width: `${percentage}%`,
                     backgroundColor: role.color,
