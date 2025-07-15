@@ -49,6 +49,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       data.file
     );
     toast.success("User updated successfully.");
+    setEditOpen(false);
+    router.refresh();
   };
 
   const handleAddSubmit = async (data: {
@@ -130,8 +132,9 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       </div>
 
       <DataTable
-        data={users}
-        excludeColumns={["roleId"]}
+        data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
+        excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
+        defaultHiddenColumns={["phone"]}
         columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {

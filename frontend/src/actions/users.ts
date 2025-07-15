@@ -175,6 +175,25 @@ export async function deleteUser(userId: string) {
       }
     }
 
+    // Delete records in the correct order to handle foreign key constraints
+    try {
+      await db.transaction(async (tx) => {
+        // Delete profile first (it has foreign key to user)
+        await tx.delete(profile).where(eq(profile.userId, userId));
+        
+        // Delete user record
+        await tx.delete(user).where(eq(user.id, userId));
+        
+        // Delete image last (if it exists)
+        if (imageId) {
+          await tx.delete(image).where(eq(image.id, imageId));
+        }
+      });
+    } catch (dbError) {
+      logServer("Database deletion failed", { error: dbError });
+      return { success: false, error: "Failed to delete user records from database" };
+    }
+
     logServer("User deletion completed successfully");
     return { success: true };
   } catch (error) {
