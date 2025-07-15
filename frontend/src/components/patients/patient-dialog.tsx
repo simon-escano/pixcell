@@ -176,7 +176,7 @@ export function PatientDialog({
               <div className="group relative cursor-pointer">
                 <Avatar className="size-24">
                   <AvatarImage
-                    src={preview || existingPatient?.imageUrl || ""}
+                    src={preview || existingPatient?.imageId || ""}
                     className="object-cover"
                   />
                   <AvatarFallback>
@@ -220,6 +220,7 @@ export function PatientDialog({
             <PhoneInput
               id="phone"
               defaultCountry="PH"
+              placeholder="Phone Number"
               value={contactNumber.replace(/\s+/g, "")}
               onChange={(val) => setContactNumber(val)}
             />
