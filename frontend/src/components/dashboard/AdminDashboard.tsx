@@ -177,7 +177,7 @@ export async function AdminDashboard() {
   }));
 
   const mainMetrics = [
-    { title: "Total Users", value: users.length, icon: <Users className="text-muted-foreground h-4 w-4" /> },
+    { title: "Total Users", value: usersWithProfiles.length, icon: <Users className="text-muted-foreground h-4 w-4" /> },
     { title: "Total Patients", value: patients.length, icon: <User className="text-muted-foreground h-4 w-4" /> },
     { title: "Total Images", value: samples.length, icon: <ImageIcon className="text-muted-foreground h-4 w-4" /> },
     { title: "Total Reports", value: reports.length, icon: <FileText className="text-muted-foreground h-4 w-4" /> },
