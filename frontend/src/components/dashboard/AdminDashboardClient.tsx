@@ -44,7 +44,7 @@ function ProfessionalStorageChart({ used, total }: { used: number; total: number
       <div className="space-y-2">
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300 ease-out hover:scale-y-110 hover:scale-x-105 hover:shadow-md cursor-pointer"
             style={{ width: `${percentUsed * 100}%` }}
           />
         </div>
@@ -203,10 +203,10 @@ export default function AdminDashboardCompact({
           <CardTitle className="text-sm font-semibold">Patient Demographics Overview</CardTitle>
           <div className="flex items-center space-x-2">
             <Select value={genderFilter} onValueChange={setGenderFilter}>
-              <SelectTrigger className="w-28 h-7 text-xs">
+              <SelectTrigger className="h-4 text-xs px-2 min-w-0 w-auto" size="sm">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="min-w-0 w-auto" align="start">
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
