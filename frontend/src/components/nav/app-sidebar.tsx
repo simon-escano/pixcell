@@ -53,7 +53,6 @@ export async function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavRecents recentSamples={recentSamples} />
         <NavSecondaryWrapper />
         <NavTertiary className="mt-auto" />
       </SidebarContent>
