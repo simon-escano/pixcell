@@ -90,12 +90,14 @@ function SampleCard({
         >
           <CardHeader className="overflow-hidden p-0">
             <div className="relative h-40 w-full overflow-hidden">
-              <Image
-                src={sample.imageUrl || ""}
-                alt="Sample Image"
-                fill
-                className="h-full w-full object-cover"
-              />
+              {typeof sample.imageUrl === 'string' && sample.imageUrl ? (
+                <Image
+                  src={sample.imageUrl}
+                  alt="Sample Image"
+                  fill
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
             </div>
           </CardHeader>
           <CardFooter className="flex w-full flex-1 flex-col gap-2 overflow-hidden p-4">
@@ -105,7 +107,7 @@ function SampleCard({
             </div>
             <div className="flex w-full flex-1 gap-2 overflow-hidden">
               <UserButton
-                imageUrl={patient.imageUrl || ""}
+                imageUrl={typeof patient.imageUrl === 'string' && patient.imageUrl ? patient.imageUrl : ''}
                 firstName={patient.firstName}
                 lastName={patient.lastName}
                 onClick={handlePatientClick}
@@ -113,7 +115,7 @@ function SampleCard({
               />
               {profile && (
                 <UserButton
-                  imageUrl={profile.imageUrl || ""}
+                  imageUrl={typeof profile.imageUrl === 'string' && profile.imageUrl ? profile.imageUrl : ''}
                   firstName={profile.firstName}
                   lastName={profile.lastName}
                   roleName={role?.name || "Unknown"}
