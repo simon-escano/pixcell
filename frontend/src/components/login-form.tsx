@@ -31,8 +31,8 @@ export function LoginForm({
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) {
-      router.replace("/");
       toast.success("Successfully logged in");
+      router.replace("/");
     } else {
       toast.error(error.message);
     }

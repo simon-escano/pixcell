@@ -1,130 +1,104 @@
-'use client';
+import Base from "@/components/base";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getReportsByGeneratedBy } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
+import { format } from "date-fns";
+import { FileText, User } from "lucide-react";
+import Link from "next/link";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { User } from '@supabase/auth-helpers-nextjs';
-
-type Patient = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  // add other fields if needed
-};
-
-export default function ReportsPage() {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [form, setForm] = useState({ title: '', content: '' });
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      // eslint-disable-next-line no-alert
-      alert('Supabase environment variables are missing! Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
-    }
-    const supabase = createClientComponentClient();
-    supabase.auth.getSession().then(({ data, error }) => {
-      console.log('Supabase session:', data?.session, 'Error:', error);
-      setUser(data?.session?.user || null);
-      setChecking(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    // Fetch patients from your API
-    async function fetchPatients() {
-      const res = await fetch('/api/patients');
-      const data = await res.json();
-      setPatients(data);
-    }
-    fetchPatients();
-  }, []);
-
-  const handleCreateClick = (patient: Patient) => {
-    setSelectedPatient(patient);
-    setShowForm(true);
-    setForm({ title: '', content: '' });
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    // POST to your API to create the report
-    const res = await fetch('/api/reports', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        patientId: selectedPatient?.id,
-      }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (data.success && data.reportId) {
-      // Redirect to the new report's edit page
-      router.push(`/reports/${data.reportId}`);
-    }
-  };
+export default async function ReportsPage() {
+  const user = await getUser();
+  const reports = await getReportsByGeneratedBy(user.id);
 
   return (
-    <div>
-      {checking ? (
-        <div>Loading...</div>
-      ) : !user ? (
-        <div>Please log in to view reports.</div>
-      ) : (
-        <>
-          <h1>Reports</h1>
-          <ul>
-            {patients.map((patient) => (
-              <li key={patient.id}>
-                {patient.firstName} {patient.lastName}
-                <button onClick={() => handleCreateClick(patient)} style={{ marginLeft: 8 }}>
-                  Create Report
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          {showForm && (
-            <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
-              <h2>Create Report for {selectedPatient?.firstName} {selectedPatient?.lastName}</h2>
-              <input
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Title"
-                required
-                style={{ display: 'block', marginBottom: 8 }}
-              />
-              <textarea
-                name="content"
-                value={form.content}
-                onChange={handleChange}
-                placeholder="Content"
-                required
-                rows={6}
-                style={{ display: 'block', marginBottom: 8 }}
-              />
-              <button type="submit" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Report'}
-              </button>
-              <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: 8 }}>
-                Cancel
-              </button>
-            </form>
-          )}
-        </>
-      )}
-    </div>
+    <Base>
+      <div className="h-full overflow-y-auto p-4 sm:p-8">
+        <div className="space-y-4">
+          {reports.map((report) => (
+            <Card key={report.id} className="bg-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-base font-medium">
+                  Report for {report.patientName}
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs ${
+                      report.isAiGenerated
+                        ? "bg-blue-200 text-blue-800"
+                        : "bg-green-200 text-green-800"
+                    }`}
+                  >
+                    {report.isAiGenerated ? "AI Generated" : "Manual"}
+                  </span>
+                  {report.exportedUrl && (
+                    <Link
+                      href={report.exportedUrl}
+                      target="_blank"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Link>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage
+                          src={report.patientImage || ""}
+                          alt={report.patientName}
+                          className="rounded-lg"
+                        />
+                        <AvatarFallback className="rounded-lg">
+                          {report.patientName.split(" ").map((n) => n[0]).join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">
+                          <Link
+                            href={`/patients/${report.patientId}`}
+                            className="hover:underline"
+                          >
+                            {report.patientName}
+                          </Link>
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          Sample: {report.sampleName || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <User className="text-muted-foreground h-4 w-4" />
+                      <div className="text-right">
+                        <p className="text-sm font-medium">
+                          <Link
+                            href={`/users/${report.generatedById}`}
+                            className="hover:underline"
+                          >
+                            {report.generatedByName}
+                          </Link>
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {report.generatedByRole}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-muted-foreground text-sm">
+                    {report.content}
+                  </div>
+                  <div className="text-muted-foreground text-xs">
+                    {format(new Date(report.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Base>
   );
 }
