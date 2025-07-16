@@ -18,6 +18,7 @@ import {
 import { getUser } from "@/lib/auth";
 import { Clock } from "lucide-react";
 import { PatientWithImage, ProfileWithImage } from "@/db/schema";
+import ClientDate from "@/components/client-date";
 
 interface SamplePageProps {
   sampleId: string;
@@ -99,7 +100,7 @@ export async function SamplePage({
             </div>
             <div className="text-muted-foreground border-muted-foreground/20 bg-background top-2 right-2 flex w-full items-center justify-center gap-2 rounded-md border p-1.5 text-sm">
               <Clock className="h-3 w-3" />
-              {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
+              {sample.capturedAt ? <ClientDate date={sample.capturedAt} /> : "N/A"}
             </div>
           </Card>
         </div>

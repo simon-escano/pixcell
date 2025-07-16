@@ -17,7 +17,7 @@ export const useCurrentUserImage = () => {
 
       const { data: profile, error: profileError } = await supabase
         .from('profile')
-        .select('image_url')
+        .select('image_id')
         .eq('id', userId)
         .single()
 
@@ -26,7 +26,7 @@ export const useCurrentUserImage = () => {
         return
       }
 
-      setImage(profile.image_url)
+      setImage(profile.image_id)
     }
 
     fetchUserImage()

@@ -1,6 +1,14 @@
 import os
 import google.generativeai as genai
 from typing import Dict, Any
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY environment variable is not set. Please set it in your environment or .env file.")
 
 # Get API key from environment variable
 # Check GC LOL -molt

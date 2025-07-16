@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { loginAction } from "@/actions/users";
 import toast from "react-hot-toast";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export function LoginForm({
   className,
@@ -24,15 +25,17 @@ export function LoginForm({
   const [isPending, startTransition] = useTransition();
 
   const handleClickLoginButton = async (formData: FormData) => {
-    startTransition(async () => {
-      const { errorMessage } = await loginAction(formData);
-      if (!errorMessage) {
-        router.replace("/");
-        toast.success("Successfully logged in");
-      } else {
-        toast.error(errorMessage);
-      }
-    });
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const supabase = createClientComponentClient();
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      router.replace("/");
+      toast.success("Successfully logged in");
+    } else {
+      toast.error(error.message);
+    }
   };
 
   return (

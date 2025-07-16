@@ -15,6 +15,7 @@ import {
   Sun,
   Type,
   BrainCircuit,
+  FilePlus,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -134,6 +135,7 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           alt={JSON.stringify(sample.metadata)}
           fill
           className="flex-1 object-contain"
+          priority
         />
         <RealtimeCursors roomName={roomName} username={username} />
       </div>
@@ -202,8 +204,13 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
       {(detectionResults || aiAnalysis) && (
         <Card className="mt-4 p-4">
           {detectionResults && (
-            <div className="mb-4">
+            <div className="mb-4 p-4 bg-muted-foreground/10 rounded-lg shadow-sm flex flex-col gap-3">
               <h3 className="text-lg font-semibold mb-2">Detection Results</h3>
+              <Button variant="default" className="w-fit flex items-center gap-2">
+                <FilePlus className="w-4 h-4" />
+                Create Report
+              </Button>
+
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>Total Detections: {detectionResults.total_detections}</div>
                 {Object.entries(detectionResults.detections).map(([class_name, count]) => (

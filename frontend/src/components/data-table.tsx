@@ -36,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ClientDate from "./client-date";
 
 export type ActionItem = {
   label: string | React.ReactNode;
@@ -231,7 +232,7 @@ export function DataTable<TData extends Record<string, any>>({
 
           // Format dates
           if (isDate && value) {
-            return <div>{new Date(value as string).toLocaleString()}</div>;
+            return <div><ClientDate date={value as string} /></div>;
           }
 
           // Format booleans
