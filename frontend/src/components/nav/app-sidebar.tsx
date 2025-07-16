@@ -44,7 +44,6 @@ export async function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">PixCell</span>
-                  <span className="truncate text-xs">Premium Plan</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -54,7 +53,7 @@ export async function AppSidebar({
       <SidebarContent>
         <NavMain />
         <NavSecondaryWrapper />
-        <NavTertiary className="mt-auto" />
+        <NavTertiary />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} profile={profileData} role={profileRole} />
