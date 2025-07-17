@@ -52,9 +52,9 @@ export async function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavSecondaryWrapper />
-        <NavTertiary />
       </SidebarContent>
+      <NavSecondaryWrapper />
+      <NavTertiary />
       <SidebarFooter>
         <NavUser user={user} profile={profileData} role={profileRole} />
       </SidebarFooter>

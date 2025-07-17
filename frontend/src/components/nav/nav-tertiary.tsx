@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { LifeBuoy, Send, type LucideIcon } from "lucide-react";
+import { LifeBuoy, Send, Settings, ChevronRight } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -8,6 +8,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export function NavTertiary({ ...props }) {
   const items = [
@@ -20,6 +25,11 @@ export function NavTertiary({ ...props }) {
       title: "Feedback",
       url: "/feedback",
       icon: Send,
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
     },
   ];
   return (
