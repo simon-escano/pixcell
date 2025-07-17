@@ -176,7 +176,12 @@ export function PatientDialog({
               <div className="group relative cursor-pointer">
                 <Avatar className="size-24">
                   <AvatarImage
-                    src={preview || existingPatient?.imageUrl || ""}
+                    src={
+                      preview ||
+                      (existingPatient && 'imageUrl' in existingPatient
+                        ? (existingPatient.imageUrl as string | null) || ""
+                        : "")
+                    }
                     className="object-cover"
                   />
                   <AvatarFallback>
