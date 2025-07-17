@@ -8,7 +8,7 @@ export default async function PatientsPage() {
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <PatientsTable patients={patients} />
+        <PatientsTable patients={patients.map(p => ({ ...p, noteId: p.id ?? null }))} />
       </div>
     </Base>
   );
