@@ -102,7 +102,7 @@ export default async function PatientPage({
             <CardHeader className="px-6">
               <CardTitle>Notes</CardTitle>
             </CardHeader>
-            <CardContent className="px-6">{patientData.notes}</CardContent>
+            {/* <CardContent className="px-6">{patientData.notes}</CardContent> */}
           </Card>
         </div>
         <div className="space-y-4 xl:col-span-3">

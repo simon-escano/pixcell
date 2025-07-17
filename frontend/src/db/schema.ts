@@ -42,7 +42,8 @@ export const patient = pgTable("patient", {
   weight: integer("weight").notNull(),
   bloodType: varchar("blood_type", { length: 3 }).notNull(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  noteId: uuid("note_id").references(() => note.id).unique()
+  noteId: uuid("note_id").references(() => note.id).unique(),
+  createdBy: uuid("created_by").references(() => profile.id),
 });
 
 export const note = pgTable("note",{
@@ -133,6 +134,13 @@ export const feedback = pgTable("feedback", {
   // Metadata
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const doctorPatient = pgTable("doctor_patient", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  doctorId: uuid("doctor_id").notNull().references(() => profile.id),
+  patientId: uuid("patient_id").notNull().references(() => patient.id),
+  orderNo: integer("order_no"),
 });
 
 export type Role = typeof role.$inferSelect;

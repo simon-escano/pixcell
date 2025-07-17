@@ -18,11 +18,34 @@ export default async function ReportsPage() {
     ? await getAllReports()
     : await getReportsByGeneratedBy(user.id);
 
+  // Normalize all fields that could possibly be objects
+  function extractString(val: unknown): string {
+    if (typeof val === 'string') return val;
+    if (val && typeof val === 'object' && 'value' in val && typeof (val as any).value === 'string') {
+      return (val as any).value;
+    }
+    return '';
+  }
+  const normalizedReports = reports.map((report) => ({
+    ...report,
+    patientName: extractString(report.patientName),
+    generatedByName: extractString(report.generatedByName),
+    patientImage: extractString(report.patientImage),
+    generatedByImage: extractString(report.generatedByImage),
+    sampleName: extractString(report.sampleName),
+    generatedByRole: extractString(report.generatedByRole),
+    content: extractString(report.content),
+    exportedUrl: extractString(report.exportedUrl),
+    exportFormat: extractString(report.exportFormat),
+  }));
+
+  console.log("reports", reports);
+
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         <div className="space-y-4">
-          {reports.map((report) => (
+          {normalizedReports.map((report) => (
             <Card key={report.id} className="bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-base font-medium">
@@ -60,7 +83,7 @@ export default async function ReportsPage() {
                           className="rounded-lg"
                         />
                         <AvatarFallback className="rounded-lg">
-                          {report.patientName.split(" ").map((n) => n[0]).join("")}
+                          {report.patientName.split(" ").map((n: string) => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>

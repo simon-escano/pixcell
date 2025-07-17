@@ -16,6 +16,7 @@ import SampleArea from "./sample-area";
 import Avatars from "@/components/avatars";
 import { ShareDialog } from "../share-dialog";
 import UserButton from "@/components/users/user-button";
+import ClientDate from "@/components/client-date";
 
 interface SamplePageProps {
   roomName?: string;
@@ -109,7 +110,7 @@ export function SamplePage({
             </div>
             <div className="text-muted-foreground border-muted-foreground/20 bg-background top-2 right-2 flex w-full items-center justify-center gap-2 rounded-md border p-1.5 text-sm">
               <Clock className="h-3 w-3" />
-              {sample.capturedAt ? sample.capturedAt.toLocaleString() : "N/A"}
+              {sample.capturedAt ? <ClientDate date={sample.capturedAt} /> : "N/A"}
             </div>
           </Card>
         </div>

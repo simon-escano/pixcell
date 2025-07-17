@@ -1,9 +1,15 @@
 import Base from "@/components/base";
 import CameraClient from "./camera-client";
-import { getAllPatients } from "@/db/queries/select";
+import { getProfileByUserId, getRoleById, getAllPatientsForUser } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
 
 export default async function CameraPage() {
-  const patients = await getAllPatients();
+  const user = await getUser();
+  const profile = await getProfileByUserId(user.id);
+  const role = await getRoleById(profile.roleId);
+  const patients = await getAllPatientsForUser(user.id, role.id); // or role, depending on function signature
+  
+  const patientsWithNotes = patients.map(p => ({ ...p, notes: "" }));
   
   return (
     <Base>
@@ -15,7 +21,7 @@ export default async function CameraPage() {
               Capture high-resolution images of your microscope samples
             </p>
           </div>
-          <CameraClient patients={patients} />
+          <CameraClient patients={patientsWithNotes} />
         </div>
       </div>
     </Base>

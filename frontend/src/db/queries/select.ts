@@ -1,4 +1,4 @@
-import { patient, profile, report, role, sample, user, image, note, sample_image, session, feedback } from "@/db/schema"
+import { patient, profile, report, role, sample, user, image, note, sample_image, session, feedback, doctorPatient } from "@/db/schema"
 import { eq, sql, desc } from "drizzle-orm"
 import { db } from "..";
 
@@ -47,26 +47,60 @@ export async function getAllProfiles() {
   return await db.select().from(profile);
 }
 
-export async function getAllPatients() {
-  return await db
-    .select({
-      id: patient.id,
-      firstName: patient.firstName,
-      lastName: patient.lastName,
-      email: patient.email,
-      contactNumber: patient.contactNumber,
-      address: patient.address,
-      height: patient.height,
-      weight: patient.weight,
-      sex: patient.sex,
-      bloodType: patient.bloodType,
-      birthDate: patient.birthDate,
-      createdAt: patient.createdAt,
-      imageId: patient.imageId,
-      imageUrl: image.imageUrl
-    })
-    .from(patient)
-    .leftJoin(image, eq(patient.imageId, image.id));
+/**
+ * Get all patients for the current user.
+ * If the user is an administrator, return all patients.
+ * If the user is a doctor, return only assigned patients (via doctor_patient).
+ * @param profileId - The current user's profile id
+ * @param roleName - The current user's role name (e.g., 'Administrator')
+ */
+export async function getAllPatientsForUser(profileId: string, roleName: string) {
+  if (roleName === "Administrator") {
+    // Return all patients
+    return await db
+      .select({
+        id: patient.id,
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        contactNumber: patient.contactNumber,
+        address: patient.address,
+        height: patient.height,
+        weight: patient.weight,
+        sex: patient.sex,
+        bloodType: patient.bloodType,
+        birthDate: patient.birthDate,
+        createdAt: patient.createdAt,
+        imageId: patient.imageId,
+        imageUrl: image.imageUrl,
+        createdBy: patient.createdBy
+      })
+      .from(patient)
+      .leftJoin(image, eq(patient.imageId, image.id));
+  } else {
+    // Return only patients assigned to this doctor
+    return await db
+      .select({
+        id: patient.id,
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        contactNumber: patient.contactNumber,
+        address: patient.address,
+        height: patient.height,
+        weight: patient.weight,
+        sex: patient.sex,
+        bloodType: patient.bloodType,
+        birthDate: patient.birthDate,
+        createdAt: patient.createdAt,
+        imageId: patient.imageId,
+        imageUrl: image.imageUrl
+      })
+      .from(patient)
+      .innerJoin(doctorPatient, eq(doctorPatient.patientId, patient.id))
+      .leftJoin(image, eq(patient.imageId, image.id))
+      .where(eq(doctorPatient.doctorId, profileId));
+  }
 }
 
 export async function getPatientById(id: string) {

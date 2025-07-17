@@ -1,14 +1,18 @@
 import Base from "@/components/base";
 import PatientsTable from "@/components/patients/patients-table";
-import { getAllPatients } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
+import { getAllPatientsForUser, getRoleById, getProfileByUserId} from "@/db/queries/select";
 
 export default async function PatientsPage() {
-  const patients = await getAllPatients();
+  const user = await getUser();
+  const profile = await getProfileByUserId(user.id);
+  const role = await getRoleById(profile.roleId);
+  const patients = await getAllPatientsForUser(profile.id,role.name);
 
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <PatientsTable patients={patients} />
+        <PatientsTable patients={patients.map(p => ({ ...p, noteId: p.id ?? null, createdBy: null }))} />
       </div>
     </Base>
   );
