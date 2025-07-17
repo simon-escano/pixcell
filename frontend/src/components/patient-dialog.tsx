@@ -76,10 +76,13 @@ export function PatientDialog({
       const supabase = createClientComponentClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Fetch profile from your API or DB using user.id
-        const res = await fetch(`/api/profile/${user.id}`);
-        const data = await res.json();
-        setProfile(data);
+        // Query your profile table directly using Supabase client
+        const { data: profile, error } = await supabase
+          .from('profile')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        if (profile) setProfile(profile);
       }
     }
     fetchProfile();
