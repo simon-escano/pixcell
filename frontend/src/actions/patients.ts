@@ -217,6 +217,7 @@ export async function addPatient(data: {
   bloodType: string;
   birthDate: string;
   file?: File | null;
+  createdBy: string; // <-- Add this!
 }) {
   let imageId: string | undefined;
 
@@ -265,6 +266,7 @@ export async function addPatient(data: {
     await db.insert(patient).values({
       ...insertData,
       createdAt: new Date(),
+      createdBy: data.createdBy, // <-- Make sure this is set!
     });
     return { success: true };
   } catch (error) {

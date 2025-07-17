@@ -42,7 +42,8 @@ export const patient = pgTable("patient", {
   weight: integer("weight").notNull(),
   bloodType: varchar("blood_type", { length: 3 }).notNull(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  noteId: uuid("note_id").references(() => note.id).unique()
+  noteId: uuid("note_id").references(() => note.id).unique(),
+  createdBy: uuid("created_by").references(() => profile.id),
 });
 
 export const note = pgTable("note",{

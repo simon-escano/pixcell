@@ -9,7 +9,9 @@ import {
   getPatientsWithLastReport,
   getRecentUploads,
   getPatientGenderStats,
-  getMonthlyStats
+  getMonthlyStats,
+  getProfileByUserId, 
+  getRoleById
 } from "@/db/queries/select"
 import { db } from "@/db"
 import { patient, sample, report, sample_image } from "@/db/schema"

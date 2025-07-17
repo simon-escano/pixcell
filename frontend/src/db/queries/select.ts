@@ -66,7 +66,8 @@ export async function getAllPatientsForUser(profileId: string, roleName: string)
         birthDate: patient.birthDate,
         createdAt: patient.createdAt,
         imageId: patient.imageId,
-        imageUrl: image.imageUrl
+        imageUrl: image.imageUrl,
+        createdBy: patient.createdBy
       })
       .from(patient)
       .leftJoin(image, eq(patient.imageId, image.id));

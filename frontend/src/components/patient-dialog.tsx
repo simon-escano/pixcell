@@ -1,5 +1,6 @@
 "use client";
 
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,6 +69,22 @@ export function PatientDialog({
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
+  const [profile, setProfile] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      const supabase = createClientComponentClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Fetch profile from your API or DB using user.id
+        const res = await fetch(`/api/profile/${user.id}`);
+        const data = await res.json();
+        setProfile(data);
+      }
+    }
+    fetchProfile();
+  }, []);
+
   useEffect(() => {
     if (existingPatient) {
       setFirstName(existingPatient.firstName);
@@ -124,6 +141,8 @@ export function PatientDialog({
         toast.success("Patient updated", { id: toastId });
         router.refresh();
       } else {
+        if (!profile) return; // or show loading
+
         await addPatient({
           firstName,
           lastName,
@@ -136,6 +155,7 @@ export function PatientDialog({
           bloodType,
           birthDate: date?.toISOString().slice(0, 10) || "",
           file: file ?? undefined,
+          createdBy: profile.id,
         });
         toast.success("Patient added", { id: toastId });
         router.refresh();
