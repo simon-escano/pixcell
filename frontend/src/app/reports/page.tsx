@@ -85,7 +85,7 @@ export default async function ReportsPage() {
                             href={`/patients/${report.patientId}`}
                             className="hover:underline"
                           >
-                            {typeof report.patientName === "object" ? report.patientName.value : report.patientName}
+                            {report.patientName}
                           </Link>
                         </p>
                         <p className="text-muted-foreground text-xs">
@@ -101,7 +101,7 @@ export default async function ReportsPage() {
                             href={`/users/${report.generatedById}`}
                             className="hover:underline"
                           >
-                            {typeof report.generatedByName === "object" ? report.generatedByName.value : report.generatedByName}
+                            {report.generatedByName}
                           </Link>
                         </p>
                         <p className="text-muted-foreground text-xs">

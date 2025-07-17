@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
+type Report = { title: string; content: string; doctorId: string; /* add other fields as needed */ };
+
 export default function ReportPage() {
   const router = useRouter();
   const params = useParams();
   const reportId = params?.id;
-  const [report, setReport] = useState(null);
+  const [report, setReport] = useState<Report | null>(null);
   const [form, setForm] = useState({ title: "", content: "" });
   const [canEdit, setCanEdit] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function ReportPage() {
           setCanEdit(data.doctorId === userData.user.id);
         }
       } catch (err) {
-        setError(err.message || "Unknown error");
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -44,7 +46,7 @@ export default function ReportPage() {
     if (reportId) fetchReportAndUser();
   }, [reportId]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -60,7 +62,7 @@ export default function ReportPage() {
       if (!res.ok) throw new Error("Failed to save report");
       // Optionally refetch or update state
     } catch (err) {
-      setError(err.message || "Unknown error");
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setSaving(false);
     }
@@ -69,7 +71,7 @@ export default function ReportPage() {
   const handleExport = async () => {
     // Simple PDF export using jsPDF (if installed)
     if (typeof window !== "undefined") {
-      const jsPDF = (await import("jspdf")).jsPDF;
+      const { default: jsPDF } = await import("jspdf");
       const doc = new jsPDF();
       doc.text(form.title, 10, 10);
       doc.text(form.content, 10, 20);
