@@ -135,6 +135,13 @@ export const feedback = pgTable("feedback", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const doctorPatient = pgTable("doctor_patient", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  doctorId: uuid("doctor_id").notNull().references(() => profile.id),
+  patientId: uuid("patient_id").notNull().references(() => patient.id),
+  orderNo: integer("order_no"),
+});
+
 export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;

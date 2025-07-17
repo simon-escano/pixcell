@@ -1,7 +1,8 @@
 "use server"
+import { getUser } from "@/lib/auth";
 
 import { 
-  getAllPatients, 
+  getAllPatientsForUser, 
   getAllSamples, 
   getReportCountByPatientId,
   getReportsLast30Days,
@@ -74,6 +75,10 @@ async function getSampleMonthlyChange() {
 
 export async function getDashboardStats() {
   try {
+    const user = await getUser();
+    const profile = await getProfileByUserId(user.id);
+    const role = await getRoleById(profile.roleId);
+
     const [
       patients,
       samples,
@@ -83,7 +88,7 @@ export async function getDashboardStats() {
       genderStats,
       monthlyStats
     ] = await Promise.all([
-      getAllPatients(),
+      getAllPatientsForUser(profile.id, role.name),
       getAllSamples(),
       getReportsLast30Days(),
       getPatientsWithLastReport(),
