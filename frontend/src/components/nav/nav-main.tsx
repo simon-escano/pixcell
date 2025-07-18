@@ -37,21 +37,10 @@ export function NavMain() {
   ];
   return (
     <SidebarGroup>
-      <SidebarMenuItem className="flex items-center gap-2">
+      {/* Upload Sample and Camera buttons at the top, separated from dashboard links */}
+      <div className="flex flex-col gap-2 mb-2">
         <UploadSampleWrapper />
-        <HoverCard>
-          <HoverCardTrigger className="h-full">
-            <div className="cn-div aspect-square h-full">
-              <Info />
-              <span className="sr-only">Help</span>
-            </div>
-          </HoverCardTrigger>
-          <HoverCardContent>
-            Click the button to upload a sample image for collaboration and
-            analysis; ensure it's in JPEG, PNG, or GIF format and under 10MB.
-          </HoverCardContent>
-        </HoverCard>
-      </SidebarMenuItem>
+      </div>
       <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
