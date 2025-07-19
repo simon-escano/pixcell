@@ -19,36 +19,40 @@ export default async function ReportsPage() {
     ? await getAllReports()
     : await getReportsByGeneratedBy(user.id);
 
-  // Normalize all fields that could possibly be objects
-  function extractString(val: unknown): string {
-    if (typeof val === 'string') return val;
-    if (val && typeof val === 'object' && 'value' in val && typeof (val as any).value === 'string') {
-      return (val as any).value;
-    }
-    return '';
-  }
-  const normalizedReports = reports.map((report) => ({
-    ...report,
-    patientName: extractString(report.patientName),
-    generatedByName: extractString(report.generatedByName),
-    patientImage: extractString(report.patientImage),
-    generatedByImage: extractString(report.generatedByImage),
-    sampleName: extractString(report.sampleName),
-    generatedByRole: extractString(report.generatedByRole),
-    content: extractString(report.content),
-    exportedUrl: extractString(report.exportedUrl),
-    exportFormat: extractString(report.exportFormat),
-  }));
+  // Normalize reports to ensure consistent structure
+  const normalizedReports = reports.map((report: any) => {
+    // Handle different report structures from different queries
+    const baseReport = {
+      id: report.id,
+      title: report.title || '',
+      testType: report.testType || '',
+      status: report.status || 'pending',
+      createdAt: report.createdAt,
+      content: report.content || '',
+      isAiGenerated: report.isAiGenerated || false,
+      exportedUrl: report.exportedUrl || '',
+      exportFormat: report.exportFormat || '',
+      sampleId: report.sampleId || '',
+      sampleName: report.sampleName || '',
+      patientId: report.patientId || '',
+      patientName: report.patientName || '',
+      patientImage: report.patientImage || '',
+      generatedBy: report.generatedBy || report.generatedById || '',
+      generatedById: report.generatedById || report.generatedBy || '',
+      generatedByName: report.generatedByName || '',
+      generatedByImage: report.generatedByImage || '',
+      generatedByRole: report.generatedByRole || '',
+    };
+    
+    return baseReport;
+  });
 
   console.log("reports", reports);
 
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <ReportsTable reports={reports}>
-
-        </ReportsTable>
-
+        <ReportsTable reports={normalizedReports} />
       </div>
     </Base>
   );

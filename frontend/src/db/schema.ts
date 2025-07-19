@@ -4,11 +4,11 @@ import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pg
 const authSchema = pgSchema('auth');
 
 export const reportStatusEnum = pgEnum("report_status", [
-  // Add your enum values here, e.g.:
-  "pending",
-  "completed",
-  "failed",
-  // ...etc
+  "Draft",
+  "Finalized",
+  "UNDER_REVIEW",
+  "REJECTED",
+  "ARCHIVED",
 ]);
 
 

@@ -5,6 +5,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { DataTable } from "../data-table";
 import { CustomAlertDialog } from "../custom-alert-dialog";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
+import { deleteReport } from "@/actions/reports";
 
 const ReportsTable = ({ reports }: { reports: Report[] }) => {
   const router = useRouter();
@@ -39,6 +42,13 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
 
   return (
     <div>
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-2xl font-bold tracking-tight">Reports</h2>
+        <Button onClick={() => router.push("/reports/create")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Report
+        </Button>
+      </div>
       <DataTable
         data={reports}
         excludeColumns={[   
@@ -85,10 +95,15 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
           )
         }
         onConfirm={async () => {
-          // TODO: Implement deleteReport action
-          toast.success("Report deleted");
-          setDeleteOpen(false);
-          router.refresh();
+          if (!selectedReport) return;
+          const res = await deleteReport(selectedReport.id);
+          if (res.success) {
+            toast.success("Report deleted");
+            setDeleteOpen(false);
+            router.refresh();
+          } else {
+            toast.error(res.error || "Failed to delete report.");
+          }
         }}
         confirmText="Continue"
         cancelText="Cancel"

@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
 import { DataTable } from "../data-table";
 import { CustomAlertDialog } from "../custom-alert-dialog";
+import UserButton from "../users/user-button";
 
 const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const router = useRouter();
@@ -57,6 +58,22 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         columnConfigs={[
           { key: "address", enableSorting: false, maxWidth: 200 },
           { key: "contactNumber", enableSorting: false },
+          {
+            key: "firstName",
+            customRender: (_: any, row?: any) => {
+              // fallback: just render the first name if row is not available
+              if (!row) return String(_);
+              return (
+                <UserButton
+                  imageUrl={row.imageUrl || ""}
+                  firstName={row.firstName}
+                  lastName={row.lastName}
+                  redirectUrl={`/patients/${row.id}`}
+                  roleName={"Patient"}
+                />
+              );
+            },
+          },
         ]}
         actionItems={actionItems}
         customHeaderContent={<PatientDialog mode="add" />}
