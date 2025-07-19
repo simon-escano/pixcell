@@ -31,6 +31,24 @@ interface Sample {
   capturedAt: Date | null;
   imageId: string | null;
   imageUrl: string | null;
+  createdByName?: string; // Add this line to match report-preview
+}
+
+interface TableData {
+  id: string;
+  title: string;
+  headers: string[];
+  rows: string[][];
+}
+
+interface ReportContent {
+  text: string;
+  tables: TableData[];
+}
+
+interface Role {
+  id: string;
+  name: string;
 }
 
 interface PDFExportProps {
@@ -40,8 +58,12 @@ interface PDFExportProps {
     content: string;
     isAiGenerated: boolean;
   };
+  reportContent: ReportContent;
   selectedPatient: Patient | undefined;
   selectedSample: Sample | undefined;
+  doctorName: string;
+  doctorRole: Role;
+  doctorLicense: string;
 }
 
 // PDF Styles
@@ -51,7 +73,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 40,
     fontSize: 12,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans', // Remove custom font
   },
   header: {
     borderBottom: '2px solid #e5e7eb',
@@ -84,18 +106,18 @@ const styles = StyleSheet.create({
   companyInfo: {
     fontSize: 12,
     color: '#374151',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   companyName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 4,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   contactInfo: {
     marginTop: 4,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   patientAvatar: {
     width: 64,
@@ -108,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#4b5563',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   patientImage: {
     width: 64,
@@ -119,13 +141,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 8,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   subtitle: {
     fontSize: 14,
     color: '#6b7280',
     marginBottom: 20,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   headerRow: {
     flexDirection: 'row',
@@ -136,7 +158,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 12,
     color: '#6b7280',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   section: {
     marginBottom: 25,
@@ -148,7 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   sectionContent: {
     backgroundColor: '#f9fafb',
@@ -172,17 +194,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#374151',
     marginBottom: 4,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   value: {
     color: '#1f2937',
     marginBottom: 8,
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   content: {
     lineHeight: 1.6,
     color: '#1f2937',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
   footer: {
     borderTop: '1px solid #e5e7eb',
@@ -192,7 +214,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     fontSize: 10,
     color: '#6b7280',
-    fontFamily: 'Arial',
+    // fontFamily: 'DejaVuSans',
   },
 });
 
@@ -226,167 +248,194 @@ const formatDateTime = (date: Date) => {
   });
 };
 
-const ReportPDF = ({ formData, selectedPatient, selectedSample }: PDFExportProps) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.logoSection}>
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>🧬</Text>
-            </View>
-            <View style={styles.companyInfo}>
-              <Text style={styles.companyName}>PixCell</Text>
-              <Text>123 Medical Center Dr.</Text>
-              <View style={styles.contactInfo}>
-                <Text>📞 +1 (555) 123-4567</Text>
-                <Text>✉️ admin@pixcell.com</Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.patientAvatar}>
-            {selectedPatient && selectedPatient.imageUrl ? (
-              <Image 
-                src={selectedPatient.imageUrl} 
-                style={styles.patientImage}
-              />
-            ) : selectedPatient ? (
-              <Text style={styles.patientInitials}>
-                {selectedPatient.firstName[0]}{selectedPatient.lastName[0]}
-              </Text>
-            ) : (
-              <Text style={styles.patientInitials}>👤</Text>
-            )}
-          </View>
-        </View>
-
-
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.title}>
-              {formData.title || "Medical Report"}
-            </Text>
-            <Text style={styles.subtitle}>
-              {getTestTypeDisplayName(formData.testType) || "Test Type"}
-            </Text>
-          </View>
-          <View style={styles.dateInfo}>
-            <Text>Date: {formatDate(new Date())}</Text>
-            <Text>Report ID: {selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A"}</Text>
-          </View>
-        </View>
-        
-      </View>
-
-      {/* Patient and Sample Information */}
-      <View style={styles.section}>
-        <View style={styles.infoGrid}>
-          {/* Patient Information */}
-          {selectedPatient && (
-            <View style={styles.infoItem}>
-              <Text style={styles.sectionTitle}>Patient Information</Text>
-              <View style={styles.sectionContent}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Name:</Text>
-                  <Text style={styles.value}>{selectedPatient.firstName} {selectedPatient.lastName}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Email:</Text>
-                  <Text style={styles.value}>{selectedPatient.email}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Phone:</Text>
-                  <Text style={styles.value}>{selectedPatient.contactNumber}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Address:</Text>
-                  <Text style={styles.value}>{selectedPatient.address}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Sex:</Text>
-                  <Text style={styles.value}>{selectedPatient.sex}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Blood Type:</Text>
-                  <Text style={styles.value}>{selectedPatient.bloodType}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Height:</Text>
-                  <Text style={styles.value}>{selectedPatient.height} cm</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Weight:</Text>
-                  <Text style={styles.value}>{selectedPatient.weight} kg</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Birth Date:</Text>
-                  <Text style={styles.value}>{formatDate(new Date(selectedPatient.birthDate))}</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Sample Information */}
-          {selectedSample && (
-            <View style={styles.infoItem}>
-              <Text style={styles.sectionTitle}>Sample Information</Text>
-              <View style={styles.sectionContent}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Sample Name:</Text>
-                  <Text style={styles.value}>{selectedSample.sampleName || `Sample ${selectedSample.id.slice(0, 8)}`}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Sample ID:</Text>
-                  <Text style={styles.value}>{selectedSample.id.slice(0, 8).toUpperCase()}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Patient ID:</Text>
-                  <Text style={styles.value}>{selectedSample.patientId.slice(0, 8).toUpperCase()}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.label}>Created By:</Text>
-                  <Text style={styles.value}>{selectedSample.createdBy.slice(0, 8).toUpperCase()}</Text>
-                </View>
-                {selectedSample.capturedAt && (
-                  <View style={styles.infoRow}>
-                    <Text style={styles.label}>Captured:</Text>
-                    <Text style={styles.value}>{formatDate(new Date(selectedSample.capturedAt))}</Text>
+const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps) => {
+  // --- Pagination logic ---
+  // Each paragraph = 1 block, each table = 3 blocks, 9 blocks per page
+  const BLOCKS_PER_PAGE = 9;
+  const TABLE_BLOCK_SIZE = 3;
+  // Split text into paragraphs (empty lines or \n\n)
+  const text = formData.content || "";
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map(p => p.trim())
+    .filter(Boolean);
+  // Interleave paragraphs and tables in order (tables first, then text)
+  const tables = reportContent.tables || [];
+  const blocks: Array<{ type: 'text'; value: string } | { type: 'table'; value: TableData }> = [
+    ...tables.map(t => ({ type: 'table' as const, value: t })),
+    ...paragraphs.map(p => ({ type: 'text' as const, value: p })),
+  ];
+  // Paginate blocks
+  const pages: Array<Array<typeof blocks[0]>> = [];
+  let currentPage: Array<typeof blocks[0]> = [];
+  let currentBlockCount = 0;
+  for (const block of blocks) {
+    const blockSize = block.type === 'text' ? 1 : TABLE_BLOCK_SIZE;
+    if (currentBlockCount + blockSize > BLOCKS_PER_PAGE) {
+      if (currentPage.length > 0) pages.push(currentPage);
+      currentPage = [];
+      currentBlockCount = 0;
+    }
+    currentPage.push(block);
+    currentBlockCount += blockSize;
+  }
+  if (currentPage.length > 0) pages.push(currentPage);
+  const totalPages = Math.max(1, pages.length);
+  // --- Render pages ---
+  return (
+    <Document>
+      {pages.map((pageContent, pageIdx) => (
+        <Page key={pageIdx} size="A4" style={styles.page}>
+          {/* Header */}
+          <View style={styles.header} fixed>
+            <View style={styles.headerContent}>
+              <View style={styles.logoSection}>
+                
+                <View style={styles.companyInfo}>
+                  <Text style={styles.companyName}>PixCell</Text>
+                  <Text>123 Medical Center Dr.</Text>
+                  <View style={styles.contactInfo}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                      
+                      <Text>+1 (555) 123-4567</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      
+                      <Text>admin@pixcell.com</Text>
+                    </View>
                   </View>
+                </View>
+              </View>
+              <View style={styles.patientAvatar}>
+                {selectedPatient && selectedPatient.imageUrl ? (
+                  <Image 
+                    src={selectedPatient.imageUrl} 
+                    style={styles.patientImage}
+                  />
+                ) : selectedPatient ? (
+                  <Text style={styles.patientInitials}>
+                    {selectedPatient.firstName[0]}{selectedPatient.lastName[0]}
+                  </Text>
+                ) : (
+                  <Text style={styles.patientInitials}>👤</Text>
                 )}
               </View>
             </View>
+            {pageIdx === 0 && (
+              <View style={styles.headerRow}>
+                <View>
+                  <Text style={styles.title}>
+                    {formData.title || "Medical Report"}
+                  </Text>
+                  <Text style={styles.subtitle}>
+                    {getTestTypeDisplayName(formData.testType) || "Test Type"}
+                  </Text>
+                </View>
+                <View style={styles.dateInfo}>
+                  <Text>Date: {formatDate(new Date())}</Text>
+                  <Text>Report ID: {selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A"}</Text>
+                </View>
+              </View>
+            )}
+            {/* Sample Information only on first page */}
+            {pageIdx === 0 && selectedSample && (
+              <View style={{ marginTop: 8, marginBottom: 8 }}>
+                <Text style={styles.sectionTitle}>Sample Information</Text>
+                <View style={styles.sectionContent}>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Sample Name:</Text>
+                    <Text style={styles.value}>{selectedSample.sampleName || `Sample ${selectedSample.id.slice(0, 8)}`}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Sample ID:</Text>
+                    <Text style={styles.value}>{selectedSample.id.slice(0, 8).toUpperCase()}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Created By:</Text>
+                    <Text style={styles.value}>{(selectedSample.createdByName || selectedSample.createdBy)}</Text>
+                  </View>
+                  {selectedSample.capturedAt && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.label}>Captured:</Text>
+                      <Text style={styles.value}>{formatDate(new Date(selectedSample.capturedAt))}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+          {/* Main Content: mixed text and tables */}
+          <View style={{ marginBottom: 24, flex: 1 }}>
+            {pageContent.map((block, idx) =>
+              block.type === 'text' ? (
+                <View key={idx} style={{ marginBottom: 12 }}>
+                  <Text style={styles.content}>{block.value}</Text>
+                </View>
+              ) : (
+                <View key={idx} style={{ marginBottom: 16 }}>
+                  <Text style={styles.sectionTitle}>{block.value.title}</Text>
+                  <View style={{ borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
+                    <View style={{ flexDirection: 'row', backgroundColor: '#f3f4f6' }}>
+                      {block.value.headers.map((header, i) => (
+                        <View key={i} style={{ flex: 1, padding: 6, borderRightWidth: i < block.value.headers.length - 1 ? 1 : 0, borderColor: '#e5e7eb' }}>
+                          <Text style={{ fontWeight: 'bold', color: '#374151' }}>{header}</Text>
+                        </View>
+                      ))}
+                    </View>
+                    {block.value.rows.map((row, rowIdx) => (
+                      <View key={rowIdx} style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#e5e7eb' }}>
+                        {row.map((cell, colIdx) => (
+                          <View key={colIdx} style={{ flex: 1, padding: 6, borderRightWidth: colIdx < row.length - 1 ? 1 : 0, borderColor: '#e5e7eb' }}>
+                            <Text style={{ color: '#1f2937' }}>{cell}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )
+            )}
+          </View>
+          {/* Footer: always present, doctor signatory only on last page */}
+          {pageIdx === totalPages - 1 && (
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>{doctorName}</Text>
+              <Text style={{ textTransform: 'uppercase' }}>{doctorRole.name}</Text>
+              <Text>Licence: {doctorLicense}</Text>
+            </View>
           )}
-        </View>
-      </View>
+          <View style={styles.footer} fixed>
+            <View>
+              <Text>PID {selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A"} | {selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : "N/A"}</Text>
+              <Text>IMPORTANT NOTICE: For result interpretation, please consult your primary physician.</Text>
+            </View>
+            <View>
+              <Text>Page {pageIdx + 1} of {totalPages}</Text>
+              <Text>PixCell Medical System</Text>
+            </View>
+          </View>
+        </Page>
+      ))}
+    </Document>
+  );
+};
 
-      {/* Report Content */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Report Content</Text>
-        <Text style={styles.content}>
-          {formData.content || "No content provided."}
-        </Text>
-      </View>
+export { ReportPDF };
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <View>
-          <Text>Generated by: {formData.isAiGenerated ? "AI Assistant" : "Medical Staff"}</Text>
-          <Text>Date: {formatDateTime(new Date())}</Text>
-        </View>
-        <View>
-          <Text>Page 1 of 1</Text>
-          <Text>PixCell Medical System</Text>
-        </View>
-      </View>
-    </Page>
-  </Document>
-);
-
-export const PDFExport = ({ formData, selectedPatient, selectedSample }: PDFExportProps) => {
+export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps) => {
   const handleExportPDF = async () => {
     try {
-      const blob = await pdf(<ReportPDF formData={formData} selectedPatient={selectedPatient} selectedSample={selectedSample} />).toBlob();
+      const blob = await pdf(
+        <ReportPDF 
+          formData={formData}
+          reportContent={reportContent}
+          selectedPatient={selectedPatient}
+          selectedSample={selectedSample}
+          doctorName={doctorName}
+          doctorRole={doctorRole}
+          doctorLicense={doctorLicense}
+        />
+      ).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -409,7 +458,7 @@ export const PDFExport = ({ formData, selectedPatient, selectedSample }: PDFExpo
       size="sm"
       className="flex items-center space-x-2"
     >
-      <Download className="h-4 w-4" />
+      <img src="/icons/worm.svg" alt="Worm" width="16" height="16" />
       <span>Export PDF</span>
     </Button>
   );

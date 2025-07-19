@@ -7,6 +7,8 @@ import { PDFExport } from "./pdf-export";
 import { FileText, Calendar, Worm, TestTube, Phone, Mail } from "lucide-react";
 import { format } from "date-fns";
 import type { Role } from "@/db/schema";
+import { pdf } from '@react-pdf/renderer';
+import { ReportPDF } from './pdf-export';
 
 // Copied from create-report-form.tsx
 interface Patient {
@@ -135,20 +137,17 @@ export default function ReportPreview({
     <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-gray-300">
       <div className="flex items-center">
         <div className="flex items-center gap-3 self-center font-medium">
-          <div className="bg-primary text-primary-foreground flex h-12 w-12 items-center justify-center rounded-md">
-            <Worm className="size-6" />
-          </div>
-          <span className="text-lg font-semibold">PixCell</span>
+          
         </div>
         <div className="text-sm text-gray-700 ml-4">
           <p className="font-semibold text-lg text-gray-800">PixCell</p>
           <p>123 Medical Center Dr.</p>
           <p className="flex items-center space-x-1">
-            <Phone className="h-3 w-3 text-gray-500" />
+            <img src="/icons/phone.svg" alt="Phone" className="h-3 w-3 text-gray-500" />
             <span>+1 (555) 123-4567</span>
           </p>
           <p className="flex items-center space-x-1">
-            <Mail className="h-3 w-3 text-gray-500" />
+            <img src="/icons/mail.svg" alt="Mail" className="h-3 w-3 text-gray-500" />
             <span>admin@pixcell.com</span>
           </p>
         </div>
@@ -190,13 +189,37 @@ export default function ReportPreview({
         <div className="flex items-center space-x-4">
           <PDFExport 
             formData={formData}
+            reportContent={reportContent}
             selectedPatient={selectedPatient}
             selectedSample={selectedSample}
+            doctorName={doctorName}
+            doctorRole={doctorRole}
+            doctorLicense={doctorLicense}
           />
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              const blob = await pdf(
+                <ReportPDF
+                  formData={formData}
+                  reportContent={reportContent}
+                  selectedPatient={selectedPatient}
+                  selectedSample={selectedSample}
+                  doctorName={doctorName}
+                  doctorRole={doctorRole}
+                  doctorLicense={doctorLicense}
+                />
+              ).toBlob();
+              const url = URL.createObjectURL(blob);
+              window.open(url, '_blank');
+              setTimeout(() => URL.revokeObjectURL(url), 10000);
+            }}
+            className="flex items-center space-x-2"
+          >
             <FileText className="h-4 w-4" />
-            <span>PDF Preview</span>
-          </div>
+            <span>Preview PDF</span>
+          </Button>
         </div>
       </div>
       {/* Navigation Controls */}
