@@ -58,6 +58,7 @@
     "react-hot-toast": "^2.5.2",
     "react-markup": "^2.0.0",
     "react-phone-number-input": "^3.4.12",
+    "react-qr-code": "^2.0.18",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.2.0",
     "vaul": "^1.1.2",

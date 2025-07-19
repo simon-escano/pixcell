@@ -458,7 +458,7 @@ export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSa
       size="sm"
       className="flex items-center space-x-2"
     >
-      <img src="/icons/worm.svg" alt="Worm" width="16" height="16" />
+      <Download className="h-4 w-4" />
       <span>Export PDF</span>
     </Button>
   );

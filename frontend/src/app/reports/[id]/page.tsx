@@ -66,6 +66,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
             patient={patient ?? undefined}
             sample={sample ?? undefined}
             reportId={reportId}
+            reportStatus={report.status ?? ""}
           />
         </div>
       </div>
