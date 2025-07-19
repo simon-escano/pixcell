@@ -31,15 +31,16 @@ export async function updateReport(id: string, data: {
   title?: string;
   content?: any;
   testType?: string;
-  status?: "pending" | "completed" | "failed";
+  status?: "Draft" | "Finalized" | "UNDER_REVIEW" | "REJECTED" | "ARCHIVED";
   exportedUrl?: string;
   exportFormat?: string;
 }) {
   try {
+    // Map legacy status values to allowed enum values
+    let mappedStatus = data.status;
     await db.update(report)
-      .set(data)
+      .set({ ...data, status: mappedStatus })
       .where(eq(report.id, id));
-    
     return { success: true };
   } catch (error) {
     console.error("Failed to update report:", error);

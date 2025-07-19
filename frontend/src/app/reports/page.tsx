@@ -21,29 +21,14 @@ export default async function ReportsPage() {
 
   // Normalize reports to ensure consistent structure
   const normalizedReports = reports.map((report: any) => {
-    // Handle different report structures from different queries
     const baseReport = {
       id: report.id,
       title: report.title || '',
-      testType: report.testType || '',
-      status: report.status || 'pending',
-      createdAt: report.createdAt,
-      content: report.content || '',
-      isAiGenerated: report.isAiGenerated || false,
-      exportedUrl: report.exportedUrl || '',
-      exportFormat: report.exportFormat || '',
-      sampleId: report.sampleId || '',
-      sampleName: report.sampleName || '',
-      patientId: report.patientId || '',
+      createdAt: report.createdAt ? format(new Date(report.createdAt), 'MMMM d, yyyy') : '',
       patientName: report.patientName || '',
-      patientImage: report.patientImage || '',
-      generatedBy: report.generatedBy || report.generatedById || '',
-      generatedById: report.generatedById || report.generatedBy || '',
-      generatedByName: report.generatedByName || '',
-      generatedByImage: report.generatedByImage || '',
-      generatedByRole: report.generatedByRole || '',
+      generatedBy: report.generatedByName || '',
+      status: report.status,
     };
-    
     return baseReport;
   });
 
@@ -52,7 +37,8 @@ export default async function ReportsPage() {
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <ReportsTable reports={normalizedReports} />
+        {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
+        <ReportsTable reports={normalizedReports as any} />
       </div>
     </Base>
   );

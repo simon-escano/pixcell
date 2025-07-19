@@ -10,7 +10,13 @@ export default async function CreateReportPage() {
   
   // Get patients based on user role
   const patients = await getAllPatientsForUser(profile.id, role.name);
-  const profiles = await getAllProfiles();
+  let profiles = (await getAllProfiles()).map((p: any) => {
+    if (p.imageId === null) {
+      const { imageId, ...rest } = p;
+      return rest;
+    }
+    return p;
+  });
 
   return (
     <Base>

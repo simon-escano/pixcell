@@ -246,15 +246,31 @@ export async function getReportsByGeneratedBy(userId: string) {
   return await db
     .select({
       id: report.id,
-      createdAt: report.createdAt,
-      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
       title: report.title,
-      testType: report.testType,
-      status: report.status,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      patientImage: patientImage.imageUrl,
+      generatedById: user.id,
+      generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+      generatedByImage: generatedByImage.imageUrl,
+      generatedByRole: role.name,
+      status: report.status
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
     .leftJoin(patient, eq(sample.patientId, patient.id))
+    .leftJoin(patientImage, eq(patient.imageId, patientImage.id))
+    .leftJoin(user, eq(report.generatedBy, user.id))
+    .leftJoin(profile, eq(user.id, profile.userId))
+    .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
+    .leftJoin(role, eq(profile.roleId, role.id))
     .where(eq(report.generatedBy, userId))
     .orderBy(report.createdAt);
 }
@@ -394,7 +410,8 @@ export async function getAllReports() {
       generatedById: user.id,
       generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
       generatedByImage: generatedByImage.imageUrl,
-      generatedByRole: role.name
+      generatedByRole: role.name,
+      title: report.title,
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))

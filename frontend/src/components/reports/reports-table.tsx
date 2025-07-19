@@ -8,6 +8,7 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { deleteReport } from "@/actions/reports";
+import { format } from "date-fns";
 
 const ReportsTable = ({ reports }: { reports: Report[] }) => {
   const router = useRouter();
@@ -61,18 +62,17 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
           'patientId',
           'patientImage',
           'generatedById',
-          'generatedByName',
           'generatedByImage',
           'generatedByRole',]}
         defaultHiddenColumns={[]}
         searchPlaceholder="Search reports..."
-        searchableColumns={["id", "title", "patientName", "testType", "status"]}
+        searchableColumns={["id", "title", "patientName", "testType", "status", "generatedByName" , "createdAt"]}
         columnConfigs={[
-          { key: "id" },
+          { key: "id", customRender: (value: string) => String(value).slice(0, 8).toUpperCase() },
           { key: "title", maxWidth: 250 },
           { key: "patientName", maxWidth: 180 },
           { key: "testType", maxWidth: 140 },
-          { key: "createdAt", enableSorting: true },
+          { key: "createdAt", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
           { key: "status" },
         ]}
         actionItems={actionItems}
