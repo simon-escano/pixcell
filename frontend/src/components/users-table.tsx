@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Camera } from "lucide-react";
+import { Camera, CirclePlus } from "lucide-react";
 import { PhoneInput } from "./ui/phone-input";
 
 type CombinedUser = {
@@ -131,6 +131,13 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     },
   ];
 
+  const addUserButton = (
+    <Button className="ml-2" variant="default">
+       <CirclePlus />
+      Add User
+    </Button>
+  );
+
   return (
     <div>
       <DataTable
@@ -142,6 +149,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         onRowClick={(user: CombinedUser) => {
           router.push(`/users/${user.id}`);
         }}
+        customHeaderContent={addUserButton}
       />
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

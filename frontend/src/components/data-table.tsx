@@ -373,6 +373,7 @@ export function DataTable<TData extends Record<string, any>>({
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
+        {/* Wrap Columns dropdown and customHeaderContent in a flex-row with a small gap */}
         <div className="flex items-center gap-2">
           {enableColumnVisibility && (
             <DropdownMenu>

@@ -10,7 +10,7 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
 import { UserDialog } from "./user-dialog";
-import { Plus } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 
 type CombinedUser = {
   id: User["id"];
@@ -124,13 +124,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="mr-2 size-4" />
-          Add User
-        </Button>
-      </div>
-
+      {/* Remove the separate Add User button above the table */}
       <DataTable
         data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
         excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
@@ -140,6 +134,12 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         onRowClick={(user: CombinedUser) => {
           router.push(`/users/${user.id}`);
         }}
+        customHeaderContent={
+          <Button onClick={() => setAddOpen(true)} className="ml-2">
+            <CirclePlus/>
+            Add User
+          </Button>
+        }
       />
 
       <UserDialog

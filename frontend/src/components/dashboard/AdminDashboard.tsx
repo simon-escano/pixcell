@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllUsers, getAllSamples, getAllReports, getAllPatients, getAllUsersWithProfiles, getPatientGenderStats } from "@/db/queries/select";
+import { getAllUsers, getAllSamples, getAllReports, getAllPatientsForUser, getAllUsersWithProfiles, getPatientGenderStats } from "@/db/queries/select";
 import { createClient } from '@supabase/supabase-js';
 import { Users, User, Image as ImageIcon, FileText, Database, PieChart as PieChartIcon } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -146,9 +146,10 @@ const ROLE_COLORS = [
   "#fbbf24", // yellow-400
 ];
 
-export async function AdminDashboard() {
+// Change to accept profileId as a prop
+export default async function AdminDashboard({ profileId }: { profileId: string }) {
   const users = await getAllUsers();
-  const patients = await getAllPatients();
+  const patients = await getAllPatientsForUser(profileId, "Administrator");
   const samples = await getAllSamples();
   const reports = await getAllReports();
   const usersWithProfiles = await getAllUsersWithProfiles();
