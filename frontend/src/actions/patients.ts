@@ -219,6 +219,11 @@ export async function addPatient(data: {
   file?: File | null;
   createdBy: string; // <-- Add this!
 }) {
+  // Check if email already exists
+  const existing = await db.select().from(patient).where(eq(patient.email, data.email)).limit(1);
+  if (existing.length > 0) {
+    return { success: false, error: "Email already exists." };
+  }
   let imageId: string | undefined;
 
   if (data.file) {

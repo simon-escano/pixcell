@@ -146,7 +146,7 @@ export function PatientDialog({
       } else {
         if (!profile) return; // or show loading
 
-        await addPatient({
+        const result = await addPatient({
           firstName,
           lastName,
           email,
@@ -160,11 +160,14 @@ export function PatientDialog({
           file: file ?? undefined,
           createdBy: profile.id,
         });
-        toast.success("Patient added", { id: toastId });
-        router.refresh();
+        if (result && result.success === false && result.error) {
+          toast.error(result.error, { id: toastId });
+        } else {
+          toast.success("Patient added", { id: toastId });
+          router.refresh();
+          setOpen(false);
+        }
       }
-
-      setOpen(false);
     } catch (error) {
       toast.error("Failed to save patient", { id: toastId });
     } finally {

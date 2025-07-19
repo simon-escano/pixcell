@@ -33,6 +33,12 @@ export const signupAction = async (formData: FormData) => {
     const lastName = formData.get("lastName") as string;
     const roleId = formData.get("roleId") as string;
 
+    // Check if email already exists
+    const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
+    if (existing.length > 0) {
+      return { errorMessage: "Email already exists." };
+    }
+
     const auth = await getSupabaseAuth();
 
     const { data, error } = await auth.signUp({
