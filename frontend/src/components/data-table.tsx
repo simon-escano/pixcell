@@ -69,6 +69,10 @@ export type DataTableProps<TData> = {
   searchableColumns?: string[];
   separateLastAction?: boolean;
   defaultHiddenColumns?: string[];
+  // Add for batch selection
+  selectedRowIds?: string[];
+  onSelectedRowIdsChange?: (ids: string[]) => void;
+  getRowId?: (row: TData, index: number, parent?: any) => string;
 };
 
 export function DataTable<TData extends Record<string, any>>({
@@ -88,6 +92,9 @@ export function DataTable<TData extends Record<string, any>>({
   searchableColumns,
   separateLastAction = false,
   defaultHiddenColumns = [],
+  selectedRowIds,
+  onSelectedRowIdsChange,
+  getRowId,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -100,7 +107,42 @@ export function DataTable<TData extends Record<string, any>>({
     });
     return initialVisibility;
   });
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({});
+
+  // Sync controlled selection from parent
+  React.useEffect(() => {
+    if (selectedRowIds) {
+      const selectionObj: Record<string, boolean> = {};
+      selectedRowIds.forEach((id) => {
+        selectionObj[id] = true;
+      });
+      // Only update if different
+      const isDifferent =
+        Object.keys(selectionObj).length !== Object.keys(rowSelection).length ||
+        Object.keys(selectionObj).some((id) => rowSelection[id] !== selectionObj[id]);
+      if (isDifferent) {
+        setRowSelection(selectionObj);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRowIds]);
+
+  // Notify parent on selection change, only if different
+  const prevIdsRef = React.useRef<string[]>([]);
+  React.useEffect(() => {
+    if (onSelectedRowIdsChange) {
+      const ids = Object.keys(rowSelection).filter((id) => rowSelection[id]);
+      // Only notify if different
+      if (
+        ids.length !== prevIdsRef.current.length ||
+        ids.some((id, i) => id !== prevIdsRef.current[i])
+      ) {
+        prevIdsRef.current = ids;
+        onSelectedRowIdsChange(ids);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection]);
 
   // Convert columnConfigs array to a map for easier access
   const columnConfigMap = React.useMemo(() => {
@@ -357,6 +399,7 @@ export function DataTable<TData extends Record<string, any>>({
       rowSelection,
       globalFilter,
     },
+    getRowId,
   });
 
   // Update data when props change

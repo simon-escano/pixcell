@@ -52,6 +52,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
   const [addOpen, setAddOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<CombinedUser | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
   const handleEditSubmit = async (data: {
     firstName: string;
@@ -238,7 +240,20 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
             />
           </div>
         }
+        selectedRowIds={selectedIds}
+        onSelectedRowIdsChange={setSelectedIds}
+        getRowId={row => row.id}
       />
+      {selectedIds.length > 0 && (
+        <div className="flex justify-start mt-4">
+          <Button
+            variant="destructive"
+            onClick={() => setBatchDeleteOpen(true)}
+          >
+            Delete Selected ({selectedIds.length})
+          </Button>
+        </div>
+      )}
 
       <UserDialog
         open={editOpen}
@@ -282,6 +297,37 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
           } else {
             toast.error(res.error || "Failed to delete user.");
           }
+        }}
+        confirmText="Continue"
+        cancelText="Cancel"
+      />
+      <CustomAlertDialog
+        open={batchDeleteOpen}
+        onOpenChange={setBatchDeleteOpen}
+        title="Are you absolutely sure?"
+        description={
+          <>
+            This action cannot be undone. This will permanently delete {selectedIds.length} users and remove all their data from our system.
+          </>
+        }
+        onConfirm={async () => {
+          const failed: { id: string, error: string }[] = [];
+          for (const id of selectedIds) {
+            const res = await deleteUser(id);
+            if (!res.success) {
+              failed.push({ id, error: res.error || 'Unknown error' });
+            }
+          }
+          if (failed.length > 0) {
+            toast.error(
+              failed.map(f => `ID: ${f.id} - ${f.error}`).join('\n')
+            );
+          } else {
+            toast.success("Selected users deleted.");
+          }
+          setSelectedIds([]);
+          setBatchDeleteOpen(false);
+          router.refresh();
         }}
         confirmText="Continue"
         cancelText="Cancel"
