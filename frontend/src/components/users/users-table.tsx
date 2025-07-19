@@ -10,7 +10,10 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
 import { UserDialog } from "./user-dialog";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Upload, XCircle } from "lucide-react";
+// @ts-ignore: If types are missing for papaparse
+import Papa from "papaparse";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 
 type CombinedUser = {
   id: User["id"];
@@ -23,12 +26,32 @@ type CombinedUser = {
   roleName: Role["name"];
 };
 
+function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
+  return (
+    <div className="flex items-start gap-3 bg-red-50 shadow-lg rounded-md p-4 border-l-4 border-red-400">
+      <XCircle className="text-red-500 w-6 h-6 mt-1 flex-shrink-0" />
+      <div>
+        <div className="font-semibold text-red-700 mb-2">{title}</div>
+        <ul className="pl-4 list-disc space-y-1">
+          {failed.map((f, i) => (
+            <li key={i}>
+              <span className="font-medium">{f.email}</span>
+              <span className="text-red-600 font-normal">: {f.error}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<CombinedUser | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleEditSubmit = async (data: {
     firstName: string;
@@ -95,6 +118,76 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     }
   };
 
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results: Papa.ParseResult<any>) => {
+        try {
+          const response = await fetch("/api/users/batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(results.data),
+          });
+          const result = await response.json();
+          if (response.ok) {
+            const failed = result.results?.filter((r: any) => !r.success) || [];
+            if (failed.length > 0) {
+              toast.custom(
+                <ImportErrorToast
+                  title="Some users were not imported:"
+                  failed={failed}
+                />, { duration: 2000 }
+              );
+            } else {
+              toast.success("Users imported successfully.");
+            }
+            router.refresh();
+          } else {
+            toast.error(result.message || "Failed to import users.");
+          }
+        } catch (err) {
+          toast.error("Error importing users.");
+        }
+      },
+      error: () => {
+        toast.error("Failed to parse CSV file.");
+      },
+    });
+    e.target.value = "";
+  };
+
+  const handleAddManual = () => {
+    setAddOpen(true);
+  };
+
+  const addUserDropdown = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="ml-2" variant="default">
+          <CirclePlus className="mr-2 h-4 w-4" />
+          Add User
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={handleAddManual}>
+          <CirclePlus className="mr-2 h-4 w-4" />
+          Add Manually
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleImportClick}>
+          <Upload className="mr-2 h-4 w-4" />
+          Import via CSV
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   const actionItems = [
     {
       label: "Copy User ID",
@@ -124,21 +217,26 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
 
   return (
     <div>
-      {/* Remove the separate Add User button above the table */}
       <DataTable
         data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
         excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
         defaultHiddenColumns={["phone"]}
-        columnConfigs={[{ key: "imageUrl", maxWidth: 200 }]}
+        columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
           router.push(`/users/${user.id}`);
         }}
         customHeaderContent={
-          <Button onClick={() => setAddOpen(true)} className="ml-2">
-            <CirclePlus/>
-            Add User
-          </Button>
+          <div className="flex items-center gap-2">
+            {addUserDropdown}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
         }
       />
 

@@ -17,6 +17,7 @@
 /frontend/.next/
 /frontend/out/
 
+
 # production
 /build
 
@@ -48,3 +49,5 @@ yarn-error.log*
 
 # large models
 /backend/models/*
+
+/files
