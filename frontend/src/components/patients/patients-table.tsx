@@ -40,6 +40,8 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const [addOpen, setAddOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
   const handleEditPatient = (patient: Patient) => {
     setSelectedPatient(patient);
@@ -170,7 +172,20 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         onRowClick={(patient: Patient) => {
           router.push(`/patients/${patient.id}`);
         }}
+        selectedRowIds={selectedIds}
+        onSelectedRowIdsChange={setSelectedIds}
+        getRowId={row => row.id}
       />
+      {selectedIds.length > 0 && (
+        <div className="flex justify-start mt-4">
+          <Button
+            variant="destructive"
+            onClick={() => setBatchDeleteOpen(true)}
+          >
+            Delete Selected ({selectedIds.length})
+          </Button>
+        </div>
+      )}
       <PatientDialog
         mode="edit"
         existingPatient={selectedPatient}
@@ -183,6 +198,37 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         open={addOpen}
         setOpen={setAddOpen}
         showTrigger={false}
+      />
+      <CustomAlertDialog
+        open={batchDeleteOpen}
+        onOpenChange={setBatchDeleteOpen}
+        title="Are you absolutely sure?"
+        description={
+          <>
+            This action cannot be undone. This will permanently delete {selectedIds.length} patients and remove all their data from our system.
+          </>
+        }
+        onConfirm={async () => {
+          const failed: { id: string, error: string }[] = [];
+          for (const id of selectedIds) {
+            const res = await deletePatient(id);
+            if (!res.success) {
+              failed.push({ id, error: res.error || 'Unknown error' });
+            }
+          }
+          if (failed.length > 0) {
+            toast.error(
+              failed.map(f => `ID: ${f.id} - ${f.error}`).join('\n')
+            );
+          } else {
+            toast.success("Selected patients deleted.");
+          }
+          setSelectedIds([]);
+          setBatchDeleteOpen(false);
+          router.refresh();
+        }}
+        confirmText="Continue"
+        cancelText="Cancel"
       />
       <CustomAlertDialog
         open={deleteOpen}
