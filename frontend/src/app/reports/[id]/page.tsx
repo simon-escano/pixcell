@@ -62,11 +62,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         </div>
         <div className="w-full md:w-80 flex flex-col gap-6">
           <ReportActions
-            formData={formData}
-            patient={patient ?? undefined}
-            sample={sample ?? undefined}
             reportId={reportId}
             reportStatus={report.status ?? ""}
+            formData={formData}
           />
         </div>
       </div>
