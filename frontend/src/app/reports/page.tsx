@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { FileText, User } from "lucide-react";
 import Link from "next/link";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";
+import ReportsTable from "@/components/reports/reports-table";
 
 export default async function ReportsPage() {
   const user = await getUser();
@@ -18,116 +19,26 @@ export default async function ReportsPage() {
     ? await getAllReports()
     : await getReportsByGeneratedBy(user.id);
 
-  // Normalize all fields that could possibly be objects
-  function extractString(val: unknown): string {
-    if (typeof val === 'string') return val;
-    if (val && typeof val === 'object' && 'value' in val && typeof (val as any).value === 'string') {
-      return (val as any).value;
-    }
-    return '';
-  }
-  const normalizedReports = reports.map((report) => ({
-    ...report,
-    patientName: extractString(report.patientName),
-    generatedByName: extractString(report.generatedByName),
-    patientImage: extractString(report.patientImage),
-    generatedByImage: extractString(report.generatedByImage),
-    sampleName: extractString(report.sampleName),
-    generatedByRole: extractString(report.generatedByRole),
-    content: extractString(report.content),
-    exportedUrl: extractString(report.exportedUrl),
-    exportFormat: extractString(report.exportFormat),
-  }));
+  // Normalize reports to ensure consistent structure
+  const normalizedReports = reports.map((report: any) => {
+    const baseReport = {
+      id: report.id,
+      title: report.title || '',
+      createdAt: report.createdAt ? format(new Date(report.createdAt), 'MMMM d, yyyy') : '',
+      patientName: report.patientName || '',
+      generatedBy: report.generatedByName || '',
+      status: report.status,
+    };
+    return baseReport;
+  });
 
   console.log("reports", reports);
 
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <div className="space-y-4">
-          {normalizedReports.map((report) => (
-            <Card key={report.id} className="bg-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-base font-medium">
-                  Report for {report.patientName}
-                </CardTitle>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs ${
-                      report.isAiGenerated
-                        ? "bg-blue-200 text-blue-800"
-                        : "bg-green-200 text-green-800"
-                    }`}
-                  >
-                    {report.isAiGenerated ? "AI Generated" : "Manual"}
-                  </span>
-                  {report.exportedUrl && (
-                    <Link
-                      href={report.exportedUrl}
-                      target="_blank"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Link>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage
-                          src={report.patientImage || ""}
-                          alt={report.patientName}
-                          className="rounded-lg"
-                        />
-                        <AvatarFallback className="rounded-lg">
-                          {report.patientName.split(" ").map((n: string) => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">
-                          <Link
-                            href={`/patients/${report.patientId}`}
-                            className="hover:underline"
-                          >
-                            {report.patientName}
-                          </Link>
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          Sample: {report.sampleName || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <User className="text-muted-foreground h-4 w-4" />
-                      <div className="text-right">
-                        <p className="text-sm font-medium">
-                          <Link
-                            href={`/users/${report.generatedById}`}
-                            className="hover:underline"
-                          >
-                            {report.generatedByName}
-                          </Link>
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {report.generatedByRole}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-muted-foreground text-sm">
-                    {report.content}
-                  </div>
-                  <div className="text-muted-foreground text-xs">
-                    {format(new Date(report.createdAt), "MMM d, yyyy 'at' h:mm a")}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
+        <ReportsTable reports={normalizedReports as any} />
       </div>
     </Base>
   );

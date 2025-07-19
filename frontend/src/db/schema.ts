@@ -1,7 +1,16 @@
 import { not } from "drizzle-orm";
-import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema, integer, pgEnum } from "drizzle-orm/pg-core";
 
 const authSchema = pgSchema('auth');
+
+export const reportStatusEnum = pgEnum("report_status", [
+  "Draft",
+  "Finalized",
+  "UNDER_REVIEW",
+  "REJECTED",
+  "ARCHIVED",
+]);
+
 
 export const user = authSchema.table('users', {
 	id: uuid('id').primaryKey(),
@@ -91,15 +100,20 @@ export const annotation = pgTable("annotation", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+
 export const report = pgTable("report", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
   isAiGenerated: boolean("is_ai_generated").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
   exportedUrl: text("exported_url"),
-  content: text("content").notNull(),
-  exportFormat: varchar("export_format"),
-  sampleId: uuid("sample_id").notNull().references(() => sample.id, { onDelete: 'cascade' }),
+  content: jsonb("content").notNull(),
+  exportFormat: varchar("export_format", { length: 255 }),
+  sampleId: uuid("sample_id").notNull().references(() => sample.id, { onDelete: "cascade" }),
   generatedBy: uuid("generated_by").notNull().references(() => user.id),
+  title: text("title"),
+  patientId: uuid("patient_id").references(() => patient.id, { onUpdate: "cascade", onDelete: "cascade" }),
+  testType: text("test_type"),
+  status: reportStatusEnum("status"),
 });
 
 export const session = pgTable("session", {
@@ -174,3 +188,4 @@ export type PatientWithImage = Omit<Patient, 'noteId'> & {
 export type ProfileWithImage = Profile & {
   imageUrl: string | null;
 };
+

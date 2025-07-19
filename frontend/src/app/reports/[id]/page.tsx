@@ -1,122 +1,77 @@
-"use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getReportById, getPatientById, getSampleById, getProfileByUserId, getRoleById } from "@/db/queries/select";
+import Base from "@/components/base";
+import ReportPreview from "@/components/reports/report-preview";
+import { PDFExport } from "@/components/reports/pdf-export";
+import ReportActions from "./report-actions-client";
+import { Card } from "@/components/ui/card";
+import { Edit, Trash2, QrCode } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-type Report = { title: string; content: string; doctorId: string; /* add other fields as needed */ };
+// interface Params { id: string | string[] }
+export default async function ReportPage({ params }: { params: Promise<{ id: string | string[] }> }) {
+  const { id } = await params;
+  const reportId = Array.isArray(id) ? id[0] : (id ?? "");
+  const report = await getReportById(reportId);
+  if (!report) {
+    return <div className="flex justify-center items-center h-96">Report not found.</div>;
+  }
+  const patient = report.patientId ? await getPatientById(report.patientId) : null;
+  const sample = report.sampleId ? await getSampleById(report.sampleId) : null;
+  let doctor = null, role = null;
+  if (sample?.createdBy) {
+    doctor = await getProfileByUserId(sample.createdBy);
+    if (doctor?.roleId) role = await getRoleById(doctor.roleId);
+  }
 
-export default function ReportPage() {
-  const router = useRouter();
-  const params = useParams();
-  const reportId = params?.id;
-  const [report, setReport] = useState<Report | null>(null);
-  const [form, setForm] = useState({ title: "", content: "" });
-  const [canEdit, setCanEdit] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  // Ensure content is always an object with string text and array tables
+  const contentObj = (typeof report.content === 'object' && report.content !== null)
+    ? report.content as any
+    : { text: '', tables: [] };
 
-  useEffect(() => {
-    async function fetchReportAndUser() {
-      setLoading(true);
-      setError("");
-      try {
-        // Fetch report data
-        const res = await fetch(`/api/reports/${reportId}`);
-        if (!res.ok) throw new Error("Failed to fetch report");
-        const data = await res.json();
-        setReport(data);
-        setForm({ title: data.title, content: data.content });
-
-        // Fetch current user
-        const supabase = createClientComponentClient();
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError || !userData?.user) {
-          setCanEdit(false);
-        } else {
-          setCanEdit(data.doctorId === userData.user.id);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (reportId) fetchReportAndUser();
-  }, [reportId]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const formData = {
+    title: report.title || "",
+    testType: report.testType || "",
+    content: typeof contentObj.text === 'string' ? contentObj.text : "",
+    isAiGenerated: report.isAiGenerated || false,
   };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/reports/${reportId}`, {
-        method: "PUT",
-        body: JSON.stringify(form),
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) throw new Error("Failed to save report");
-      // Optionally refetch or update state
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setSaving(false);
-    }
+  const reportContent = {
+    text: typeof contentObj.text === 'string' ? contentObj.text : "",
+    tables: Array.isArray(contentObj.tables) ? contentObj.tables : [],
   };
+  const doctorName = doctor ? `${doctor.firstName} ${doctor.lastName}` : "N/A";
+  const doctorRole = role && role.id && role.name ? role : { id: 'unknown', name: 'Doctor' };
+  const doctorLicense = (doctor && 'licenseNo' in doctor && (doctor as any).licenseNo) ? (doctor as any).licenseNo : "N/A";
 
-  const handleExport = async () => {
-    // Simple PDF export using jsPDF (if installed)
-    if (typeof window !== "undefined") {
-      const { default: jsPDF } = await import("jspdf");
-      const doc = new jsPDF();
-      doc.text(form.title, 10, 10);
-      doc.text(form.content, 10, 20);
-      doc.save(`${form.title || "report"}.pdf`);
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
-  if (!report) return <div>Report not found.</div>;
+  // Small client component for actions (delete, QR, etc.)
+  // const ReportActions = dynamic(() => import("./report-actions-client"), { ssr: false });
 
   return (
-    <div>
-      <h1>Edit Report</h1>
-      {canEdit ? (
-        <form onSubmit={e => e.preventDefault()}>
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Title"
-            style={{ display: "block", marginBottom: 8, width: 300 }}
+    <Base>
+      <div className="flex flex-col md:flex-row gap-8 p-4 md:p-8 max-w-7xl mx-auto">
+        <div className="flex-1 min-w-0">
+          <ReportPreview
+            formData={formData}
+            reportContent={reportContent}
+            selectedPatient={patient ?? undefined}
+            selectedSample={sample ? { ...sample, createdByName: doctorName } : undefined}
+            doctorName={doctorName}
+            doctorRole={doctorRole}
+            doctorLicense={doctorLicense}
           />
-          <textarea
-            name="content"
-            value={form.content}
-            onChange={handleChange}
-            placeholder="Content"
-            rows={10}
-            style={{ display: "block", marginBottom: 8, width: 500 }}
-          />
-          <button type="button" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save"}
-          </button>
-          <button type="button" onClick={handleExport} style={{ marginLeft: 8 }}>
-            Export as PDF
-          </button>
-        </form>
-      ) : (
-        <div>
-          <h2>{report.title}</h2>
-          <p>{report.content}</p>
-          <p>You do not have permission to edit this report.</p>
         </div>
-      )}
-    </div>
+        <div className="w-full md:w-80 flex flex-col gap-6">
+          <ReportActions
+            reportId={reportId}
+            reportStatus={report.status ?? ""}
+            formData={formData}
+          />
+        </div>
+      </div>
+    </Base>
+
+
+
+    
   );
 } 
