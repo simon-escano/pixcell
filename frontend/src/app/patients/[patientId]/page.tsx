@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { getPatientById, getReportCountByPatientId, getSamplesByPatientId } from "@/db/queries/select"
+import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId } from "@/db/queries/select"
 import { FileText, TestTube, Edit } from "lucide-react"
 import { UploadSampleDrawerForPatient } from "@/components/samples/upload-sample-drawer"
 import { useRouter } from "next/navigation";
 import { EditPatientDialogTrigger } from "@/components/patients/edit-patient-dialog-trigger";
+import { PatientReportsList } from "@/components/patients/patient-reports-list";
 
 export default async function PatientPage({
   params,
@@ -19,6 +20,7 @@ export default async function PatientPage({
   const patientData = await getPatientById(patientId)
   const samples = await getSamplesByPatientId(patientId)
   const reportCount = await getReportCountByPatientId(patientId)
+  const reports = await getReportsByPatientId(patientId)
 
   // State for edit dialog (client component)
   // We'll use a client wrapper for the edit dialog trigger and state
@@ -214,15 +216,19 @@ export default async function PatientPage({
                     </TabsContent>
 
                     <TabsContent value="reports" className="h-full m-0 p-4">
-                      <div className="flex flex-col items-center justify-center h-full text-center">
-                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
-                          <FileText className="h-8 w-8 text-slate-400" />
+                      {reports.length > 0 ? (
+                        <PatientReportsList reports={reports} />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                            <FileText className="h-8 w-8 text-slate-400" />
+                          </div>
+                          <h3 className="text-base font-medium text-slate-900 mb-2">No reports available</h3>
+                          <p className="text-slate-600 max-w-sm leading-relaxed text-sm">
+                            Reports will be generated automatically once samples are processed and analyzed.
+                          </p>
                         </div>
-                        <h3 className="text-base font-medium text-slate-900 mb-2">No reports available</h3>
-                        <p className="text-slate-600 max-w-sm leading-relaxed text-sm">
-                          Reports will be generated automatically once samples are processed and analyzed.
-                        </p>
-                      </div>
+                      )}
                     </TabsContent>
                   </div>
                 </Tabs>
