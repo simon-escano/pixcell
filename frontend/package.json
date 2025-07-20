@@ -11,6 +11,7 @@
   "dependencies": {
     "@dnd-kit/modifiers": "^9.0.0",
     "@liveblocks/client": "^3.0.0",
+    "@liveblocks/core": "^3.1.4",
     "@liveblocks/node": "^3.0.0",
     "@liveblocks/react": "^3.0.0",
     "@liveblocks/react-ui": "^3.0.0",
