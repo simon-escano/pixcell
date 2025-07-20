@@ -1,8 +1,8 @@
 import {
-  getMetaSampleImagesBySampleId,
   getSampleById
 } from "@/db/queries/select";
 import { redirect } from "next/navigation";
+import { getMetaSampleImagesBySampleId } from "../queries";
 
 const SamplePage = async ({
   params,

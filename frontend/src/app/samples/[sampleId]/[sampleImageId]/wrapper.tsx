@@ -8,12 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import ProfileCard from "../../components/profile-card";
 import { MetaSample, MetaSampleImage } from "../../types";
 import SampleImageContainer from "./sample-image-container";
 import { User } from "@supabase/supabase-js";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface SamplePageWrapperProps {
   currentUser: User;
@@ -96,7 +98,36 @@ const SamplePageWrapper = ({
           </Table>
         </div>
         </div>
-        <div className="flex-1 rounded-md border"></div>
+        <div className="flex-1 rounded-md mb-4 border">
+        </div>
+        <div className="flex w-full items-center gap-2 p-2 border rounded-lg">
+            <Select
+              disabled={false}
+              onValueChange={undefined}
+              value={undefined}
+            >
+              <SelectTrigger className="h-full flex-1">
+                <SelectValue placeholder="Choose model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="parasite_detection_yolov8">
+                  Parasite Detection
+                </SelectItem>
+                <SelectItem value="anemia_detection_yolov8">
+                  Anemia Detection
+                </SelectItem>
+                <SelectItem value="malaria_detection_yolov8">
+                  Malaria Detection
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={undefined}
+            >
+              <Search />
+              Detect
+            </Button>
+        </div>
       </div>
     </div>
   );
