@@ -29,7 +29,8 @@ export const profile = pgTable("profile", {
   lastName: varchar("last_name").notNull(),
   userId: uuid('user_id').references(() => user.id).notNull(),
   roleId: uuid("role_id").notNull().references(() => role.id),
-  imageId: uuid("image_id").references(() => image.id)
+  imageId: uuid("image_id").references(() => image.id),
+  licenseNo: text("license_no")
 });
 
 export const image = pgTable("image", {
@@ -51,17 +52,11 @@ export const patient = pgTable("patient", {
   weight: integer("weight").notNull(),
   bloodType: varchar("blood_type", { length: 3 }).notNull(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  noteId: uuid("note_id").references(() => note.id).unique(),
   createdBy: uuid("created_by").references(() => profile.id),
 });
 
-export const note = pgTable("note",{
-  id: uuid("id").primaryKey(),
-  note_content: text("note_content")
-});
 
-
-export const sample_image = pgTable("sample_image",{
+export const sampleImage = pgTable("sample_image",{
   id: uuid("id").primaryKey().defaultRandom(),
   sampleId: uuid("sample_id").references(() => sample.id),
   uploadedBy: uuid("profile_id").references(() => profile.id),
@@ -70,8 +65,6 @@ export const sample_image = pgTable("sample_image",{
   imageId: uuid("image_id").references(() => image.id).unique(),
 
 });
-
-
 
 export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -89,18 +82,6 @@ export const aiAnalysis = pgTable("ai_analysis", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const annotation = pgTable("annotation", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sample_image_id: uuid("sample_image_id").notNull().references(() => sample_image.id, { onDelete: 'cascade' }),
-  profileId: uuid("profile_id").notNull().references(() => profile.id),
-  content: jsonb("content").notNull(),
-  drawingData: jsonb("drawing_data").notNull(),
-  coordinates: jsonb("coordinates").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-
 export const report = pgTable("report", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   isAiGenerated: boolean("is_ai_generated").notNull(),
@@ -114,6 +95,7 @@ export const report = pgTable("report", {
   patientId: uuid("patient_id").references(() => patient.id, { onUpdate: "cascade", onDelete: "cascade" }),
   testType: text("test_type"),
   status: reportStatusEnum("status"),
+  code: text('code'),
 });
 
 export const session = pgTable("session", {
@@ -155,19 +137,18 @@ export const doctorPatient = pgTable("doctor_patient", {
   doctorId: uuid("doctor_id").notNull().references(() => profile.id),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
   orderNo: integer("order_no"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
-export type SampleImage = typeof sample_image.$inferSelect;
+export type SampleImage = typeof sampleImage.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
-export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
-export type Note = typeof note.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 
 // Combined type for sample with image data

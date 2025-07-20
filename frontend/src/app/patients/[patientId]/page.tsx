@@ -98,12 +98,7 @@ export default async function PatientPage({
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-none">
-            <CardHeader className="px-6">
-              <CardTitle>Notes</CardTitle>
-            </CardHeader>
-            {/* <CardContent className="px-6">{patientData.notes}</CardContent> */}
-          </Card>
+
         </div>
         <div className="space-y-4 xl:col-span-3">
           <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

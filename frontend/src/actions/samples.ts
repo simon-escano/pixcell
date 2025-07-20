@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { sample, sample_image, image, profile } from "@/db/schema";
+import { sample, sampleImage, image, profile } from "@/db/schema";
 import sizeOf from "image-size";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -52,116 +52,177 @@ async function ensureSampleImagesBucket() {
  */
 export async function uploadSampleAction(
   patientId: string,
-  file: File,
+  files: File[],
   sampleName: string
 ) {
-  const currentUser = await getUser();
-  if (!file || !patientId || !sampleName.trim()) {
-    throw new Error("Missing required fields: patientId, file, and sampleName are required.");
+  // Validate inputs
+  if (!files?.length || !patientId || !sampleName.trim()) {
+    throw new Error("Missing required fields: patientId, files, and sampleName are required.");
   }
 
+  // Get current user and profile
+  const currentUser = await getUser();
+  const userProfile = await db
+    .select({ id: profile.id })
+    .from(profile)
+    .where(eq(profile.userId, currentUser.id))
+    .limit(1);
+
+  if (!userProfile?.[0]) {
+    throw new Error("User profile not found");
+  }
+
+  // Ensure storage bucket exists
+  await ensureSampleImagesBucket();
+
   try {
-    // Ensure the bucket exists before uploading
-    await ensureSampleImagesBucket();
-    
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const { data, error: uploadError } = await supabase.storage
-      .from('sample-images')
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Supabase Storage upload failed:", uploadError);
-      throw new Error(`Failed to upload image: ${uploadError.message}`);
-    }
-
-    const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
-    const dimensions = sizeOf(buffer);
-
-    try {
-      // Get the profile for the current user
-      const userProfile = await db
-        .select({ id: profile.id })
-        .from(profile)
-        .where(eq(profile.userId, currentUser.id))
-        .limit(1);
-
-      if (!userProfile || userProfile.length === 0) {
-        throw new Error("User profile not found");
-      }
-
-      // First, create the image record
-      const [imageRecord] = await db.insert(image).values({
-        id: crypto.randomUUID(),
-        imageUrl,
-      }).returning();
-
-      // Then, create the sample record
-      const [sampleRecord] = await db.insert(sample).values({
+    // Create ONE sample record
+    const [sampleRecord] = await db
+      .insert(sample)
+      .values({
         patientId,
         sampleName: sampleName.trim(),
-        createdBy: currentUser?.id,
-      }).returning();
+        createdBy: currentUser.id,
+      })
+      .returning();
 
-      // Finally, create the sample_image record
-      await db.insert(sample_image).values({
-        sampleId: sampleRecord.id,
-        uploadedBy: userProfile[0].id,
+
+    // Process all files for this single sample
+    const uploadPromises = files.map(file => 
+      uploadFileAndInsertRecords(file, sampleRecord.id, userProfile[0].id)
+    );
+    
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+
+    return { 
+      success: true, 
+      sampleId: sampleRecord.id,
+      filesUploaded: files.length 
+    };
+
+  } catch (error) {
+    console.error("Error in uploadSampleAction:", error);
+    throw error;
+  }
+
+  async function uploadFileAndInsertRecords(
+    file: File, 
+    sampleId: string, 
+    profileId: string
+  ) {
+    try {
+      // Convert file to buffer
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      
+      // Generate unique filename
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-${file.name}`;
+      
+      // Upload to Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from("sample-images")
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase Storage upload failed:", uploadError);
+        throw new Error(`Failed to upload image ${file.name}: ${uploadError.message}`);
+      }
+
+      // Generate public URL
+      const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
+      
+      // Get image dimensions
+      const dimensions = sizeOf(buffer);
+
+      // Insert image record
+      const [imageRecord] = await db
+        .insert(image)
+        .values({
+          id: crypto.randomUUID(),
+          imageUrl,
+        })
+        .returning();
+
+      // Link image to sample
+      await db.insert(sampleImage).values({
+        sampleId, // This should be the same for all files
+        uploadedBy: profileId,
         metadata: dimensions,
         imageId: imageRecord.id,
       });
 
-    } catch (dbError: any) {
-      console.error("Database insert failed:", dbError);
-      throw new Error(`Failed to save sample data: ${dbError.message}`);
-    }
 
-    return { success: true, imageUrl };
-  } catch (error: any) {
-    console.error("Error in uploadSampleAction:", error);
-    throw new Error(`Sample upload failed: ${error.message}`);
+      return imageRecord.id;
+
+    } catch (error) {
+      console.error(`Error uploading file ${file.name}:`, error);
+      throw error;
+    }
   }
 }
 
 export async function deleteSample(sampleId: string) {
   try {
-    // Get sample_image data to find the image URL
+    // Get all sample_image data with their associated image URLs
     const sampleImageData = await db
       .select({
+        sampleImageId: sampleImage.id,
+        imageId: sampleImage.imageId,
         imageUrl: image.imageUrl,
-        imageId: sample_image.imageId,
       })
-      .from(sample_image)
-      .leftJoin(image, eq(sample_image.imageId, image.id))
-      .where(eq(sample_image.sampleId, sampleId))
-      .limit(1);
+      .from(sampleImage)
+      .leftJoin(image, eq(sampleImage.imageId, image.id))
+      .where(eq(sampleImage.sampleId, sampleId));
 
     if (sampleImageData.length === 0) {
       return { success: false, error: "Sample not found" };
     }
 
-    const imageUrl = sampleImageData[0].imageUrl;
-    if (imageUrl) {
-      const path = imageUrl.split('/storage/v1/object/public/sample-images/')[1];
-      if (path) {
-        const { error: deleteError } = await supabase.storage
-          .from('sample-images')
-          .remove([path]);
+    // Collect all storage paths to delete
+    const storagePaths: string[] = [];
+    const imageIds: string[] = [];
 
-        if (deleteError) {
-          console.error("Failed to delete image from storage:", deleteError);
-          return { success: false, error: "Failed to delete image from storage" };
+    for (const record of sampleImageData) {
+      if (record.imageUrl) {
+        // Check if the image comes from the sample-images bucket
+        const bucketPath = record.imageUrl.split('/storage/v1/object/public/sample-images/')[1];
+        if (bucketPath) {
+          storagePaths.push(bucketPath);
         }
+      }
+      
+      if (record.imageId) {
+        imageIds.push(record.imageId);
       }
     }
 
-    // Delete from sample table (this will cascade to sample_image due to foreign key)
+    // Delete all images from storage (sample-images bucket)
+    if (storagePaths.length > 0) {
+      const { error: deleteStorageError } = await supabase.storage
+        .from('sample-images')
+        .remove(storagePaths);
+      
+      if (deleteStorageError) {
+        console.error("Failed to delete images from storage:", deleteStorageError);
+        return { success: false, error: "Failed to delete images from storage" };
+      }
+    }
+
+    // Delete all sample_image records first
+    await db.delete(sampleImage).where(eq(sampleImage.sampleId, sampleId));
+
+    // Delete all image records second
+    if (imageIds.length > 0) {
+      await db.delete(image).where(inArray(image.id, imageIds));
+    }
+
+    // Finally, delete the sample record
     await db.delete(sample).where(eq(sample.id, sampleId));
+
     return { success: true };
   } catch (error) {
     console.error("Failed to delete sample:", error);

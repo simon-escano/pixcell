@@ -11,10 +11,15 @@ import {
   getPatientGenderStats,
   getMonthlyStats,
   getProfileByUserId, 
-  getRoleById
+  getRoleById,
+  getSamplesByUserId,
+  getReportsLast30DaysByUser,
+  getPatientsWithLastReportByUser,
+  getRecentUploadsByUser,
+  getPatientGenderStatsByUser
 } from "@/db/queries/select"
 import { db } from "@/db"
-import { patient, sample, report, sample_image } from "@/db/schema"
+import { patient, sample, report, sampleImage } from "@/db/schema"
 import { sql } from "drizzle-orm"
 
 // Helper function to calculate monthly changes
@@ -60,15 +65,15 @@ async function getSampleMonthlyChange() {
         count: sql<number>`count(distinct ${sample.id})`,
       })
       .from(sample)
-      .leftJoin(sample_image, sql`${sample.id} = ${sample_image.sampleId}`)
-      .where(sql`${sample_image.capturedAt} >= ${startOfCurrentMonth.toISOString()}`),
+      .leftJoin(sampleImage, sql`${sample.id} = ${sampleImage.sampleId}`)
+      .where(sql`${sampleImage.capturedAt} >= ${startOfCurrentMonth.toISOString()}`),
     db
       .select({
         count: sql<number>`count(distinct ${sample.id})`,
       })
       .from(sample)
-      .leftJoin(sample_image, sql`${sample.id} = ${sample_image.sampleId}`)
-      .where(sql`${sample_image.capturedAt} >= ${startOfLastMonth.toISOString()} and ${sample_image.capturedAt} < ${endOfLastMonth.toISOString()}`),
+      .leftJoin(sampleImage, sql`${sample.id} = ${sampleImage.sampleId}`)
+      .where(sql`${sampleImage.capturedAt} >= ${startOfLastMonth.toISOString()} and ${sampleImage.capturedAt} < ${endOfLastMonth.toISOString()}`),
   ]);
 
   const current = Number(currentMonthCount[0]?.count ?? 0);
@@ -85,6 +90,8 @@ export async function getDashboardStats() {
     const profile = await getProfileByUserId(user.id);
     const role = await getRoleById(profile.roleId);
 
+    console.log(profile)
+    console.log(role)
     const [
       patients,
       samples,
@@ -95,11 +102,11 @@ export async function getDashboardStats() {
       monthlyStats
     ] = await Promise.all([
       getAllPatientsForUser(profile.id, role.name),
-      getAllSamples(),
-      getReportsLast30Days(),
-      getPatientsWithLastReport(),
-      getRecentUploads(),
-      getPatientGenderStats(),
+      getSamplesByUserId(user.id),
+      getReportsLast30DaysByUser(user.id),
+      getPatientsWithLastReportByUser(user.id),
+      getRecentUploadsByUser(user.id),
+      getPatientGenderStatsByUser(user.id),
       getMonthlyStats()
     ]);
     

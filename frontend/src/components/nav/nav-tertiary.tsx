@@ -17,11 +17,6 @@ import {
 export function NavTertiary({ ...props }) {
   const items = [
     {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
       title: "Feedback",
       url: "/feedback",
       icon: Send,

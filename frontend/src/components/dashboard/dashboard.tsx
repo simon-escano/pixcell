@@ -238,36 +238,40 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
           </CardHeader>
           <CardContent className="px-4 pb-3">
             <div className="space-y-2">
-              {stats?.patientsWithLastReport.slice(0, 4).map((report, index) => (
-                <div
-                  key={`${report.patientId}-${report.sampleId || "no-sample"}-${index}`}
-                  className="flex items-center space-x-2 p-2 rounded-md bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900/70 transition-colors"
-                >
-                  <Avatar className="h-6 w-6">
-                    {report.userImage ? (
-                      <AvatarImage src={report.userImage || "/placeholder.svg"} alt={report.userName} />
-                    ) : (
-                      <AvatarFallback className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs">
-                        {report.userName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {report.patientName}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {report.sampleName || "Sample"} • {formatDate(report.reportCreatedAt || report.dateTaken)}
-                    </p>
+              {stats?.patientsWithLastReport.length === 0 ? (
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No recent reports found.</div>
+              ) : (
+                stats?.patientsWithLastReport.slice(0, 4).map((report, index) => (
+                  <div
+                    key={`${report.patientId}-${report.sampleId || "no-sample"}-${index}`}
+                    className="flex items-center space-x-2 p-2 rounded-md bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900/70 transition-colors"
+                  >
+                    <Avatar className="h-6 w-6">
+                      {report.userImage ? (
+                        <AvatarImage src={report.userImage || "/placeholder.svg"} alt={report.userName} />
+                      ) : (
+                        <AvatarFallback className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs">
+                          {report.userName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {report.patientName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {report.sampleName || "Sample"} • {formatDate(report.reportCreatedAt || report.dateTaken)}
+                      </p>
+                    </div>
+                    <Badge variant={report.isAiGenerated ? "default" : "secondary"} className="text-xs px-1.5 py-0.5">
+                      {report.isAiGenerated ? "AI" : "Manual"}
+                    </Badge>
                   </div>
-                  <Badge variant={report.isAiGenerated ? "default" : "secondary"} className="text-xs px-1.5 py-0.5">
-                    {report.isAiGenerated ? "AI" : "Manual"}
-                  </Badge>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -281,30 +285,34 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
           </CardHeader>
           <CardContent className="px-4 pb-3">
             <div className="space-y-2">
-              {stats?.recentUploads.slice(0, 4).map((upload, index) => (
-                <div
-                  key={`${upload.id}-${index}`}
-                  className="flex items-center space-x-2 p-2 rounded-md bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900/70 transition-colors"
-                >
-                  <div className="h-6 w-6 rounded-md overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    <img
-                      src={upload.imageUrl || "/placeholder.svg?height=24&width=24"}
-                      alt="Sample"
-                      className="h-full w-full object-cover"
-                    />
+              {stats?.recentUploads.length === 0 ? (
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No recent uploads found.</div>
+              ) : (
+                stats?.recentUploads.slice(0, 4).map((upload, index) => (
+                  <div
+                    key={`${upload.id}-${index}`}
+                    className="flex items-center space-x-2 p-2 rounded-md bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900/70 transition-colors"
+                  >
+                    <div className="h-6 w-6 rounded-md overflow-hidden bg-gray-200 dark:bg-gray-700">
+                      <img
+                        src={upload.imageUrl || "/placeholder.svg?height=24&width=24"}
+                        alt="Sample"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {upload.patientName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{upload.sampleName || "Sample"}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(upload.capturedAt)}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{upload.uploadedBy}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {upload.patientName}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{upload.sampleName || "Sample"}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(upload.capturedAt)}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">{upload.uploadedBy}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
