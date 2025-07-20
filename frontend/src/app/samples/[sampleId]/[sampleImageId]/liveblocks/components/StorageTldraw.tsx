@@ -39,9 +39,7 @@ export function StorageTldraw({
     const imageWidth = sampleImage.metadata.width;
     const imageHeight = sampleImage.metadata.height;
     const assetId = AssetRecordType.createId(sampleImage.id);
-
     if (editor.getShape(shapeId) === undefined) {
-      console.log(sampleImage.imageUrl)
       editor
         .createAssets([
           {
