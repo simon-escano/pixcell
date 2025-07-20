@@ -18,7 +18,14 @@ export default async function PatientPage({
 }) {
   const patientId = (await params).patientId
   const patientData = await getPatientById(patientId)
-  const samples = await getSamplesByPatientId(patientId)
+  const samplesRaw = await getSamplesByPatientId(patientId)
+  // Deduplicate samples by id
+  const samples = Object.values(
+    samplesRaw.reduce((acc: Record<string, typeof samplesRaw[0]>, sample) => {
+      if (!acc[sample.id]) acc[sample.id] = sample;
+      return acc;
+    }, {})
+  )
   const reportCount = await getReportCountByPatientId(patientId)
   const reports = await getReportsByPatientId(patientId)
 
@@ -164,7 +171,7 @@ export default async function PatientPage({
                         <div className="space-y-2 h-full overflow-auto">
                           {samples.map((sample, index) => (
                             <div
-                              key={sample.id}
+                              key={`${sample.id}-${index}`}
                               className="group flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-200"
                             >
                               <div className="flex items-center gap-3">

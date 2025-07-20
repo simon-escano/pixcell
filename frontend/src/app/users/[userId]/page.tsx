@@ -1,5 +1,7 @@
 import Base from "@/components/base";
 import UploadSampleWrapper from "@/components/samples/upload-sample-wrapper";
+import SampleCard from "@/app/samples/components/sample-card";
+import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "@/app/samples/queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -22,6 +24,7 @@ export default async function UserPage({
   const samples = await getSamplesByUserId(userId);
   const reports = await getReportsByGeneratedBy(userId);
   const role = (await getRoleById(profile.roleId)).name;
+  const metaUser = await getMetaProfileByUserId(userId);
 
   return (
     <Base>
@@ -81,9 +84,18 @@ export default async function UserPage({
         </div>
         <div className="space-y-4 xl:col-span-3">
           <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {samples.map(async (sample) => (
-              <UploadSampleWrapper key={sample.id} sample={sample} />
-            ))}
+            {metaUser && samples.map(async (sample) => {
+              const metaSample = await getMetaSampleById(sample.id);
+              const metaSampleImages = await getMetaSampleImagesBySampleId(sample.id);
+              return (
+                <SampleCard
+                  key={sample.id}
+                  currentUser={metaUser}
+                  sample={metaSample!}
+                  sampleImages={metaSampleImages}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
