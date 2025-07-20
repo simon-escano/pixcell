@@ -81,18 +81,6 @@ export const aiAnalysis = pgTable("ai_analysis", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const annotation = pgTable("annotation", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sample_image_id: uuid("sample_image_id").notNull().references(() => sampleImage.id, { onDelete: 'cascade' }),
-  profileId: uuid("profile_id").notNull().references(() => profile.id),
-  content: jsonb("content").notNull(),
-  drawingData: jsonb("drawing_data").notNull(),
-  coordinates: jsonb("coordinates").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-
 export const report = pgTable("report", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   isAiGenerated: boolean("is_ai_generated").notNull(),
@@ -106,6 +94,7 @@ export const report = pgTable("report", {
   patientId: uuid("patient_id").references(() => patient.id, { onUpdate: "cascade", onDelete: "cascade" }),
   testType: text("test_type"),
   status: reportStatusEnum("status"),
+  code: text('code'),
 });
 
 export const session = pgTable("session", {
@@ -155,7 +144,6 @@ export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
 export type SampleImage = typeof sampleImage.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
-export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
