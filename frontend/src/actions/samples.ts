@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { sample, sample_image, image, profile } from "@/db/schema";
+import { sample, sampleImage, image, profile } from "@/db/schema";
 import sizeOf from "image-size";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
@@ -109,7 +109,7 @@ export async function uploadSampleAction(
       }).returning();
 
       // Finally, create the sample_image record
-      await db.insert(sample_image).values({
+      await db.insert(sampleImage).values({
         sampleId: sampleRecord.id,
         uploadedBy: userProfile[0].id,
         metadata: dimensions,
@@ -134,11 +134,11 @@ export async function deleteSample(sampleId: string) {
     const sampleImageData = await db
       .select({
         imageUrl: image.imageUrl,
-        imageId: sample_image.imageId,
+        imageId: sampleImage.imageId,
       })
-      .from(sample_image)
-      .leftJoin(image, eq(sample_image.imageId, image.id))
-      .where(eq(sample_image.sampleId, sampleId))
+      .from(sampleImage)
+      .leftJoin(image, eq(sampleImage.imageId, image.id))
+      .where(eq(sampleImage.sampleId, sampleId))
       .limit(1);
 
     if (sampleImageData.length === 0) {

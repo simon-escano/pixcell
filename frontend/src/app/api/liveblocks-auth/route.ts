@@ -1,15 +1,31 @@
+import { getCurrentUser } from "@/app/samples/[sampleId]/[sampleImageId]/liveblocks/database";
 import { Liveblocks } from "@liveblocks/node";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+
+// Authenticating your Liveblocks application
+// https://liveblocks.io/docs/authentication
 
 const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
+  secret: process.env.LIVEBLOCKS_SECRET_KEY! as string,
 });
 
-export async function POST(req: NextRequest) {
-  const session = liveblocks.prepareSession(`user-${Math.floor(Math.random() * 10)}`);
-  session.allow(`sample_*`, session.FULL_ACCESS);
+export async function POST(request: NextRequest) {
+  // Get the current user's unique id and info from your database
+  const user = await getCurrentUser();
 
-  const { status, body } = await session.authorize();
+  // Create a session for the current user
+  // userInfo is made available in Liveblocks presence hooks, e.g. useOthers
+  const session = liveblocks.prepareSession(`${user.id}`, {
+    userInfo: {
+      ...user.info,
+      avatar: user.info.avatar || '',
+    },
+  });
 
-  return new NextResponse(body, { status });
+  // Use a naming pattern to allow access to rooms with a wildcard
+  session.allow(`liveblocks:sample-edit:*`, session.FULL_ACCESS);
+
+  // Authorize the user and return the result
+  const { body, status } = await session.authorize();
+  return new Response(body, { status });
 }
