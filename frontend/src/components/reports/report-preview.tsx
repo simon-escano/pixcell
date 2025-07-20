@@ -58,6 +58,7 @@ interface ReportPreviewProps {
     testType: string;
     content: string;
     isAiGenerated: boolean;
+    customTestType?: string;
   };
   reportContent: ReportContent;
   selectedPatient?: Patient;
@@ -67,7 +68,8 @@ interface ReportPreviewProps {
   doctorLicense: string;
 }
 
-const getTestTypeDisplayName = (testType: string) => {
+const getTestTypeDisplayName = (testType: string, customTestType?: string) => {
+  if (testType === "other" && customTestType) return customTestType;
   const testTypes: { [key: string]: string } = {
     blood_test: "Blood Test",
     urine_test: "Urine Test",
@@ -241,7 +243,7 @@ export default function ReportPreview({
                     {formData.title || "Medical Report"}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">
-                    {getTestTypeDisplayName(formData.testType) || "Test Type"}
+                    {getTestTypeDisplayName(formData.testType, formData.customTestType) || "Test Type"}
                   </p>
                 </div>
                 <div className="text-right">

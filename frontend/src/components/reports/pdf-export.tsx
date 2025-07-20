@@ -57,6 +57,7 @@ interface PDFExportProps {
     testType: string;
     content: string;
     isAiGenerated: boolean;
+    customTestType?: string;
   };
   reportContent: ReportContent;
   selectedPatient: Patient | undefined;
@@ -218,7 +219,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const getTestTypeDisplayName = (testType: string) => {
+const getTestTypeDisplayName = (testType: string, customTestType?: string) => {
+  if (testType === "other" && customTestType) return customTestType;
   const testTypes: { [key: string]: string } = {
     blood_test: "Blood Test",
     urine_test: "Urine Test",
@@ -328,7 +330,7 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
                     {formData.title || "Medical Report"}
                   </Text>
                   <Text style={styles.subtitle}>
-                    {getTestTypeDisplayName(formData.testType) || "Test Type"}
+                    {getTestTypeDisplayName(formData.testType, formData.customTestType) || "Test Type"}
                   </Text>
                 </View>
                 <View style={styles.dateInfo}>
