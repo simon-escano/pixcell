@@ -333,10 +333,10 @@ export function PatientDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Doctor Assignment</Label>
+            <Label>Assigned Professional</Label>
             <Select value={selectedDoctor} onValueChange={(val) => { setSelectedDoctor(val); onDoctorChange && onDoctorChange(val); }}>
               <SelectTrigger>
-                <SelectValue placeholder="Select Doctor" />
+                <SelectValue placeholder="Select Professional" />
               </SelectTrigger>
               <SelectContent>
                 {doctors.map((doc) => (
