@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
           weight: Number(p.weight),
           bloodType: p.bloodType,
           imageId: p.imageId || null,
-          noteId: p.noteId || null,
           createdBy: p.createdBy || null,
         });
         results.push({ email: p.email, success: true });
