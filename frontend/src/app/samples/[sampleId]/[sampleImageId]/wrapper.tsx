@@ -8,7 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlusIcon, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Ellipsis, PlusIcon, Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import ProfileCard from "../../components/profile-card";
 import { MetaSample, MetaSampleImage } from "../../types";
@@ -16,6 +22,7 @@ import SampleImageContainer from "./sample-image-container";
 import { User } from "@supabase/supabase-js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { handleCopySampleId, handleDeleteSample } from "../../components/sample-card";
 
 interface SamplePageWrapperProps {
   currentUser: User;
@@ -48,9 +55,33 @@ const SamplePageWrapper = ({
       <div className="flex h-full flex-col w-[300px]">
         <div className="flex flex-col overflow-hidden mb-4 rounded-md border">
           <div className="flex flex-col gap-2 p-3">
-          <h1 className="font-display px-1 text-lg lg:text-xl">
-            {sample.sampleName}
-          </h1>
+          <div className="flex items-center">
+            <h1 className="font-display px-1 text-lg lg:text-xl mr-4 flex-1">
+              {sample.sampleName}
+            </h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="cursor-pointer">
+                  <Ellipsis className="text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => {
+                  handleCopySampleId(sample)
+                }}>
+                  Copy Sample ID
+                </DropdownMenuItem>
+                {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") ? <DropdownMenuItem
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => {
+                      handleDeleteSample(sample, router)
+                    }}
+                  >
+                  Delete Sample
+                </DropdownMenuItem> : ""}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <ProfileCard profile={sample.createdBy!} />
             <ProfileCard profile={sample.patient!} />
