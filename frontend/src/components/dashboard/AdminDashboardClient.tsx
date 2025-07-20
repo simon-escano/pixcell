@@ -143,21 +143,42 @@ export default function AdminDashboardCompact({
 
   const transformedData = genderStats
     ?.reduce((acc: any[], curr: any) => {
-      const genderKey = curr.gender === "M" ? "male" : curr.gender === "F" ? "female" : curr.gender?.toLowerCase()
-      const existingMonth = acc.find((item) => item.month === curr.month)
-      if (existingMonth) {
-        existingMonth[genderKey] = curr.count
-      } else {
-        acc.push({
-          month: curr.month,
-          [genderKey]: curr.count,
-          male: curr.gender === "M" ? curr.count : 0,
-          female: curr.gender === "F" ? curr.count : 0,
-        })
+      const genderKey = curr.gender === "M" ? "male" : curr.gender === "F" ? "female" : curr.gender?.toLowerCase();
+      let monthObj = acc.find((item) => item.month === curr.month);
+      if (!monthObj) {
+        monthObj = { month: curr.month, male: 0, female: 0 };
+        acc.push(monthObj);
       }
-      return acc
+      monthObj[genderKey] += curr.count; // sum, don't overwrite
+      return acc;
     }, [])
-    .sort((a: any, b: any) => a.month.localeCompare(b.month))
+    .sort((a: any, b: any) => a.month.localeCompare(b.month));
+
+  // Custom tooltip to show only nonzero values and avoid duplicates, with improved UI
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || payload.length === 0) return null;
+    return (
+      <div className="rounded-md border bg-white dark:bg-gray-900 p-2 shadow min-w-[90px]">
+        <div className="font-bold text-sm mb-1 text-gray-900 dark:text-gray-100">
+          {format(new Date(label + "-01"), "MMMM yyyy")}
+        </div>
+        <div className="space-y-0.5">
+          {payload
+            .filter((entry: any) => entry.value !== 0)
+            .map((entry: any, idx: number) => (
+              <div key={idx} className="flex items-center gap-1 text-xs text-gray-700 dark:text-gray-200">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="font-medium">{entry.name}:</span>
+                <span className="tabular-nums ml-1">{parseInt(entry.value, 10)}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-3">
@@ -237,17 +258,10 @@ export default function AdminDashboardCompact({
                   allowDecimals={false}
                   axisLine={false}
                   tickLine={false}
+                  domain={["auto", "auto"]}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [value, name === "male" ? "Male" : "Female"]}
-                  labelFormatter={(label) => format(new Date(label + "-01"), "MMMM yyyy")}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "6px",
-                    fontSize: "11px",
-                    boxShadow: "0 2px 4px -1px rgb(0 0 0 / 0.1)",
-                  }}
+                  content={CustomTooltip}
                 />
                 <Line
                   type="monotone"

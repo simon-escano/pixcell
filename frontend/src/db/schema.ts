@@ -51,13 +51,7 @@ export const patient = pgTable("patient", {
   weight: integer("weight").notNull(),
   bloodType: varchar("blood_type", { length: 3 }).notNull(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  noteId: uuid("note_id").references(() => note.id).unique(),
   createdBy: uuid("created_by").references(() => profile.id),
-});
-
-export const note = pgTable("note",{
-  id: uuid("id").primaryKey(),
-  note_content: text("note_content")
 });
 
 
@@ -165,7 +159,6 @@ export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
-export type Note = typeof note.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 
 // Combined type for sample with image data

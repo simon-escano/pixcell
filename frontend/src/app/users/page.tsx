@@ -35,12 +35,12 @@ export default async function OtherUsersPage() {
   return (
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <UsersTable users={users} roles={rolesData} />
+        <UsersTable users={users} />
       </div>
     </Base>
   );
 }
 
 export const metadata = {
-  title: "Other Users - PixCell",
+  title: "Manage Users - PixCell",
 };

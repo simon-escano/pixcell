@@ -12,7 +12,7 @@ export function PatientInfo({ patient }: { patient: any }) {
   if (!patient) return <div>No patient found.</div>;
 
   const filteredKeys = Object.keys(patient).filter(
-    (key) => key !== "imageUrl" && key !== "notes",
+    (key) => key !== "imageUrl"
   );
 
   const copyToClipboard = (value: string, fieldName: string) => {

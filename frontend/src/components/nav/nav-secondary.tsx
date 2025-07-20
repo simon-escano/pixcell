@@ -31,11 +31,13 @@ import {
 export function NavSecondary({ isAdmin }: { isAdmin: boolean }) {
   const items = [
     ...(isAdmin ? [{
-      title: "Other users",
+      title: "Manage users",
       url: "/users",
       icon: UsersRound,
     }] : []),
   ];
+
+  if (!isAdmin) return null;
 
   return (
     <SidebarGroup>
