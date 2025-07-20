@@ -1,6 +1,6 @@
 "use client";
 
-import ImprovedReportForm from "./improved-report-form";
+import ImprovedReportForm from "./report-form";
 import { addReport } from "@/actions/reports";
 import { Role } from "@/db/schema";
 

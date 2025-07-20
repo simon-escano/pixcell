@@ -1,5 +1,5 @@
 "use client";
-import ImprovedReportForm from "./improved-report-form";
+import ImprovedReportForm from "./report-form";
 import { updateReport } from "@/actions/reports";
 
 export default function EditReportForm({

@@ -28,9 +28,8 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { TableEditor, TableDisplay } from "./table-editor"
-import ReportPreview from "./report-preview"
 import { Progress } from "@/components/ui/progress"
-import ImprovedReportPreview from "./improved-report-preview";
+import ImprovedReportPreview from "./report-preview";
 
 // Types (keeping the same as original)
 import type { Role } from "@/db/schema"
