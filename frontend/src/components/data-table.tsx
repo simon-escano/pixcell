@@ -46,6 +46,7 @@ export type ActionItem = {
 
 export type ColumnConfig = {
   key: string;
+  header?: string; // <-- Add this line
   maxWidth?: number;
   enableSorting?: boolean;
   enableSearching?: boolean;
@@ -246,9 +247,8 @@ export function DataTable<TData extends Record<string, any>>({
                   column.toggleSorting(column.getIsSorted() === "asc")
                 }
               >
-                {key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())}
+                {config?.header ??
+                  key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
                 <ChevronsUpDown className="ml-2 h-4 w-4" />
               </Button>
             );
@@ -257,9 +257,8 @@ export function DataTable<TData extends Record<string, any>>({
           // Return just the text without sorting functionality
           return (
             <div className="px-1">
-              {key
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
+              {config?.header ??
+                key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
             </div>
           );
         },

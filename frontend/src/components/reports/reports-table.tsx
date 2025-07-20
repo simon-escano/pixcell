@@ -70,9 +70,9 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
         searchPlaceholder="Search reports..."
         searchableColumns={["id", "title", "patientName", "testType", "status", "generatedByName" , "createdAt"]}
         columnConfigs={[
-          { key: "id", customRender: (value: string) => String(value).slice(0, 8).toUpperCase() },
+          { key: "id", header: "Report ID",customRender: (value: string) => String(value).slice(0, 8).toUpperCase() },
           { key: "title", maxWidth: 250 },
-          { key: "patientName", maxWidth: 180, customRender: (_value, row) => {
+          { key: "patientName", header:"Patient", maxWidth: 180, customRender: (_value, row) => {
             // Parse first and last name from patientName
             const [firstName = "", ...rest] = (row.patientName || "").split(" ");
             const lastName = rest.join(" ");
@@ -90,9 +90,9 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
             );
           } },
           { key: "testType", maxWidth: 140 },
-          { key: "createdAt", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
+          { key: "createdAt", header: "Date Created", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
           {
-            key: "generatedByName",
+            key: "generatedByName", header:"Medical Professional",
             customRender: (_value, row) => {
               // Parse first and last name from generatedByName
               const [firstName = "", ...rest] = (row.generatedByName || "").split(" ");
