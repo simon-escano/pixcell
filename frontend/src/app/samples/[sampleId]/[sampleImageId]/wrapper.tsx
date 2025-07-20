@@ -36,7 +36,7 @@ const SamplePageWrapper = ({
   const sampleId = useParams().sampleId;
 
   return (
-    <div className="flex h-screen w-full gap-4 p-6">
+    <div className="flex h-full w-full gap-4 p-6">
       <div className="flex-1 overflow-hidden rounded-md border">
         <SampleImageContainer
           currentUser={currentUser}

@@ -40,6 +40,12 @@ export function StorageTldraw({
     const imageHeight = sampleImage.metadata.height;
     const assetId = AssetRecordType.createId(sampleImage.id);
     if (editor.getShape(shapeId) === undefined) {
+      const wasReadonly = editor.getInstanceState().isReadonly;
+      
+      if (wasReadonly) {
+        editor.updateInstanceState({ isReadonly: false });
+      }
+      
       editor
         .createAssets([
           {
@@ -70,6 +76,10 @@ export function StorageTldraw({
           },
         })
         .zoomToFit({ animation: { duration: 100 } });
+      
+      if (wasReadonly) {
+        editor.updateInstanceState({ isReadonly: true });
+      }
     }
   };
 

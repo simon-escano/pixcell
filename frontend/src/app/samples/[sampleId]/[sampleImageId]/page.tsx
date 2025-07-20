@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
 import SamplePageWrapper from "./wrapper";
+import Base from "@/components/base";
 
 const SampleImagePage = async ({
   params,
@@ -13,12 +14,13 @@ const SampleImagePage = async ({
   const currentUser = await getUser();
 
   return (
+    <Base>
     <SamplePageWrapper
       currentUser={currentUser}
       sample={sample}
       sampleImages={sampleImages}
       selectedSampleImageId={sampleImageId}
-    />
+    /></Base>
   );
 };
 
