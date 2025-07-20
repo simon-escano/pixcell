@@ -8,8 +8,9 @@ import { FileText, User } from "lucide-react";
 import Link from "next/link";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 import ReportsTable from "@/components/reports/reports-table";
+import { cookies } from "next/headers";
 
-export default async function ReportsPage() {
+export default async function ReportsPage({ searchParams }: { searchParams: { search?: string } }) {
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
@@ -38,7 +39,7 @@ export default async function ReportsPage() {
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
-        <ReportsTable reports={normalizedReports as any} />
+        <ReportsTable reports={normalizedReports as any} initialSearch={searchParams?.search || ""} />
       </div>
     </Base>
   );

@@ -9,6 +9,8 @@ import {
   getSamplesByPatientId,
 } from "@/db/queries/select";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { UploadSampleDrawerForPatient } from "@/components/samples/upload-sample-drawer";
+import { PatientActionRow } from "@/components/patients/patient-action-row";
 
 export default async function PatientPage({
   params,
@@ -61,6 +63,7 @@ export default async function PatientPage({
                     </div>
                   ))}
                 </div>
+                <PatientActionRow patientId={patientId} patientName={patientData.firstName + ' ' + patientData.lastName} />
                 <div className="text-muted-foreground flex flex-col gap-y-4">
                   <div className="flex items-center gap-3">
                     <Mail className="size-4" /> {patientData.email}

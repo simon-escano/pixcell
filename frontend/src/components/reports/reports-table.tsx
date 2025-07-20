@@ -10,7 +10,7 @@ import { Plus } from "lucide-react";
 import { deleteReport } from "@/actions/reports";
 import { format } from "date-fns";
 
-const ReportsTable = ({ reports }: { reports: Report[] }) => {
+const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSearch?: string }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -52,6 +52,7 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
       </div>
       <DataTable
         data={reports}
+        initialSearch={initialSearch}
         excludeColumns={[   
           'content',
           'isAiGenerated',
