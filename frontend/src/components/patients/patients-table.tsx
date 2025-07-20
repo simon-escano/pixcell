@@ -11,7 +11,7 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import UserButton from "../users/user-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CirclePlus, Plus, Upload, XCircle } from "lucide-react";
+import { CirclePlus, Plus, Upload, XCircle, Trash2 } from "lucide-react";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 
@@ -150,7 +150,7 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
       <DataTable
         data={[...patients].sort((a, b) => a.firstName.localeCompare(b.firstName))}
         excludeColumns={["id", "imageId", "birthDate", "createdAt", "imageUrl", "createdBy","lastName"]}
-        defaultHiddenColumns={["contactNumber", "address", "height", "weight", "bloodType"]}
+        defaultHiddenColumns={ ["height", "weight"]}
         searchPlaceholder="Search patients..."
         searchableColumns={["firstName", "lastName", "email", "bloodType"]}
         columnConfigs={[
@@ -192,17 +192,9 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         selectedRowIds={selectedIds}
         onSelectedRowIdsChange={setSelectedIds}
         getRowId={row => row.id}
+        onBulkDelete={() => setBatchDeleteOpen(true)}
       />
-      {selectedIds.length > 0 && (
-        <div className="flex justify-start mt-4">
-          <Button
-            variant="destructive"
-            onClick={() => setBatchDeleteOpen(true)}
-          >
-            Delete Selected ({selectedIds.length})
-          </Button>
-        </div>
-      )}
+      
       <PatientDialog
         mode="edit"
         existingPatient={selectedPatient}

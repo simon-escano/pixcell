@@ -14,7 +14,7 @@ import {
   useReactTable,
   FilterFn,
 } from "@tanstack/react-table";
-import { ChevronsUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronsUpDown, ChevronDown, MoreHorizontal, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -74,6 +74,8 @@ export type DataTableProps<TData> = {
   selectedRowIds?: string[];
   onSelectedRowIdsChange?: (ids: string[]) => void;
   getRowId?: (row: TData, index: number, parent?: any) => string;
+  bulkActions?: (selectedRowIds: string[], selectedRows: any[]) => React.ReactNode;
+  onBulkDelete?: (selectedRowIds: string[], selectedRows: TData[]) => void;
 };
 
 export function DataTable<TData extends Record<string, any>>({
@@ -96,6 +98,8 @@ export function DataTable<TData extends Record<string, any>>({
   selectedRowIds,
   onSelectedRowIdsChange,
   getRowId,
+  bulkActions,
+  onBulkDelete,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -405,15 +409,47 @@ export function DataTable<TData extends Record<string, any>>({
     setData(initialData);
   }, [initialData]);
 
+  const selectedRows = getRowId
+    ? data.filter((row, idx) => (selectedRowIds ?? []).includes(getRowId(row, idx)))
+    : [];
+
+  const showDefaultBulkDelete =
+    enableRowSelection &&
+    typeof onBulkDelete === "function" &&
+    (selectedRowIds?.length ?? 0) > 0;
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-2 py-4">
-        <Input
-          placeholder={searchPlaceholder}
-          value={globalFilter}
-          onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
-        />
+        {(selectedRowIds?.length ?? 0) > 0 && bulkActions && (
+          <div>
+            {bulkActions(selectedRowIds ?? [], selectedRows)}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          {showDefaultBulkDelete && (
+            <Button
+              variant="outline"
+              onClick={() => onBulkDelete && onBulkDelete(selectedRowIds ? selectedRowIds : [], selectedRows)}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete {(selectedRowIds ? selectedRowIds : []).length} Rows
+            </Button>
+          )}
+          <Input
+            placeholder={searchPlaceholder}
+            value={globalFilter}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className="flex-grow min-w-[220px]"
+          />
+        </div>
+
+
+        
+        
+
         {/* Wrap Columns dropdown and customHeaderContent in a flex-row with a small gap */}
         <div className="flex items-center gap-2">
           {enableColumnVisibility && (
