@@ -3,7 +3,7 @@
 import { deletePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
 import { DataTable } from "../data-table";
@@ -43,6 +43,44 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [currentDoctorId, setCurrentDoctorId] = useState<string>("");
+
+  // Fetch doctors once on mount
+  useEffect(() => {
+    async function fetchDoctors() {
+      const res = await fetch('/api/doctors');
+      const allDoctors = await res.json();
+      setDoctors(allDoctors);
+    }
+    fetchDoctors();
+  }, []);
+
+  // Fetch current doctor when editing a patient
+  useEffect(() => {
+    async function fetchCurrentDoctor() {
+      if (editOpen && selectedPatient) {
+        const res = await fetch(`/api/patient/${selectedPatient.id}/doctor`);
+        const data = await res.json();
+        setCurrentDoctorId(data.doctorId || "");
+      } else {
+        setCurrentDoctorId("");
+      }
+    }
+    fetchCurrentDoctor();
+  }, [editOpen, selectedPatient]);
+
+  // Handler to update doctor assignment (should call an API route or server action)
+  const handleDoctorChange = async (doctorId: string) => {
+    if (selectedPatient) {
+      await fetch('/api/patient/doctor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId: selectedPatient.id, doctorId })
+      });
+    }
+    setCurrentDoctorId(doctorId);
+  };
 
   const handleEditPatient = (patient: Patient) => {
     setSelectedPatient(patient);
@@ -209,6 +247,9 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         open={editOpen}
         setOpen={setEditOpen}
         showTrigger={false}
+        doctors={doctors}
+        currentDoctorId={currentDoctorId}
+        onDoctorChange={handleDoctorChange}
       />
       <PatientDialog
         mode="add"

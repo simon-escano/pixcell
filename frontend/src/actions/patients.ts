@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { patient, image } from "@/db/schema"
+import { patient, image, doctorPatient } from "@/db/schema"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm"
 
@@ -278,4 +278,16 @@ export async function addPatient(data: {
     console.error("Failed to add patient:", error);
     return { success: false, error: "Failed to add patient" };
   }
+}
+
+export async function setDoctorForPatient(patientId: string, doctorId: string) {
+  // Remove any existing doctor-patient relationship for this patient
+  await db.delete(doctorPatient).where(eq(doctorPatient.patientId, patientId));
+  // Insert the new doctor-patient relationship
+  await db.insert(doctorPatient).values({
+    id: crypto.randomUUID(),
+    doctorId,
+    patientId
+  });
+  return { success: true };
 }
