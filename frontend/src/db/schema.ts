@@ -55,7 +55,7 @@ export const patient = pgTable("patient", {
 });
 
 
-export const sample_image = pgTable("sample_image",{
+export const sampleImage = pgTable("sample_image",{
   id: uuid("id").primaryKey().defaultRandom(),
   sampleId: uuid("sample_id").references(() => sample.id),
   uploadedBy: uuid("profile_id").references(() => profile.id),
@@ -64,8 +64,6 @@ export const sample_image = pgTable("sample_image",{
   imageId: uuid("image_id").references(() => image.id).unique(),
 
 });
-
-
 
 export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -85,7 +83,7 @@ export const aiAnalysis = pgTable("ai_analysis", {
 
 export const annotation = pgTable("annotation", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sample_image_id: uuid("sample_image_id").notNull().references(() => sample_image.id, { onDelete: 'cascade' }),
+  sample_image_id: uuid("sample_image_id").notNull().references(() => sampleImage.id, { onDelete: 'cascade' }),
   profileId: uuid("profile_id").notNull().references(() => profile.id),
   content: jsonb("content").notNull(),
   drawingData: jsonb("drawing_data").notNull(),
@@ -155,7 +153,7 @@ export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
-export type SampleImage = typeof sample_image.$inferSelect;
+export type SampleImage = typeof sampleImage.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Annotation = typeof annotation.$inferSelect;
 export type Report = typeof report.$inferSelect;

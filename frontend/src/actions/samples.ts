@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { sample, sample_image, image, profile } from "@/db/schema";
+import { sample, sampleImage, image, profile } from "@/db/schema";
 import sizeOf from "image-size";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
@@ -52,24 +52,49 @@ async function ensureSampleImagesBucket() {
  */
 export async function uploadSampleAction(
   patientId: string,
-  file: File,
+  files: File[],
   sampleName: string
 ) {
-  const currentUser = await getUser();
-  if (!file || !patientId || !sampleName.trim()) {
+  if (!files?.length || !patientId || !sampleName.trim()) {
     throw new Error("Missing required fields: patientId, file, and sampleName are required.");
   }
 
-  try {
-    // Ensure the bucket exists before uploading
-    await ensureSampleImagesBucket();
-    
+  const currentUser = await getUser();
+
+  const userProfile = await db
+    .select({ id: profile.id })
+    .from(profile)
+    .where(eq(profile.userId, currentUser.id))
+    .limit(1);
+
+  if (!userProfile?.[0]) {
+    throw new Error("User profile not found");
+  }
+
+  const [sampleRecord] = await db
+    .insert(sample)
+    .values({
+      patientId,
+      sampleName: sampleName.trim(),
+      createdBy: currentUser.id,
+    })
+    .returning();
+
+  await ensureSampleImagesBucket();
+
+  for (const file of files) {
+    await uploadFileAndInsertRecords(file, sampleRecord.id, userProfile[0].id);
+  }
+
+  return { success: true };
+
+  async function uploadFileAndInsertRecords(file: File, sampleId: string, profileId: string) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const fileName = `${Date.now()}-${file.name}`;
 
     const { data, error: uploadError } = await supabase.storage
-      .from('sample-images')
+      .from("sample-images")
       .upload(fileName, buffer, {
         contentType: file.type,
         upsert: false,
@@ -83,48 +108,20 @@ export async function uploadSampleAction(
     const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
     const dimensions = sizeOf(buffer);
 
-    try {
-      // Get the profile for the current user
-      const userProfile = await db
-        .select({ id: profile.id })
-        .from(profile)
-        .where(eq(profile.userId, currentUser.id))
-        .limit(1);
-
-      if (!userProfile || userProfile.length === 0) {
-        throw new Error("User profile not found");
-      }
-
-      // First, create the image record
-      const [imageRecord] = await db.insert(image).values({
+    const [imageRecord] = await db
+      .insert(image)
+      .values({
         id: crypto.randomUUID(),
         imageUrl,
-      }).returning();
+      })
+      .returning();
 
-      // Then, create the sample record
-      const [sampleRecord] = await db.insert(sample).values({
-        patientId,
-        sampleName: sampleName.trim(),
-        createdBy: currentUser?.id,
-      }).returning();
-
-      // Finally, create the sample_image record
-      await db.insert(sample_image).values({
-        sampleId: sampleRecord.id,
-        uploadedBy: userProfile[0].id,
-        metadata: dimensions,
-        imageId: imageRecord.id,
-      });
-
-    } catch (dbError: any) {
-      console.error("Database insert failed:", dbError);
-      throw new Error(`Failed to save sample data: ${dbError.message}`);
-    }
-
-    return { success: true, imageUrl };
-  } catch (error: any) {
-    console.error("Error in uploadSampleAction:", error);
-    throw new Error(`Sample upload failed: ${error.message}`);
+    await db.insert(sampleImage).values({
+      sampleId,
+      uploadedBy: profileId,
+      metadata: dimensions,
+      imageId: imageRecord.id,
+    });
   }
 }
 
@@ -134,11 +131,11 @@ export async function deleteSample(sampleId: string) {
     const sampleImageData = await db
       .select({
         imageUrl: image.imageUrl,
-        imageId: sample_image.imageId,
+        imageId: sampleImage.imageId,
       })
-      .from(sample_image)
-      .leftJoin(image, eq(sample_image.imageId, image.id))
-      .where(eq(sample_image.sampleId, sampleId))
+      .from(sampleImage)
+      .leftJoin(image, eq(sampleImage.imageId, image.id))
+      .where(eq(sampleImage.sampleId, sampleId))
       .limit(1);
 
     if (sampleImageData.length === 0) {
