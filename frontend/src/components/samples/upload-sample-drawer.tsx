@@ -16,40 +16,110 @@ import {
 import { PatientSearchCombobox } from "@/components/patients/patient-search-combobox";
 import UploadSampleFile from "./upload-sample-file";
 import toast from "react-hot-toast";
-import { uploadSampleAction } from "@/actions/samples";
+import { editSampleAction, uploadSampleAction } from "@/actions/samples";
 import { getErrorMessage } from "@/utils";
 import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
+import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/samples/types";
 
-export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
+interface SampleDrawerProps {
+  patients: any[];
+  sample?: MetaSample;
+  sampleImages?: MetaSampleImage[];
+  patient?: MetaPatient;
+  children?: React.ReactNode;
+}
+
+// Helper function to convert MetaSampleImage to File-like object for display
+const createFileFromSampleImage = (sampleImage: MetaSampleImage): File => {
+  // Create a mock File object from the sample image
+  // You might need to adjust this based on your MetaSampleImage structure
+  const blob = new Blob([], { type: 'image/jpeg' }); // Empty blob, just for display
+  const file = new File([blob], sampleImage.imageUrl || 'sample-image.jpg', {
+    type: 'image/jpeg'
+  });
+  
+  // Add custom properties for existing images
+  (file as any).isExisting = true;
+  (file as any).imageId = sampleImage.id;
+  (file as any).imageUrl = sampleImage.imageUrl;
+  
+  return file;
+};
+
+export default function SampleDrawer({ 
+  patients, 
+  sample, 
+  sampleImages, 
+  patient,
+  children
+}: SampleDrawerProps) {
   const router = useRouter();
-  const [selectedPatient, setSelectedPatient] = React.useState<string>("");
+  const isEditMode = !!(sample && sampleImages);
+  
+  const [selectedPatient, setSelectedPatient] = React.useState<string>(
+    patient?.id || ""
+  );
   const [files, setFiles] = React.useState<File[]>([]);
-  const [sampleName, setSampleName] = React.useState<string>("");
+  const [sampleName, setSampleName] = React.useState<string>(
+    sample?.sampleName || ""
+  );
   const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
   const [isUploading, setIsUploading] = React.useState<boolean>(false);
 
+  // Initialize form when sample data is provided
+  React.useEffect(() => {
+    if (sample) {
+      setSampleName(sample.sampleName || "");
+    }
+    if (patient) {
+      setSelectedPatient(patient.id);
+    }
+    // Initialize files with existing sample images in edit mode
+    if (sampleImages && sampleImages.length > 0) {
+      const existingFiles = sampleImages.map(createFileFromSampleImage);
+      setFiles(existingFiles);
+    }
+  }, [sample, patient, sampleImages]);
+
   const handleSubmit = async () => {
     if (!selectedPatient || files.length === 0 || !sampleName.trim()) {
-      toast.error("Select a patient, enter sample name, and upload at least one sample.");
+      toast.error(`Select a patient, enter sample name, and ${isEditMode ? 'have' : 'upload'} at least one sample.`);
       return;
     }
 
     setIsUploading(true);
+    const actionText = isEditMode ? 'Saving' : 'Uploading';
     const uploadingToast = toast.loading(
-      `Uploading ${files.length} sample${files.length !== 1 ? 's' : ''}...`
+      `${actionText} ${files.length} sample${files.length !== 1 ? 's' : ''}...`
     );
 
     try {
-      await uploadSampleAction(selectedPatient, files, sampleName.trim());
+      // Filter out existing images that haven't changed
+      const newFiles = files.filter(file => !(file as any).isExisting);
       
-      toast.success(`${files.length} sample(s) uploaded successfully.`, {
+      // In edit mode, you might want to call a different action like updateSampleAction
+      if (isEditMode) {
+        // TODO: Replace with your update sample action
+        // await updateSampleAction(sample.id, selectedPatient, newFiles, sampleName.trim());
+        await editSampleAction(sample.id, newFiles);
+      } else {
+        await uploadSampleAction(selectedPatient, files, sampleName.trim());
+      }
+      
+      const successText = isEditMode ? 'saved' : 'uploaded';
+      toast.success(`${files.length} sample(s) ${successText} successfully.`, {
         id: uploadingToast,
       });
       setDrawerOpen(false);
-      setFiles([]);
-      setSampleName("");
-      setSelectedPatient("");
+      
+      // Only reset form in upload mode
+      if (!isEditMode) {
+        setFiles([]);
+        setSampleName("");
+        setSelectedPatient("");
+      }
+      
       router.refresh();
     } catch (error) {
       toast.error(getErrorMessage(error), {
@@ -62,11 +132,49 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
 
   const resetForm = () => {
     if (!isUploading) {
-      setFiles([]);
-      setSampleName("");
-      setSelectedPatient("");
+      if (isEditMode) {
+        // In edit mode, reset to original values
+        setSampleName(sample?.sampleName || "");
+        setSelectedPatient(patient?.id || "");
+        // Reset files to original sample images
+        if (sampleImages && sampleImages.length > 0) {
+          const existingFiles = sampleImages.map(createFileFromSampleImage);
+          setFiles(existingFiles);
+        } else {
+          setFiles([]);
+        }
+      } else {
+        // In upload mode, clear everything
+        setFiles([]);
+        setSampleName("");
+        setSelectedPatient("");
+      }
     }
   };
+
+  const getButtonText = () => {
+    if (isEditMode) {
+      return isUploading ? "Saving..." : `Save (${files.length})`;
+    }
+    return isUploading ? "Uploading..." : `Submit (${files.length})`;
+  };
+
+  const getDrawerTitle = () => {
+    return isEditMode ? "Edit samples" : "Upload samples";
+  };
+
+  const getDrawerDescription = () => {
+    return isEditMode 
+      ? "Modify samples or update analysis"
+      : "Submit samples to share or for analysis";
+  };
+
+  // Debug logging to check patient selection
+  React.useEffect(() => {
+    console.log("Selected patient:", selectedPatient);
+    console.log("Patient prop:", patient);
+    console.log("Patients array:", patients);
+  }, [selectedPatient, patient, patients]);
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -81,21 +189,15 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
           }
         }}
       >
-        <DrawerTrigger asChild>
-          <Button 
-            className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full justify-start rounded-lg shadow-sm"
-            disabled={isUploading}
-          >
-            <ImageUp />
-            <span>Upload samples</span>
-          </Button>
+        <DrawerTrigger disabled={isUploading} asChild>
+          {children}
         </DrawerTrigger>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
-              <DrawerTitle>Upload samples</DrawerTitle>
+              <DrawerTitle>{getDrawerTitle()}</DrawerTitle>
               <DrawerDescription>
-                Submit samples to share or for analysis
+                {getDrawerDescription()}
               </DrawerDescription>
             </DrawerHeader>
             <>
@@ -131,10 +233,10 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
                   {isUploading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Uploading...
+                      {isEditMode ? "Saving..." : "Uploading..."}
                     </>
                   ) : (
-                    `Submit (${files.length})`
+                    getButtonText()
                   )}
                 </Button>
               </DrawerFooter>
@@ -142,15 +244,6 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
           </div>
         </DrawerContent>
       </Drawer>
-      <Button
-        variant="outline"
-        className="border-2 hover:bg-secondary/80 w-full justify-start rounded-lg shadow-sm"
-        onClick={() => router.push('/camera')}
-        disabled={isUploading}
-      >
-        <Camera className="text-primary" />
-        <span>Camera</span>
-      </Button>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import sizeOf from "image-size";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
 import { eq, inArray } from "drizzle-orm";
+import { MetaPatient } from "@/app/samples/types";
+import { getProfileByUserId } from "@/db/queries/select";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,6 +16,64 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase URL or Key");
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function uploadFileAndInsertRecords(
+  file: File, 
+  sampleId: string, 
+  profileId: string
+) {
+  try {
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    
+    // Generate unique filename
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-${file.name}`;
+    
+    // Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from("sample-images")
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage upload failed:", uploadError);
+      throw new Error(`Failed to upload image ${file.name}: ${uploadError.message}`);
+    }
+
+    // Generate public URL
+    const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
+    
+    // Get image dimensions
+    const dimensions = sizeOf(buffer);
+
+    // Insert image record
+    const [imageRecord] = await db
+      .insert(image)
+      .values({
+        id: crypto.randomUUID(),
+        imageUrl,
+      })
+      .returning();
+
+    // Link image to sample
+    await db.insert(sampleImage).values({
+      sampleId, // This should be the same for all files
+      uploadedBy: profileId,
+      metadata: dimensions,
+      imageId: imageRecord.id,
+    });
+
+
+    return imageRecord.id;
+
+  } catch (error) {
+    console.error(`Error uploading file ${file.name}:`, error);
+    throw error;
+  }
+}
 
 /**
  * Ensures the sample-images bucket exists, creates it if it doesn't
@@ -105,64 +165,23 @@ export async function uploadSampleAction(
     console.error("Error in uploadSampleAction:", error);
     throw error;
   }
+}
 
-  async function uploadFileAndInsertRecords(
-    file: File, 
-    sampleId: string, 
-    profileId: string
-  ) {
-    try {
-      // Convert file to buffer
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      // Generate unique filename
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-${file.name}`;
-      
-      // Upload to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from("sample-images")
-        .upload(fileName, buffer, {
-          contentType: file.type,
-          upsert: false,
-        });
+export async function editSampleAction(sampleId: string, files: File[]) {
+  const user = await getUser();
+  const profile = await getProfileByUserId(user.id);
+  const uploadPromises = files.map(file => 
+    uploadFileAndInsertRecords(file, sampleId, profile.id)
+  );
+  
+  // Wait for all uploads to complete
+  await Promise.all(uploadPromises);
 
-      if (uploadError) {
-        console.error("Supabase Storage upload failed:", uploadError);
-        throw new Error(`Failed to upload image ${file.name}: ${uploadError.message}`);
-      }
-
-      // Generate public URL
-      const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
-      
-      // Get image dimensions
-      const dimensions = sizeOf(buffer);
-
-      // Insert image record
-      const [imageRecord] = await db
-        .insert(image)
-        .values({
-          id: crypto.randomUUID(),
-          imageUrl,
-        })
-        .returning();
-
-      // Link image to sample
-      await db.insert(sampleImage).values({
-        sampleId, // This should be the same for all files
-        uploadedBy: profileId,
-        metadata: dimensions,
-        imageId: imageRecord.id,
-      });
-
-
-      return imageRecord.id;
-
-    } catch (error) {
-      console.error(`Error uploading file ${file.name}:`, error);
-      throw error;
-    }
-  }
+  return { 
+    success: true, 
+    sampleId: sampleId,
+    filesUploaded: files.length 
+  };
 }
 
 export async function deleteSample(sampleId: string) {

@@ -47,3 +47,15 @@ export type MetaPatient = {
   createdAt: Date;
   createdBy: string | null;
 };
+
+export function isMetaPatient(obj: any): obj is MetaPatient {
+  return (
+    obj &&
+    typeof obj === "object" &&
+    obj.role === "Patient" &&
+    typeof obj.id === "string" &&
+    typeof obj.fullName === "string" &&
+    typeof obj.email === "string" &&
+    obj.createdAt instanceof Date
+  );
+}

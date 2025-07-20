@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Patient } from "@/db/schema";
+import { isMetaPatient } from "@/app/samples/types";
 
 export function PatientSearchCombobox({
   patients,
@@ -55,10 +56,17 @@ export function PatientSearchCombobox({
   });
 
   const selected = patients.find((p) => p.id === value);
+  let selectedName;
+  if (isMetaPatient(selected)) {
+    console.log("YOOO");
+    selectedName = `${selected.fullName}`
+  } else {
+    selectedName = `${selected?.firstName} ${selected?.lastName}`;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={patients.length == 1}>
         <Button
           variant="outline"
           role="combobox"
@@ -66,7 +74,7 @@ export function PatientSearchCombobox({
           className="w-full justify-between"
         >
           {selected
-            ? `${selected.firstName} ${selected.lastName} (${selected.email})`
+            ? `${selectedName} (${selected.email})`
             : "Select a patient..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -81,16 +89,24 @@ export function PatientSearchCombobox({
           <CommandList>
             <CommandEmpty>No patient found.</CommandEmpty>
             <CommandGroup>
-              {filteredPatients.map((patient) => (
+              {filteredPatients.map((patient) => {
+                let patientName;
+                if (isMetaPatient(patient)) {
+                  console.log("YOOO");
+                  patientName = `${patient.fullName}`
+                } else {
+                  patientName = `${patient.firstName} ${patient.lastName}`;
+                }
+                return (
                 <CommandItem
                   key={patient.id}
-                  value={`${patient.firstName} ${patient.lastName} ${patient.email}`.toLowerCase()}
+                  value={`${patientName} ${patient.email}`.toLowerCase()}
                   onSelect={() => {
                     onChange(patient.id);
                     setOpen(false);
                   }}
                 >
-                  {`${patient.firstName} ${patient.lastName} (${patient.email})`}
+                  {`${patientName} (${patient.email})`}
                   <Check
                     className={cn(
                       "ml-auto",
@@ -98,7 +114,7 @@ export function PatientSearchCombobox({
                     )}
                   />
                 </CommandItem>
-              ))}
+              )})}
             </CommandGroup>
           </CommandList>
         </Command>

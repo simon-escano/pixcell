@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 
-const UploadSampleDrawer = ({ trigger }: { trigger: React.ReactNode }) => {
+const SampleDrawer = ({ trigger }: { trigger: React.ReactNode }) => {
   return (
     <Drawer>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
@@ -32,4 +32,4 @@ const UploadSampleDrawer = ({ trigger }: { trigger: React.ReactNode }) => {
   );
 };
 
-export default UploadSampleDrawer;
+export default SampleDrawer;

@@ -23,6 +23,7 @@ import { User } from "@supabase/supabase-js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { handleCopySampleId, handleDeleteSample } from "../../components/sample-card";
+import SampleDrawer from "@/components/samples/upload-sample-drawer";
 
 interface SamplePageWrapperProps {
   currentUser: User;
@@ -92,9 +93,11 @@ const SamplePageWrapper = ({
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <div className="bg-primary text-primary-foreground flex w-[40px] cursor-pointer items-center justify-center rounded-sm py-1">
-                    <PlusIcon className="size-4"></PlusIcon>
-                  </div>
+                  <SampleDrawer sample={sample} sampleImages={sampleImages} patient={sample.patient} patients={[sample.patient]}>
+                    <div className="bg-primary text-primary-foreground flex w-[40px] cursor-pointer items-center justify-center rounded-sm py-1">
+                      <PlusIcon className="size-4"></PlusIcon>
+                    </div>
+                  </SampleDrawer>
                 </TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Width</TableHead>
@@ -104,7 +107,7 @@ const SamplePageWrapper = ({
             </TableHeader>
             <TableBody>
               {sampleImages.map((sampleImage) => {
-                return (
+                return ( 
                   <TableRow
                     key={sampleImage.id}
                     className={`cursor-pointer ${sampleImage.id == selectedSampleImage.id ? "bg-border" : ""}`}
