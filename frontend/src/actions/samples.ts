@@ -248,3 +248,50 @@ export async function deleteSample(sampleId: string) {
     return { success: false, error: "Something went wrong." };
   }
 }
+
+export async function deleteSampleImage(sampleImageId: string) {
+  try {
+    // Get the sample_image record and its linked image
+    const sampleImageData = await db
+      .select({
+        imageId: sampleImage.imageId,
+        imageUrl: image.imageUrl,
+      })
+      .from(sampleImage)
+      .leftJoin(image, eq(sampleImage.imageId, image.id))
+      .where(eq(sampleImage.id, sampleImageId));
+
+    if (!sampleImageData.length) {
+      return { success: false, error: "Sample image not found" };
+    }
+
+    const { imageId, imageUrl } = sampleImageData[0];
+
+    // Delete the sample_image record
+    await db.delete(sampleImage).where(eq(sampleImage.id, sampleImageId));
+
+    // Delete the image record
+    if (imageId) {
+      await db.delete(image).where(eq(image.id, imageId));
+    }
+
+    // Delete the image from storage
+    if (imageUrl) {
+      const bucketPath = imageUrl.split('/storage/v1/object/public/sample-images/')[1];
+      if (bucketPath) {
+        const { error: deleteStorageError } = await supabase.storage
+          .from('sample-images')
+          .remove([bucketPath]);
+        if (deleteStorageError) {
+          console.error("Failed to delete image from storage:", deleteStorageError);
+          return { success: false, error: "Failed to delete image from storage" };
+        }
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete sample image:", error);
+    return { success: false, error: "Something went wrong." };
+  }
+}

@@ -1,4 +1,4 @@
-import { Camera, ContactRound, FileText, House, Images, Info } from "lucide-react";
+import { ContactRound, FileText, House, Images } from "lucide-react";
 
 import { Collapsible } from "@/components/ui/collapsible";
 import {
@@ -8,10 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import UploadSampleWrapper from "../samples/upload-sample-wrapper";
-import { Button } from "../ui/button";
-import Link from "next/link";
 
 export function NavMain() {
   const items = [
@@ -42,12 +39,6 @@ export function NavMain() {
       {/* Upload Sample and Camera buttons at the top, separated from dashboard links */}
       <div className="flex flex-col gap-2 mb-2">
         <UploadSampleWrapper />
-        <Link href="/camera"
-          className="flex items-center gap-2 px-3 py-2 border-2 hover:bg-secondary/80 w-full justify-start rounded-lg shadow-sm"
-        >
-          <Camera className="text-primary size-4" />
-          <span className="text-sm">Camera</span>
-        </Link>
       </div>
       <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>

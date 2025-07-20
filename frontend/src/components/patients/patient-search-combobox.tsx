@@ -58,7 +58,6 @@ export function PatientSearchCombobox({
   const selected = patients.find((p) => p.id === value);
   let selectedName;
   if (isMetaPatient(selected)) {
-    console.log("YOOO");
     selectedName = `${selected.fullName}`
   } else {
     selectedName = `${selected?.firstName} ${selected?.lastName}`;
@@ -92,7 +91,6 @@ export function PatientSearchCombobox({
               {filteredPatients.map((patient) => {
                 let patientName;
                 if (isMetaPatient(patient)) {
-                  console.log("YOOO");
                   patientName = `${patient.fullName}`
                 } else {
                   patientName = `${patient.firstName} ${patient.lastName}`;
