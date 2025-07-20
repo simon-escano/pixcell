@@ -187,7 +187,7 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
     <div>
       <DataTable
         data={[...patients].sort((a, b) => a.firstName.localeCompare(b.firstName))}
-        excludeColumns={["id", "imageId", "birthDate", "createdAt", "imageUrl", "createdBy","lastName"]}
+        excludeColumns={["id", "imageId", "birthDate", "createdAt", "contactNumber", "address", "imageUrl", "createdBy","lastName"]}
         defaultHiddenColumns={ ["height", "weight"]}
         searchPlaceholder="Search patients..."
         searchableColumns={["firstName", "lastName", "email", "bloodType"]}
