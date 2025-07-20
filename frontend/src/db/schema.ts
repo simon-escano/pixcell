@@ -71,8 +71,6 @@ export const sampleImage = pgTable("sample_image",{
 
 });
 
-
-
 export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
