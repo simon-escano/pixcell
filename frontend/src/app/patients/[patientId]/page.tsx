@@ -7,7 +7,8 @@ import { Separator } from "@/components/ui/separator"
 import { getPatientById, getReportCountByPatientId, getSamplesByPatientId } from "@/db/queries/select"
 import { FileText, TestTube, Edit } from "lucide-react"
 import { UploadSampleDrawerForPatient } from "@/components/samples/upload-sample-drawer"
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { EditPatientDialogTrigger } from "@/components/patients/edit-patient-dialog-trigger";
 
 export default async function PatientPage({
   params,
@@ -18,6 +19,9 @@ export default async function PatientPage({
   const patientData = await getPatientById(patientId)
   const samples = await getSamplesByPatientId(patientId)
   const reportCount = await getReportCountByPatientId(patientId)
+
+  // State for edit dialog (client component)
+  // We'll use a client wrapper for the edit dialog trigger and state
 
   return (
     <Base>
@@ -45,13 +49,8 @@ export default async function PatientPage({
                       </h1>
                       <p className="text-xs text-slate-600 mt-0.5">{patientData.email}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
+                    {/* Edit Patient Dialog Trigger (client component) */}
+                    <EditPatientDialogTrigger patient={patientData} />
                   </div>
                 </CardHeader>
 
@@ -118,18 +117,17 @@ export default async function PatientPage({
                       patientId={patientId}
                       className="bg-purple-600 hover:bg-purple-700 text-white w-full text-sm py-2"
                     />
-                    <Link
-                      href={`/reports?search=${encodeURIComponent(patientData.firstName + ' ' + patientData.lastName)}`}
-                      className="w-full"
-                    >
+                    <form action={`/reports`} method="get">
+                      <input type="hidden" name="search" value={`${patientData.firstName} ${patientData.lastName}`} />
                       <Button
+                        type="submit"
                         variant="outline"
                         size="sm"
                         className="w-full text-sm py-2 text-slate-600 hover:text-slate-900 bg-transparent"
                       >
                         View Reports
                       </Button>
-                    </Link>
+                    </form>
                   </div>
                 </CardContent>
               </Card>
