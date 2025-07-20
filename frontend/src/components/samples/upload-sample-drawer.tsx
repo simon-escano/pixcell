@@ -95,31 +95,28 @@ export default function SampleDrawer({
     );
 
     try {
-      // Filter out existing images that haven't changed
-      const newFiles = files.filter(file => !(file as any).isExisting);
-      
-      // In edit mode, you might want to call a different action like updateSampleAction
+      // In edit mode, always append new files to the sample
       if (isEditMode) {
-        // TODO: Replace with your update sample action
-        // await updateSampleAction(sample.id, selectedPatient, newFiles, sampleName.trim());
-        await editSampleAction(sample.id, newFiles);
+        await editSampleAction(sample.id, files);
       } else {
         await uploadSampleAction(selectedPatient, files, sampleName.trim());
       }
-      
+
       const successText = isEditMode ? 'saved' : 'uploaded';
       toast.success(`${files.length} sample(s) ${successText} successfully.`, {
         id: uploadingToast,
       });
       setDrawerOpen(false);
-      
-      // Only reset form in upload mode
+
+      // Only reset form in upload mode, or clear new files in edit mode
       if (!isEditMode) {
         setFiles([]);
         setSampleName("");
         setSelectedPatient("");
+      } else {
+        setFiles([]); // Only clear new files, keep previous images
       }
-      
+
       router.refresh();
     } catch (error) {
       toast.error(getErrorMessage(error), {
@@ -133,16 +130,10 @@ export default function SampleDrawer({
   const resetForm = () => {
     if (!isUploading) {
       if (isEditMode) {
-        // In edit mode, reset to original values
+        // In edit mode, only clear new files (do not reset to original sample images)
+        setFiles([]);
         setSampleName(sample?.sampleName || "");
         setSelectedPatient(patient?.id || "");
-        // Reset files to original sample images
-        if (sampleImages && sampleImages.length > 0) {
-          const existingFiles = sampleImages.map(createFileFromSampleImage);
-          setFiles(existingFiles);
-        } else {
-          setFiles([]);
-        }
       } else {
         // In upload mode, clear everything
         setFiles([]);
@@ -154,27 +145,20 @@ export default function SampleDrawer({
 
   const getButtonText = () => {
     if (isEditMode) {
-      return isUploading ? "Saving..." : `Save (${files.length})`;
+      return isUploading ? "Saving..." : `Save`;
     }
     return isUploading ? "Uploading..." : `Submit (${files.length})`;
   };
 
   const getDrawerTitle = () => {
-    return isEditMode ? "Edit samples" : "Upload samples";
+    return isEditMode ? "Add more sample images" : "Upload sample";
   };
 
   const getDrawerDescription = () => {
     return isEditMode 
-      ? "Modify samples or update analysis"
-      : "Submit samples to share or for analysis";
+      ? "Upload more sample images for this sample"
+      : "Submit sample images to share or for analysis";
   };
-
-  // Debug logging to check patient selection
-  React.useEffect(() => {
-    console.log("Selected patient:", selectedPatient);
-    console.log("Patient prop:", patient);
-    console.log("Patients array:", patients);
-  }, [selectedPatient, patient, patients]);
 
   return (
     <div className="w-full flex flex-col gap-2">
