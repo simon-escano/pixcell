@@ -1,8 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
+const QRCode = dynamic(() => import("react-qr-code"), { ssr: false });
+
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import QRCode from "react-qr-code";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { deleteReport } from "@/actions/reports";
@@ -10,6 +12,7 @@ import { FileText, Edit, Trash2, QrCode, Copy, Download } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import React from "react";
+import StatusUpdate, { ReportStatus } from "@/components/reports/status-update";
 
 export default function ReportActions({
   reportId,
@@ -19,7 +22,7 @@ export default function ReportActions({
 }: {
   reportId: string;
   formData: any;
-  reportStatus: string;
+  reportStatus: ReportStatus;
   reportCode: string
 }) {
   const router = useRouter();
@@ -74,8 +77,13 @@ export default function ReportActions({
     document.body.removeChild(link);
   };
 
+  const handleStatusUpdated = async () => {
+    router.refresh();
+  };
+
   return (
     <div className="space-y-4">
+     
       {reportStatus === "Finalized" && (
         <div className="flex flex-col items-center gap-2">
           <div className="bg-white p-2 rounded shadow" id={qrContainerId}>
@@ -98,6 +106,11 @@ export default function ReportActions({
 
         </div>
       )}
+       <StatusUpdate
+        reportId={reportId}
+        currentStatus={reportStatus}
+        onUpdate={handleStatusUpdated}
+      />
       <Button
         variant="outline"
         size="sm"

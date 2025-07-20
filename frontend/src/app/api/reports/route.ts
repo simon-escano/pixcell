@@ -1,20 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
+import { db } from "@/db";
+import { report } from "@/db/schema";
+import { getAllReports } from "@/db/queries/select";
 
-// In-memory store for demonstration (replace with DB in production)
-const reports: any[] = [];
-let nextId = 1;
 
 // POST /api/reports - create a new report
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, content, patientId } = body;
-    if (!title || !content || !patientId) {
+    const { title, content, patientId, sampleId, isAiGenerated, generatedBy, testType, status } = body;
+    if (!title || !content || !patientId || !sampleId || !isAiGenerated || !generatedBy || !testType) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
-    const reportId = String(nextId++);
-    reports.push({ id: reportId, title, content, patientId });
-    return NextResponse.json({ success: true, reportId });
+    await db.insert(report).values({
+      title,
+      content,
+      patientId,
+      sampleId,
+      isAiGenerated,
+      generatedBy,
+      testType,
+      status: status || "Draft",
+      createdAt: new Date(),
+    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });
   }
@@ -22,5 +32,10 @@ export async function POST(req: NextRequest) {
 
 // GET /api/reports - list all reports (optional, for testing)
 export async function GET() {
-  return NextResponse.json(reports);
+  try {
+    const reports = await getAllReports();
+    return NextResponse.json(reports);
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to fetch reports' }, { status: 500 });
+  }
 }

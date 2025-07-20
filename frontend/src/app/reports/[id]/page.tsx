@@ -7,6 +7,7 @@ import ReportActions from "./report-actions-client";
 import { Card } from "@/components/ui/card";
 import { Edit, Trash2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReportStatus } from "@/components/reports/status-update";
 
 // interface Params { id: string | string[] }
 export default async function ReportPage({ params }: { params: Promise<{ id: string | string[] }> }) {
@@ -63,7 +64,11 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         <div className="w-full md:w-80 flex flex-col gap-6">
           <ReportActions
             reportId={reportId}
-            reportStatus={report.status ?? ""}
+            reportStatus={
+              ["Draft", "Finalized", "UNDER_REVIEW", "REJECTED", "ARCHIVED"].includes(report.status ?? "")
+                ? (report.status as ReportStatus)
+                : "Draft"
+            }
             formData={formData}
             reportCode={report.code ?? ""}
           />
