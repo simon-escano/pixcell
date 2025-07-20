@@ -189,22 +189,7 @@ export async function getSampleById(id: string) {
 }
 
 export async function getAllSamples() {
-  return await db
-    .select({
-      id: sample.id,
-      patientId: sample.patientId,
-      sampleName: sample.sampleName,
-      createdBy: sample.createdBy,
-      // From sampleImage table
-      uploadedBy: sampleImage.uploadedBy,
-      metadata: sampleImage.metadata,
-      capturedAt: sampleImage.capturedAt,
-      imageId: sampleImage.imageId,
-      imageUrl: sampleImg.imageUrl
-    })
-    .from(sample)
-    .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
-    .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id));
+  return await db.select().from(sample);
 }
 
 export async function getProfileByUserId(userId: string) {

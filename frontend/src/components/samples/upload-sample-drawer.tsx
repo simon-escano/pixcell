@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { ImageUp, Camera } from "lucide-react";
+import { ImageUp, Camera, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
   const [files, setFiles] = React.useState<File[]>([]);
   const [sampleName, setSampleName] = React.useState<string>("");
   const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
+  const [isUploading, setIsUploading] = React.useState<boolean>(false);
 
   const handleSubmit = async () => {
     if (!selectedPatient || files.length === 0 || !sampleName.trim()) {
@@ -34,27 +35,57 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
       return;
     }
 
+    setIsUploading(true);
+    const uploadingToast = toast.loading(
+      `Uploading ${files.length} sample${files.length !== 1 ? 's' : ''}...`
+    );
+
     try {
-      // If your uploadSampleAction needs to handle multiple files, you might need to modify it
-      // For now, I'll assume you want to upload each file separately or modify the action
       await uploadSampleAction(selectedPatient, files, sampleName.trim());
       
-      toast.success(`${files.length} sample(s) uploaded successfully.`);
+      toast.success(`${files.length} sample(s) uploaded successfully.`, {
+        id: uploadingToast,
+      });
       setDrawerOpen(false);
       setFiles([]);
       setSampleName("");
       setSelectedPatient("");
       router.refresh();
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      toast.error(getErrorMessage(error), {
+        id: uploadingToast,
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const resetForm = () => {
+    if (!isUploading) {
+      setFiles([]);
+      setSampleName("");
+      setSelectedPatient("");
     }
   };
 
   return (
     <div className="w-full flex flex-col gap-2">
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <Drawer 
+        open={drawerOpen} 
+        onOpenChange={(open) => {
+          if (!isUploading) {
+            setDrawerOpen(open);
+            if (!open) {
+              resetForm();
+            }
+          }
+        }}
+      >
         <DrawerTrigger asChild>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full justify-start rounded-lg shadow-sm">
+          <Button 
+            className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full justify-start rounded-lg shadow-sm"
+            disabled={isUploading}
+          >
             <ImageUp />
             <span>Upload samples</span>
           </Button>
@@ -81,18 +112,30 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
                     placeholder="Enter sample name"
                     value={sampleName}
                     onChange={(e) => setSampleName(e.target.value)}
+                    disabled={isUploading}
                   />
                   <UploadSampleFile onFilesChange={setFiles} files={files} />
                 </div>
               </div>
               <DrawerFooter className="flex w-full flex-row pt-0">
                 <DrawerClose asChild>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" disabled={isUploading}>
                     Cancel
                   </Button>
                 </DrawerClose>
-                <Button onClick={handleSubmit} className="flex-1">
-                  Submit ({files.length})
+                <Button 
+                  onClick={handleSubmit} 
+                  className="flex-1" 
+                  disabled={isUploading || files.length === 0}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Uploading...
+                    </>
+                  ) : (
+                    `Submit (${files.length})`
+                  )}
                 </Button>
               </DrawerFooter>
             </>
@@ -103,6 +146,7 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
         variant="outline"
         className="border-2 hover:bg-secondary/80 w-full justify-start rounded-lg shadow-sm"
         onClick={() => router.push('/camera')}
+        disabled={isUploading}
       >
         <Camera className="text-primary" />
         <span>Camera</span>

@@ -55,12 +55,13 @@ export async function uploadSampleAction(
   files: File[],
   sampleName: string
 ) {
+  // Validate inputs
   if (!files?.length || !patientId || !sampleName.trim()) {
-    throw new Error("Missing required fields: patientId, file, and sampleName are required.");
+    throw new Error("Missing required fields: patientId, files, and sampleName are required.");
   }
 
+  // Get current user and profile
   const currentUser = await getUser();
-
   const userProfile = await db
     .select({ id: profile.id })
     .from(profile)
@@ -71,57 +72,98 @@ export async function uploadSampleAction(
     throw new Error("User profile not found");
   }
 
-  const [sampleRecord] = await db
-    .insert(sample)
-    .values({
-      patientId,
-      sampleName: sampleName.trim(),
-      createdBy: currentUser.id,
-    })
-    .returning();
-
+  // Ensure storage bucket exists
   await ensureSampleImagesBucket();
 
-  for (const file of files) {
-    await uploadFileAndInsertRecords(file, sampleRecord.id, userProfile[0].id);
-  }
-
-  return { success: true };
-
-  async function uploadFileAndInsertRecords(file: File, sampleId: string, profileId: string) {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const { data, error: uploadError } = await supabase.storage
-      .from("sample-images")
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Supabase Storage upload failed:", uploadError);
-      throw new Error(`Failed to upload image: ${uploadError.message}`);
-    }
-
-    const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
-    const dimensions = sizeOf(buffer);
-
-    const [imageRecord] = await db
-      .insert(image)
+  try {
+    // Create ONE sample record
+    const [sampleRecord] = await db
+      .insert(sample)
       .values({
-        id: crypto.randomUUID(),
-        imageUrl,
+        patientId,
+        sampleName: sampleName.trim(),
+        createdBy: currentUser.id,
       })
       .returning();
 
-    await db.insert(sampleImage).values({
-      sampleId,
-      uploadedBy: profileId,
-      metadata: dimensions,
-      imageId: imageRecord.id,
-    });
+    console.log(`Sample created!: ${sampleRecord.id}`)
+
+    // Process all files for this single sample
+    const uploadPromises = files.map(file => 
+      uploadFileAndInsertRecords(file, sampleRecord.id, userProfile[0].id)
+    );
+    
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+
+    return { 
+      success: true, 
+      sampleId: sampleRecord.id,
+      filesUploaded: files.length 
+    };
+
+  } catch (error) {
+    console.error("Error in uploadSampleAction:", error);
+    throw error;
+  }
+
+  async function uploadFileAndInsertRecords(
+    file: File, 
+    sampleId: string, 
+    profileId: string
+  ) {
+    try {
+      // Convert file to buffer
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      
+      // Generate unique filename
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}-${file.name}`;
+      
+      // Upload to Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from("sample-images")
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase Storage upload failed:", uploadError);
+        throw new Error(`Failed to upload image ${file.name}: ${uploadError.message}`);
+      }
+
+      // Generate public URL
+      const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
+      
+      // Get image dimensions
+      const dimensions = sizeOf(buffer);
+
+      // Insert image record
+      const [imageRecord] = await db
+        .insert(image)
+        .values({
+          id: crypto.randomUUID(),
+          imageUrl,
+        })
+        .returning();
+
+      // Link image to sample
+      await db.insert(sampleImage).values({
+        sampleId, // This should be the same for all files
+        uploadedBy: profileId,
+        metadata: dimensions,
+        imageId: imageRecord.id,
+      });
+
+      console.log(`Uploaded sample image!: ${sampleImage.id}`)
+
+      return imageRecord.id;
+
+    } catch (error) {
+      console.error(`Error uploading file ${file.name}:`, error);
+      throw error;
+    }
   }
 }
 
