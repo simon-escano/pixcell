@@ -5,7 +5,7 @@ import { sample, sampleImage, image, profile } from "@/db/schema";
 import sizeOf from "image-size";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -127,38 +127,62 @@ export async function uploadSampleAction(
 
 export async function deleteSample(sampleId: string) {
   try {
-    // Get sample_image data to find the image URL
+    // Get all sample_image data with their associated image URLs
     const sampleImageData = await db
       .select({
-        imageUrl: image.imageUrl,
+        sampleImageId: sampleImage.id,
         imageId: sampleImage.imageId,
+        imageUrl: image.imageUrl,
       })
       .from(sampleImage)
       .leftJoin(image, eq(sampleImage.imageId, image.id))
-      .where(eq(sampleImage.sampleId, sampleId))
-      .limit(1);
+      .where(eq(sampleImage.sampleId, sampleId));
 
     if (sampleImageData.length === 0) {
       return { success: false, error: "Sample not found" };
     }
 
-    const imageUrl = sampleImageData[0].imageUrl;
-    if (imageUrl) {
-      const path = imageUrl.split('/storage/v1/object/public/sample-images/')[1];
-      if (path) {
-        const { error: deleteError } = await supabase.storage
-          .from('sample-images')
-          .remove([path]);
+    // Collect all storage paths to delete
+    const storagePaths: string[] = [];
+    const imageIds: string[] = [];
 
-        if (deleteError) {
-          console.error("Failed to delete image from storage:", deleteError);
-          return { success: false, error: "Failed to delete image from storage" };
+    for (const record of sampleImageData) {
+      if (record.imageUrl) {
+        // Check if the image comes from the sample-images bucket
+        const bucketPath = record.imageUrl.split('/storage/v1/object/public/sample-images/')[1];
+        if (bucketPath) {
+          storagePaths.push(bucketPath);
         }
+      }
+      
+      if (record.imageId) {
+        imageIds.push(record.imageId);
       }
     }
 
-    // Delete from sample table (this will cascade to sample_image due to foreign key)
+    // Delete all images from storage (sample-images bucket)
+    if (storagePaths.length > 0) {
+      const { error: deleteStorageError } = await supabase.storage
+        .from('sample-images')
+        .remove(storagePaths);
+      
+      if (deleteStorageError) {
+        console.error("Failed to delete images from storage:", deleteStorageError);
+        return { success: false, error: "Failed to delete images from storage" };
+      }
+    }
+
+    // Delete all sample_image records first
+    await db.delete(sampleImage).where(eq(sampleImage.sampleId, sampleId));
+
+    // Delete all image records second
+    if (imageIds.length > 0) {
+      await db.delete(image).where(inArray(image.id, imageIds));
+    }
+
+    // Finally, delete the sample record
     await db.delete(sample).where(eq(sample.id, sampleId));
+
     return { success: true };
   } catch (error) {
     console.error("Failed to delete sample:", error);

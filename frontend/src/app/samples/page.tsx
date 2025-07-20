@@ -2,7 +2,7 @@ import {
   getAllSamples,
 } from "@/db/queries/select";
 import SampleCard from "./components/sample-card";
-import { getMetaSampleById } from "./queries";
+import { getMetaSampleById, getMetaSampleImagesBySampleId } from "./queries";
 import Base from "@/components/base";
 
 const SamplesPage = async () => {
@@ -13,7 +13,8 @@ const SamplesPage = async () => {
       <div className="grid w-full grid-cols-2 gap-4 p-4 sm:grid-cols-3 sm:p-8 md:grid-cols-4 lg:grid-cols-5">
         {samples.map(async (sample) => {
           const metaSample = await getMetaSampleById(sample.id);
-          return <SampleCard sample={metaSample!} />;
+          const metaSampleImages = await getMetaSampleImagesBySampleId(sample.id);
+          return <SampleCard sampleImages={metaSampleImages} sample={metaSample!} />;
         })}
       </div>
     </Base>

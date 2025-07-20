@@ -1,19 +1,44 @@
+"use client";
+
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { CircleOff } from "lucide-react";
-import Link from "next/link";
-import { MetaSample } from "../types";
+import { useRouter } from "next/navigation";
+import { MetaSample, MetaSampleImage } from "../types";
 import ProfileCard from "./profile-card";
-import { getMetaSampleImagesBySampleId } from "../queries";
+import { deleteSample } from "@/actions/samples";
+import toast from "react-hot-toast";
 
 interface SampleCardProps {
   sample: MetaSample;
+  sampleImages: MetaSampleImage[];
 }
 
-const SampleCard = async ({ sample }: SampleCardProps) => {
-  const sampleImages = await getMetaSampleImagesBySampleId(sample.id);
+const SampleCard = ({ sample, sampleImages }: SampleCardProps) => {
+  const router = useRouter();
 
   // Get all images we need to display (max 3)
   const displayImages = sampleImages.slice(0, 3);
   const remainingCount = Math.max(0, sampleImages.length - 3);
+
+  const handleCopySampleId = () => {
+    navigator.clipboard.writeText(sample.id);
+    toast.success("Sample ID copied to clipboard");
+  };
+
+  const handleDeleteSample = async () => {
+    const res = await deleteSample(sample.id);
+    if (res.success) {
+      toast.success("Sample deleted successfully");
+      router.refresh();
+    } else {
+      toast.error(res.error || "Failed to delete sample");
+    }
+  };
 
   // Fetch all images at once
   const renderImageGrid = () => {
@@ -96,21 +121,38 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
   };
 
   return (
-    <Link
-      href={`/samples/${sample.id}${sampleImages.length ? `/${sampleImages[0].id}` : ""}`}
-      className="bg-card flex cursor-pointer flex-col overflow-hidden rounded-md border transition-shadow hover:shadow-lg"
-    >
-      <div className="p-2 pb-0">{renderImageGrid()}</div>
-      <div className="flex flex-col gap-2 p-3">
-        <h1 className="font-display px-1 text-lg lg:text-xl">
-          {sample.sampleName}
-        </h1>
-        <div className="grid grid-cols-2 gap-2">
-          <ProfileCard profile={sample.createdBy!} />
-          <ProfileCard profile={sample.patient!} />
+    <ContextMenu>
+    <ContextMenuTrigger>
+      <div
+        onClick={() => {
+          router.push(`/samples/${sample.id}${sampleImages.length ? `/${sampleImages[0].id}` : ""}`);
+        }}
+        className="bg-card flex cursor-pointer flex-col overflow-hidden rounded-md border transition-shadow hover:shadow-lg"
+      >
+        <div className="p-2 pb-0">{renderImageGrid()}</div>
+        <div className="flex flex-col gap-2 p-3">
+          <h1 className="font-display px-1 text-lg lg:text-xl">
+            {sample.sampleName}
+          </h1>
+          <div className="grid grid-cols-2 gap-2">
+            <ProfileCard profile={sample.createdBy!} />
+            <ProfileCard profile={sample.patient!} />
+          </div>
         </div>
       </div>
-    </Link>
+    </ContextMenuTrigger>
+    <ContextMenuContent>
+      <ContextMenuItem onClick={handleCopySampleId}>
+        Copy Sample ID
+      </ContextMenuItem>
+      <ContextMenuItem
+          className="text-red-500 hover:text-red-700"
+          onClick={handleDeleteSample}
+        >
+        Delete Sample
+      </ContextMenuItem>
+    </ContextMenuContent>
+  </ContextMenu>
   );
 };
 
