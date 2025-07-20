@@ -53,7 +53,6 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
       </div>
       <DataTable
         data={reports}
-        initialSearch={initialSearch}
         excludeColumns={[   
           'content',
           'isAiGenerated',

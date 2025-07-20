@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import SampleWrapper from "@/components/samples/sample-wrapper";
+import UploadSampleWrapper from "@/components/samples/upload-sample-wrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -82,7 +82,7 @@ export default async function UserPage({
         <div className="space-y-4 xl:col-span-3">
           <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {samples.map(async (sample) => (
-              <SampleWrapper key={sample.id} sample={sample} />
+              <UploadSampleWrapper key={sample.id} sample={sample} />
             ))}
           </div>
         </div>

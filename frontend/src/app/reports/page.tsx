@@ -10,7 +10,8 @@ import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 import ReportsTable from "@/components/reports/reports-table";
 import { cookies } from "next/headers";
 
-export default async function ReportsPage({ searchParams }: { searchParams: { search?: string } }) {
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
+  const params = await searchParams;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
@@ -44,7 +45,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: { se
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
-        <ReportsTable reports={normalizedReports as any} initialSearch={searchParams?.search || ""} />
+        <ReportsTable reports={normalizedReports as any} initialSearch={params?.search || ""} />
       </div>
     </Base>
   );
