@@ -1,6 +1,6 @@
 "use client";
 
-import ReportForm from "./ReportForm";
+import ImprovedReportForm from "./report-form";
 import { addReport } from "@/actions/reports";
 import { Role } from "@/db/schema";
 
@@ -65,7 +65,7 @@ interface CreateReportFormProps {
 
 export default function CreateReportForm({ patients, currentUserId, profiles, role }: CreateReportFormProps) {
   return (
-    <ReportForm
+    <ImprovedReportForm
       mode="create"
       onSubmit={addReport}
       patients={patients}

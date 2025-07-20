@@ -51,16 +51,16 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
-          <EditReportForm 
+          <EditReportForm
             patients={patients}
             currentUserId={user.id}
             profiles={profiles}
             role={role}
             initialFormData={initialFormData}
             initialReportContent={initialReportContent}
-            selectedPatientId={selectedPatientId}
-            selectedSampleId={selectedSampleId}
             reportId={reportId}
+            initialPatientId={selectedPatientId}
+            initialSampleId={selectedSampleId}
           />
         </div>
       </div>

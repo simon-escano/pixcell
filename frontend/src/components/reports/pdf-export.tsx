@@ -413,7 +413,7 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
             </View>
             <View>
               <Text>Page {pageIdx + 1} of {totalPages}</Text>
-              <Text>PixCell Medical System</Text>
+              <Text>PixCell System</Text>
             </View>
           </View>
         </Page>
