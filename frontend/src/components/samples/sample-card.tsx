@@ -55,12 +55,24 @@ function SampleCard({
   };
 
   const handleDeleteSample = async () => {
-    const res = await deleteSample(sample.id);
-    if (res.success) {
-      toast.success("Sample deleted successfully");
-      router.refresh();
-    } else {
-      toast.error(res.error || "Failed to delete sample");
+    const loadingToast = toast.loading("Deleting sample...");
+    
+    try {
+      const res = await deleteSample(sample.id);
+      
+      // Dismiss the loading toast
+      toast.dismiss(loadingToast);
+      
+      if (res.success) {
+        toast.success("Sample deleted successfully");
+        router.refresh();
+      } else {
+        toast.error(res.error || "Failed to delete sample");
+      }
+    } catch (error) {
+      // Dismiss the loading toast in case of error
+      toast.dismiss(loadingToast);
+      toast.error("Failed to delete sample");
     }
   };
 
