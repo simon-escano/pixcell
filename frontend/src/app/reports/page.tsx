@@ -20,17 +20,22 @@ export default async function ReportsPage() {
     : await getReportsByGeneratedBy(user.id);
 
   // Normalize reports to ensure consistent structure
-  const normalizedReports = reports.map((report: any) => {
-    const baseReport = {
-      id: report.id,
-      title: report.title || '',
-      createdAt: report.createdAt ? format(new Date(report.createdAt), 'MMMM d, yyyy') : '',
-      patientName: report.patientName || '',
-      generatedBy: report.generatedByName || '',
-      status: report.status,
-    };
-    return baseReport;
-  });
+  const normalizedReports = reports.map((report: any) => ({
+    id: report.id,
+    title: report.title || '',
+    testType: report.testType,
+    createdAt: report.createdAt,
+    patientName: report.patientName || '',
+    patientId: report.patientId || '',
+    patientImage: report.patientImage || '',
+    generatedByName: report.generatedByName || '',
+    generatedByImage: report.generatedByImage || '',
+    generatedByRole: report.generatedByRole || '',
+    generatedById: report.generatedById || '',
+    status: report.status,
+    
+    // add any other fields needed by the table here
+  }));
 
   console.log("reports", reports);
 

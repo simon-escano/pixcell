@@ -49,7 +49,7 @@ export type ColumnConfig = {
   maxWidth?: number;
   enableSorting?: boolean;
   enableSearching?: boolean;
-  customRender?: (value: any) => React.ReactNode;
+  customRender?: (value: any, row?: any) => React.ReactNode;
 };
 
 export type DataTableProps<TData> = {
@@ -227,7 +227,7 @@ export function DataTable<TData extends Record<string, any>>({
 
           // Use custom renderer if provided
           if (config?.customRender) {
-            return <div>{config.customRender(value)}</div>;
+            return <div>{config.customRender(value, row.original)}</div>;
           }
 
           // Format dates

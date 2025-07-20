@@ -9,6 +9,8 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { deleteReport } from "@/actions/reports";
 import { format } from "date-fns";
+import StatusUpdate from "./status-update";
+import UserButton from "../users/user-button";
 
 const ReportsTable = ({ reports }: { reports: Report[] }) => {
   const router = useRouter();
@@ -70,10 +72,58 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
         columnConfigs={[
           { key: "id", customRender: (value: string) => String(value).slice(0, 8).toUpperCase() },
           { key: "title", maxWidth: 250 },
-          { key: "patientName", maxWidth: 180 },
+          { key: "patientName", maxWidth: 180, customRender: (_value, row) => {
+            // Parse first and last name from patientName
+            const [firstName = "", ...rest] = (row.patientName || "").split(" ");
+            const lastName = rest.join(" ");
+            return (
+              <UserButton
+                imageUrl={row.patientImage || ""}
+                firstName={firstName}
+                lastName={lastName}
+                roleName={undefined} // Patient role is not available
+                onClick={e => {
+                  e.stopPropagation();
+                  if (row.patientId) router.push(`/patients/${row.patientId}`);
+                }}
+              />
+            );
+          } },
           { key: "testType", maxWidth: 140 },
           { key: "createdAt", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
-          { key: "status" },
+          {
+            key: "generatedByName",
+            customRender: (_value, row) => {
+              // Parse first and last name from generatedByName
+              const [firstName = "", ...rest] = (row.generatedByName || "").split(" ");
+              const lastName = rest.join(" ");
+              return (
+                <UserButton
+                  imageUrl={row.generatedByImage || ""}
+                  firstName={firstName}
+                  lastName={lastName}
+                  roleName={row.generatedByRole}
+                  onClick={e => {
+                    console.log('UserButton clicked for doctor');
+                    console.log('generatedById:', row.generatedById);
+                    e.stopPropagation();
+                    router.push(`/users/${row.generatedById}`);
+                  }}
+                />
+              );
+            },
+            maxWidth: 200,
+          },
+          {
+            key: "status",
+            customRender: (_value, row) => (
+              <StatusUpdate
+                reportId={row.id}
+                currentStatus={row.status}
+                onUpdate={async () => { router.refresh(); }}
+              />
+            ),
+          },
         ]}
         actionItems={actionItems}
         onRowClick={(report: any) => {

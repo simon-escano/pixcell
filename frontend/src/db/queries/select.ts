@@ -266,7 +266,8 @@ export async function getReportsByGeneratedBy(userId: string) {
       generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
       generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name,
-      status: report.status
+      status: report.status,
+      testType: report.testType
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
@@ -417,6 +418,7 @@ export async function getAllReports() {
       generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name,
       title: report.title,
+      testType: report.testType, // <-- Add this line
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
