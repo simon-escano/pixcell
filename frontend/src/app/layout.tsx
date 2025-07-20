@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Suspense } from "react";
+import { Providers } from "./samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +37,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Suspense>
+            <Providers>{children}</Providers>
+          </Suspense>
           <Toaster
             toastOptions={{
               className: "bg-black text-foreground shadow-md rounded-md p-4 text-left",

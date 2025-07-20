@@ -1,11 +1,8 @@
-import {
-  getImageById,
-  getMetaSampleImagesBySampleId,
-} from "@/db/queries/select";
 import { CircleOff } from "lucide-react";
 import Link from "next/link";
 import { MetaSample } from "../types";
 import ProfileCard from "./profile-card";
+import { getMetaSampleImagesBySampleId } from "../queries";
 
 interface SampleCardProps {
   sample: MetaSample;
@@ -19,13 +16,6 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
   const remainingCount = Math.max(0, sampleImages.length - 3);
 
   // Fetch all images at once
-  const images = await Promise.all(
-    displayImages.map(async (sampleImage) => {
-      const image = await getImageById(sampleImage.imageUrl!);
-      return image;
-    }),
-  );
-
   const renderImageGrid = () => {
     const imageCount = sampleImages.length;
 
@@ -43,8 +33,8 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
         <div className="h-40 overflow-hidden rounded-sm border">
           <img
             className="h-full w-full object-cover"
-            src={images[0].imageUrl! || "/placeholder.svg"}
-            alt={images[0].imageUrl!}
+            src={displayImages[0].imageUrl! || "/placeholder.svg"}
+            alt={displayImages[0].imageUrl!}
           />
         </div>
       );
@@ -54,7 +44,7 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
       // Two images: 2 columns, 1 row
       return (
         <div className="grid h-40 grid-cols-2 gap-0.5 overflow-hidden rounded-sm border">
-          {images.map((image, index) => (
+          {displayImages.map((image, index) => (
             <img
               key={index}
               className="h-full object-cover"
@@ -72,8 +62,8 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
         {/* First image takes the left column */}
         <img
           className="h-full object-cover"
-          src={images[0].imageUrl! || "/placeholder.svg"}
-          alt={images[0].imageUrl!}
+          src={displayImages[0].imageUrl! || "/placeholder.svg"}
+          alt={displayImages[0].imageUrl!}
         />
 
         {/* Right column: nested grid with 2 rows */}
@@ -81,16 +71,16 @@ const SampleCard = async ({ sample }: SampleCardProps) => {
           {/* Second image: top right */}
           <img
             className="h-full w-full object-cover"
-            src={images[1].imageUrl! || "/placeholder.svg"}
-            alt={images[1].imageUrl!}
+            src={displayImages[1].imageUrl! || "/placeholder.svg"}
+            alt={displayImages[1].imageUrl!}
           />
 
           {/* Third image: bottom right with overlay if there are more images */}
           <div className="relative">
             <img
               className="h-full w-full object-cover"
-              src={images[2].imageUrl! || "/placeholder.svg"}
-              alt={images[2].imageUrl!}
+              src={displayImages[2].imageUrl! || "/placeholder.svg"}
+              alt={displayImages[2].imageUrl!}
             />
             {remainingCount > 0 && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/60">

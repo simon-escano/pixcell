@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@dnd-kit/modifiers": "^9.0.0",
-    "@liveblocks/client": "^2.24.2",
-    "@liveblocks/node": "^2.24.2",
-    "@liveblocks/react": "^2.24.2",
+    "@liveblocks/client": "^3.0.0",
+    "@liveblocks/node": "^3.0.0",
+    "@liveblocks/react": "^3.0.0",
+    "@liveblocks/react-ui": "^3.0.0",
     "@radix-ui/react-alert-dialog": "^1.1.13",
     "@radix-ui/react-avatar": "^1.1.9",
     "@radix-ui/react-checkbox": "^1.2.3",
@@ -62,6 +63,7 @@
     "react-qr-code": "^2.0.18",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.2.0",
+    "tldraw": "^3.0.2",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "zod": "^3.24.3"
