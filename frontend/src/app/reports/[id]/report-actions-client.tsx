@@ -60,8 +60,7 @@ const getStatusConfig = (status: ReportStatus) => {
       }
     case "Finalized":
       return {
-        color:
-          "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800",
+        color: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800",
         icon: CheckCircle2,
         description: "Report has been finalized and is ready for sharing",
       }
@@ -227,12 +226,12 @@ export default function ImprovedReportActions({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col items-center space-y-3">
-              <div className="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-sm" id={qrContainerId}>
+              <div className="bg-card p-4 rounded-lg border shadow-sm" id={qrContainerId}>
                 <QRCode value={reportUrl} size={120} level="M" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-900">Report Code: {reportCode}</p>
-                <p className="text-xs text-gray-500 mt-1">Scan QR code to view report</p>
+                <p className="text-sm font-medium text-foreground">Report Code: {reportCode}</p>
+                <p className="text-xs text-muted-foreground mt-1">Scan QR code to view report</p>
               </div>
             </div>
 
@@ -307,7 +306,7 @@ export default function ImprovedReportActions({
 
           {/* Danger Zone */}
           <div className="space-y-2">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Danger Zone</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Danger Zone</p>
             <Button
               variant="destructive"
               size="sm"
@@ -467,7 +466,7 @@ export default function ImprovedReportActions({
           </DialogHeader>
 
           <div className="space-y-3">
-            <ul className="text-sm text-gray-600 space-y-1 ml-4">
+            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
               <li>• Report content and data</li>
               <li>• Associated QR codes and links</li>
               <li>• All report history</li>

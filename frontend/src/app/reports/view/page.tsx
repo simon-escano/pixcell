@@ -47,7 +47,7 @@ export default function ImprovedReportViewPage() {
 
     try {
       // Basic validation for report code format
-      const cleanCode = code.trim().toUpperCase()
+      const cleanCode = code.trim(); // Remove .toUpperCase()
       if (cleanCode.length < 6) {
         setError("Report code must be at least 6 characters long")
         setIsLoading(false)
@@ -270,7 +270,7 @@ export default function ImprovedReportViewPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>© 2024 PixCell Medical. All rights reserved.</p>
+          <p>© 2024 PixCell. All rights reserved.</p>
           <p className="mt-1">
             By accessing this report, you agree to our{" "}
             <a href="#" className="text-primary hover:underline">
