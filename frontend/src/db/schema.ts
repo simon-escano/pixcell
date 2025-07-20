@@ -29,7 +29,8 @@ export const profile = pgTable("profile", {
   lastName: varchar("last_name").notNull(),
   userId: uuid('user_id').references(() => user.id).notNull(),
   roleId: uuid("role_id").notNull().references(() => role.id),
-  imageId: uuid("image_id").references(() => image.id)
+  imageId: uuid("image_id").references(() => image.id),
+  licenseNo: text("license_no")
 });
 
 export const image = pgTable("image", {
@@ -136,6 +137,7 @@ export const doctorPatient = pgTable("doctor_patient", {
   doctorId: uuid("doctor_id").notNull().references(() => profile.id),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
   orderNo: integer("order_no"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Role = typeof role.$inferSelect;
