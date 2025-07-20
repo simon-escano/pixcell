@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteSample } from "@/actions/samples";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -8,11 +9,38 @@ import {
 } from "@/components/ui/context-menu";
 import { CircleOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { MetaProfile, MetaSample, MetaSampleImage } from "../types";
 import ProfileCard from "./profile-card";
-import { deleteSample } from "@/actions/samples";
-import toast from "react-hot-toast";
-import { User } from "@supabase/supabase-js";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+export const handleCopySampleId = (sample: MetaSample) => {
+    navigator.clipboard.writeText(sample.id);
+    toast.success("Sample ID copied to clipboard");
+  };
+
+export const handleDeleteSample = async (sample: MetaSample, router: AppRouterInstance) => {
+  const loadingToast = toast.loading("Deleting sample...");
+  
+  try {
+    const res = await deleteSample(sample.id);
+    
+    // Dismiss the loading toast
+    toast.dismiss(loadingToast);
+    
+    if (res.success) {
+      toast.success("Sample deleted successfully");
+      router.push("/samples");
+    } else {
+      toast.error(res.error || "Failed to delete sample");
+    }
+  } catch (error) {
+    // Dismiss the loading toast in case of error
+    toast.dismiss(loadingToast);
+    toast.error("Failed to delete sample");
+  }
+};
+
 
 interface SampleCardProps {
   currentUser: MetaProfile
@@ -21,38 +49,10 @@ interface SampleCardProps {
 }
 
 const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
-  const router = useRouter();
-
   // Get all images we need to display (max 3)
   const displayImages = sampleImages.slice(0, 3);
   const remainingCount = Math.max(0, sampleImages.length - 3);
-
-  const handleCopySampleId = () => {
-    navigator.clipboard.writeText(sample.id);
-    toast.success("Sample ID copied to clipboard");
-  };
-
-  const handleDeleteSample = async () => {
-    const loadingToast = toast.loading("Deleting sample...");
-    
-    try {
-      const res = await deleteSample(sample.id);
-      
-      // Dismiss the loading toast
-      toast.dismiss(loadingToast);
-      
-      if (res.success) {
-        toast.success("Sample deleted successfully");
-        router.refresh();
-      } else {
-        toast.error(res.error || "Failed to delete sample");
-      }
-    } catch (error) {
-      // Dismiss the loading toast in case of error
-      toast.dismiss(loadingToast);
-      toast.error("Failed to delete sample");
-    }
-  };
+  const router = useRouter();
 
   // Fetch all images at once
   const renderImageGrid = () => {
@@ -156,12 +156,16 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
       </div>
     </ContextMenuTrigger>
     <ContextMenuContent>
-      <ContextMenuItem onClick={handleCopySampleId}>
+      <ContextMenuItem onClick={() => {
+        handleCopySampleId(sample)
+      }}>
         Copy Sample ID
       </ContextMenuItem>
       {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") ? <ContextMenuItem
           className="text-red-500 hover:text-red-700"
-          onClick={handleDeleteSample}
+          onClick={() => {
+            handleDeleteSample(sample, router)
+          }}
         >
         Delete Sample
       </ContextMenuItem> : ""}
