@@ -134,7 +134,7 @@ export async function getSamplesByPatientId(id: string) {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sample_image table
+      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
@@ -154,7 +154,7 @@ export async function getSamplesByUserId(userId: string) {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sample_image table
+      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
@@ -174,7 +174,7 @@ export async function getSampleById(id: string) {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sample_image table
+      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
@@ -195,7 +195,7 @@ export async function getAllSamples() {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sample_image table
+      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
@@ -348,7 +348,7 @@ export async function getPatientsWithLastReportByUser(userId: string) {
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
       sampleId: sample.id,
       sampleName: sample.sampleName,
-      dateTaken: sample_image.capturedAt,
+      dateTaken: sampleImage.capturedAt,
       userId: user.id,
       userName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
       userEmail: patient.email,
@@ -359,7 +359,7 @@ export async function getPatientsWithLastReportByUser(userId: string) {
     .from(patient)
     .leftJoin(sample, eq(patient.id, sample.patientId))
     .innerJoin(report, eq(sample.id, report.sampleId))
-    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
+    .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
     .leftJoin(profileImage, eq(profile.imageId, profileImage.id))
@@ -393,19 +393,19 @@ export async function getRecentUploadsByUser(userId: string) {
     .select({
       id: sample.id,
       sampleName: sample.sampleName,
-      capturedAt: sample_image.capturedAt,
+      capturedAt: sampleImage.capturedAt,
       imageUrl: sampleImg.imageUrl,
       patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
       uploadedBy: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
     })
     .from(sample)
     .leftJoin(patient, eq(sample.patientId, patient.id))
-    .leftJoin(sample_image, eq(sample.id, sample_image.sampleId))
-    .leftJoin(profile, eq(sample_image.uploadedBy, profile.id))
+    .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
+    .leftJoin(profile, eq(sampleImage.uploadedBy, profile.id))
     .leftJoin(user, eq(profile.userId, user.id))
-    .leftJoin(sampleImg, eq(sample_image.imageId, sampleImg.id))
+    .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
     .where(eq(sample.createdBy, userId))
-    .orderBy(sample_image.capturedAt)
+    .orderBy(sampleImage.capturedAt)
     .limit(5);
 }
 
