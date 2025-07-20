@@ -25,7 +25,6 @@ import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/samples/types";
 interface SampleDrawerProps {
   patients: any[];
   sample?: MetaSample;
-  sampleImages?: MetaSampleImage[];
   patient?: MetaPatient;
   children?: React.ReactNode;
 }
@@ -50,12 +49,11 @@ const createFileFromSampleImage = (sampleImage: MetaSampleImage): File => {
 export default function SampleDrawer({ 
   patients, 
   sample, 
-  sampleImages, 
   patient,
   children
 }: SampleDrawerProps) {
   const router = useRouter();
-  const isEditMode = !!(sample && sampleImages);
+  const isEditMode = !!(sample);
   
   const [selectedPatient, setSelectedPatient] = React.useState<string>(
     patient?.id || ""
@@ -75,12 +73,7 @@ export default function SampleDrawer({
     if (patient) {
       setSelectedPatient(patient.id);
     }
-    // Initialize files with existing sample images in edit mode
-    if (sampleImages && sampleImages.length > 0) {
-      const existingFiles = sampleImages.map(createFileFromSampleImage);
-      setFiles(existingFiles);
-    }
-  }, [sample, patient, sampleImages]);
+  }, [sample, patient]);
 
   const handleSubmit = async () => {
     if (!selectedPatient || files.length === 0 || !sampleName.trim()) {

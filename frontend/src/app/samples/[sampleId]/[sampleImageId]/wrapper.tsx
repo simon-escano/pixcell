@@ -24,12 +24,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { handleCopySampleId, handleDeleteSample } from "../../components/sample-card";
 import SampleDrawer from "@/components/samples/upload-sample-drawer";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import toast from "react-hot-toast";
 
 interface SamplePageWrapperProps {
   currentUser: User;
   sample: MetaSample | undefined;
   sampleImages: MetaSampleImage[];
   selectedSampleImageId: string;
+}
+
+async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, router: any) {
+  const toastId = toast.loading("Deleting sample image...");
+  try {
+    const { deleteSampleImage } = await import("@/actions/samples");
+    const res = await deleteSampleImage(sampleImageId);
+    if (res.success) {
+      toast.success("Sample image deleted", { id: toastId });
+      router.push(`/samples/${sampleId}`);
+    } else {
+      toast.error(res.error || "Failed to delete sample image", { id: toastId });
+    }
+  } catch (e) {
+    toast.error("Failed to delete sample image", { id: toastId });
+  }
 }
 
 const SamplePageWrapper = ({
@@ -43,7 +61,7 @@ const SamplePageWrapper = ({
     sampleImages[0];
   const router = useRouter();
   sample = sample!;
-  const sampleId = useParams().sampleId;
+  const sampleId = useParams()?.sampleId;
 
   return (
     <div className="flex h-full w-full gap-4 p-6">
@@ -54,7 +72,7 @@ const SamplePageWrapper = ({
         />
       </div>
       <div className="flex h-full flex-col w-[300px]">
-        <div className="flex flex-col overflow-hidden mb-4 rounded-md border">
+        <div className="flex flex-col max-h-[300px] overflow-hidden mb-4 rounded-md border">
           <div className="flex flex-col gap-2 p-3">
           <div className="flex items-center">
             <h1 className="font-display px-1 text-lg lg:text-xl mr-4 flex-1">
@@ -88,12 +106,12 @@ const SamplePageWrapper = ({
             <ProfileCard profile={sample.patient!} />
           </div>
         </div>
-        <div className="max-h-[300px] overflow-scroll">
+        <div className="h-full overflow-scroll">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <SampleDrawer sample={sample} sampleImages={sampleImages} patient={sample.patient} patients={[sample.patient]}>
+                  <SampleDrawer sample={sample} patient={sample.patient} patients={[sample.patient]}>
                     <div className="bg-primary text-primary-foreground flex w-[40px] cursor-pointer items-center justify-center rounded-sm py-1">
                       <PlusIcon className="size-4"></PlusIcon>
                     </div>
@@ -107,25 +125,47 @@ const SamplePageWrapper = ({
             </TableHeader>
             <TableBody>
               {sampleImages.map((sampleImage) => {
-                return ( 
-                  <TableRow
-                    key={sampleImage.id}
-                    className={`cursor-pointer ${sampleImage.id == selectedSampleImage.id ? "bg-border" : ""}`}
-                    onClick={() => {
-                      router.push(`/samples/${sampleId}/${sampleImage.id}`);
-                    }}
-                  >
-                    <TableCell>
-                      <img
-                        className="h-[40px] rounded-sm object-cover"
-                        src={sampleImage.imageUrl!}
-                      />
-                    </TableCell>
-                    <TableCell>{sampleImage.metadata.type}</TableCell>
-                    <TableCell>{sampleImage.metadata.width}</TableCell>
-                    <TableCell>{sampleImage.metadata.height}</TableCell>
-                    <TableCell>{sampleImage.capturedAt}</TableCell>
-                  </TableRow>
+                return (
+                  <ContextMenu key={sampleImage.id}>
+                    <ContextMenuTrigger asChild>
+                      <TableRow
+                        key={sampleImage.id}
+                        className={`cursor-pointer ${sampleImage.id == selectedSampleImage.id ? "bg-border" : ""}`}
+                        onClick={() => {
+                          router.push(`/samples/${sampleId}/${sampleImage.id}`);
+                        }}
+                      >
+                        <TableCell>
+                          <img
+                            className="h-[40px] rounded-sm object-cover"
+                            src={sampleImage.imageUrl!}
+                          />
+                        </TableCell>
+                        <TableCell>{sampleImage.metadata.type}</TableCell>
+                        <TableCell>{sampleImage.metadata.width}</TableCell>
+                        <TableCell>{sampleImage.metadata.height}</TableCell>
+                        <TableCell>{sampleImage.capturedAt}</TableCell>
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(sampleImage.id);
+                          toast.success("Sample image ID copied");
+                        }}
+                      >
+                        Copy Sample Image ID
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        className="text-red-500 focus:text-red-700"
+                        onClick={async () => {
+                          await handleDeleteSampleImage(sampleImage.id, sample.id, router);
+                        }}
+                      >
+                        Delete Sample Image
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 );
               })}
             </TableBody>
