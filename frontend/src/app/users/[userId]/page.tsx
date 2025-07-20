@@ -1,17 +1,7 @@
 import Base from "@/components/base";
-import UploadSampleWrapper from "@/components/samples/upload-sample-wrapper";
-import SampleCard from "@/app/samples/components/sample-card";
-import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "@/app/samples/queries";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  getProfileByUserId,
-  getReportsByGeneratedBy,
-  getRoleById,
-  getSamplesByUserId,
-  getUserById,
-} from "@/db/queries/select";
-import { Mail, Phone } from "lucide-react";
+import { getProfileByUserId, getReportsByGeneratedBy, getRoleById, getSamplesByUserId, getUserById } from "@/db/queries/select";
+import { getMetaProfileByUserId, getMetaSampleImagesBySampleId } from "@/app/samples/queries";
+import UserProfileClient from "./UserProfileClient";
 
 export default async function UserPage({
   params,
@@ -26,79 +16,24 @@ export default async function UserPage({
   const role = (await getRoleById(profile.roleId)).name;
   const metaUser = await getMetaProfileByUserId(userId);
 
+  // Fetch sample images for each sample
+  const samplesWithImages = await Promise.all(
+    samples.map(async (sample) => ({
+      ...sample,
+      sampleImages: await getMetaSampleImagesBySampleId(sample.id),
+    }))
+  );
+
   return (
     <Base>
-      <div className="grid gap-4 p-4 sm:p-8 xl:grid-cols-4">
-        <div className="space-y-4 xl:col-span-1">
-          <Card className="bg-card text-card-foreground relative flex flex-col gap-6 rounded-xl border py-6 shadow-none">
-            <CardContent className="px-6">
-              <div className="space-y-12">
-                <div className="flex flex-col items-center space-y-4">
-                  <Avatar className="size-20 rounded-full">
-                    <AvatarImage
-                      src={profile.imageUrl || ""}
-                      alt={profile.firstName + profile.lastName}
-                      className="object-cover"
-                    />
-                    <AvatarFallback>
-                      {profile.firstName[0]}
-                      {profile.lastName[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-center">
-                    <h5 className="text-xl font-semibold">
-                      {profile.firstName} {profile.lastName}
-                    </h5>
-                    <div className="text-muted-foreground text-sm">{role}</div>
-                  </div>
-                </div>
-                <div className="bg-muted grid grid-cols-2 divide-x rounded-md border text-center *:py-3">
-                  {[
-                    { label: "Samples", value: samples.length },
-                    {
-                      label: "Reports",
-                      value: reports.length,
-                    },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <h5 className="text-lg font-semibold">{value}</h5>
-                      <div className="text-muted-foreground text-sm">
-                        {label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-muted-foreground flex flex-col gap-y-4">
-                  <div className="flex items-center gap-3">
-                    <Mail className="size-4" /> {user.email}
-                  </div>
-                  {user.phone && (
-                    <div className="flex items-center gap-3">
-                      <Phone className="size-4" /> {user.phone}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="space-y-4 xl:col-span-3">
-          <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {metaUser && samples.map(async (sample) => {
-              const metaSample = await getMetaSampleById(sample.id);
-              const metaSampleImages = await getMetaSampleImagesBySampleId(sample.id);
-              return (
-                <SampleCard
-                  key={sample.id}
-                  currentUser={metaUser}
-                  sample={metaSample!}
-                  sampleImages={metaSampleImages}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <UserProfileClient
+        user={user}
+        profile={profile}
+        role={role}
+        samples={samplesWithImages}
+        reports={reports}
+        metaUser={metaUser}
+      />
     </Base>
   );
 }

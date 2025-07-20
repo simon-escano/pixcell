@@ -12,6 +12,7 @@ interface ProfileCardProps {
 
 const ProfileCard = ({ profile, redirectUrl }: ProfileCardProps) => {
   const router = useRouter();
+  if (!profile) return null;
   return (
     <div
       onClick={() => {
