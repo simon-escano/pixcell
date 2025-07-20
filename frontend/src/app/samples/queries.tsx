@@ -155,7 +155,7 @@ export async function getMetaSampleImagesBySampleId(sampleId: string): Promise<M
         id: row.id,
         sampleId: row.sampleId,
         uploadedBy: profile,
-        capturedAt: row.capturedAt ? row.capturedAt.toISOString() : "",
+        capturedAt: row.capturedAt ? row.capturedAt.toLocaleString() : "",
         imageUrl: row.imageUrl,
         metadata: {
           type: meta.type ?? "",

@@ -41,6 +41,7 @@ export function StorageTldraw({
     const assetId = AssetRecordType.createId(sampleImage.id);
 
     if (editor.getShape(shapeId) === undefined) {
+      console.log(sampleImage.imageUrl)
       editor
         .createAssets([
           {
@@ -84,7 +85,6 @@ export function StorageTldraw({
           editor.user.updateUserPreferences({
             colorScheme: resolvedTheme === "dark" ? "dark" : "light",
           });
-          console.log(sampleImage);
           editor.updateInstanceState({
             isReadonly: currentUser.id != sampleImage.uploadedBy!.id,
             isGridMode: true,

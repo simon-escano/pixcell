@@ -43,9 +43,9 @@ const SamplePageWrapper = ({
           sampleImage={selectedSampleImage!}
         />
       </div>
-      <div className="flex h-full flex-col">
-        <div className="flex flex-col overflow-hidden">
-          <div className="flex flex-col gap-2 rounded-t-md border p-3">
+      <div className="flex h-full flex-col w-[300px]">
+        <div className="flex flex-col overflow-hidden mb-4 rounded-md border">
+          <div className="flex flex-col gap-2 p-3">
           <h1 className="font-display px-1 text-lg lg:text-xl">
             {sample.sampleName}
           </h1>
@@ -54,7 +54,7 @@ const SamplePageWrapper = ({
             <ProfileCard profile={sample.patient!} />
           </div>
         </div>
-        <div className="mb-4 max-h-[300px] w-[300px] overflow-scroll">
+        <div className="max-h-[300px] overflow-scroll">
           <Table>
             <TableHeader>
               <TableRow>
