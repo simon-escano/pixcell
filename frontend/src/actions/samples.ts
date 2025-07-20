@@ -86,7 +86,6 @@ export async function uploadSampleAction(
       })
       .returning();
 
-    console.log(`Sample created!: ${sampleRecord.id}`)
 
     // Process all files for this single sample
     const uploadPromises = files.map(file => 
@@ -156,7 +155,6 @@ export async function uploadSampleAction(
         imageId: imageRecord.id,
       });
 
-      console.log(`Uploaded sample image!: ${sampleImage.id}`)
 
       return imageRecord.id;
 

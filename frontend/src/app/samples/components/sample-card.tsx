@@ -8,17 +8,19 @@ import {
 } from "@/components/ui/context-menu";
 import { CircleOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { MetaSample, MetaSampleImage } from "../types";
+import { MetaProfile, MetaSample, MetaSampleImage } from "../types";
 import ProfileCard from "./profile-card";
 import { deleteSample } from "@/actions/samples";
 import toast from "react-hot-toast";
+import { User } from "@supabase/supabase-js";
 
 interface SampleCardProps {
+  currentUser: MetaProfile
   sample: MetaSample;
   sampleImages: MetaSampleImage[];
 }
 
-const SampleCard = ({ sample, sampleImages }: SampleCardProps) => {
+const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
   const router = useRouter();
 
   // Get all images we need to display (max 3)
@@ -31,12 +33,24 @@ const SampleCard = ({ sample, sampleImages }: SampleCardProps) => {
   };
 
   const handleDeleteSample = async () => {
-    const res = await deleteSample(sample.id);
-    if (res.success) {
-      toast.success("Sample deleted successfully");
-      router.refresh();
-    } else {
-      toast.error(res.error || "Failed to delete sample");
+    const loadingToast = toast.loading("Deleting sample...");
+    
+    try {
+      const res = await deleteSample(sample.id);
+      
+      // Dismiss the loading toast
+      toast.dismiss(loadingToast);
+      
+      if (res.success) {
+        toast.success("Sample deleted successfully");
+        router.refresh();
+      } else {
+        toast.error(res.error || "Failed to delete sample");
+      }
+    } catch (error) {
+      // Dismiss the loading toast in case of error
+      toast.dismiss(loadingToast);
+      toast.error("Failed to delete sample");
     }
   };
 
@@ -145,12 +159,12 @@ const SampleCard = ({ sample, sampleImages }: SampleCardProps) => {
       <ContextMenuItem onClick={handleCopySampleId}>
         Copy Sample ID
       </ContextMenuItem>
-      <ContextMenuItem
+      {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") ? <ContextMenuItem
           className="text-red-500 hover:text-red-700"
           onClick={handleDeleteSample}
         >
         Delete Sample
-      </ContextMenuItem>
+      </ContextMenuItem> : ""}
     </ContextMenuContent>
   </ContextMenu>
   );
