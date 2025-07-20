@@ -256,6 +256,16 @@ export default function ReportForm({
   const doctorRole = role;
   const doctorLicense = currentUserProfile && currentUserProfile.licenseNo ? currentUserProfile.licenseNo : "N/A";
 
+  // Deduplicate samples by sample.id for dropdown
+  const uniqueSamples = [];
+  const seenSampleIds = new Set();
+  for (const s of samples) {
+    if (!seenSampleIds.has(s.id)) {
+      uniqueSamples.push(s);
+      seenSampleIds.add(s.id);
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="space-y-6">
@@ -287,7 +297,7 @@ export default function ReportForm({
                   <SelectValue placeholder={!selectedPatientId ? "Select a patient first" : samples.length === 0 ? "No samples available" : "Select a sample"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {samples.map((sample) => (
+                  {uniqueSamples.map((sample) => (
                     <SelectItem key={sample.id} value={sample.id}>
                       {sample.sampleName || `Sample ${sample.id.slice(0, 8)}`}
                     </SelectItem>
@@ -365,16 +375,19 @@ export default function ReportForm({
               />
             </div>
           </div>
-          {selectedSampleId && selectedSampleWithDoctorName?.imageUrl && (
+          {selectedSampleId && samples.filter(s => s.id === selectedSampleId && s.imageUrl).length > 0 && (
             <Card>
               <CardContent className="pt-6">
                 <Label className="text-sm font-medium">Sample Image Preview</Label>
-                <div className="mt-2">
-                  <img
-                    src={selectedSampleWithDoctorName.imageUrl}
-                    alt="Sample preview"
-                    className="max-w-xs rounded-lg border"
-                  />
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {samples.filter(s => s.id === selectedSampleId && s.imageUrl).map((img, idx) => (
+                    <img
+                      key={img.imageId || idx}
+                      src={img.imageUrl || ''}
+                      alt={`Sample preview ${idx + 1}`}
+                      className="max-w-xs rounded-lg border"
+                    />
+                  ))}
                 </div>
               </CardContent>
             </Card>

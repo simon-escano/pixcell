@@ -13,7 +13,7 @@ import StatusUpdate from "./status-update";
 import UserButton from "../users/user-button";
 import { CirclePlus } from "lucide-react";
 
-const ReportsTable = ({ reports }: { reports: Report[] }) => {
+const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSearch?: string }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);

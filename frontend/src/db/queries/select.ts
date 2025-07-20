@@ -515,3 +515,51 @@ export async function getFeedbackByUser(userId: string) {
     .where(eq(feedback.userId, userId))
     .orderBy(desc(feedback.createdAt));
 }
+
+export async function getAllDoctors() {
+  // Return all profiles as doctors, excluding those with role 'Administrator'
+  return await db
+    .select({
+      id: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      userId: profile.userId,
+      imageUrl: image.imageUrl,
+      roleName: role.name,
+    })
+    .from(profile)
+    .leftJoin(image, eq(profile.imageId, image.id))
+    .innerJoin(role, eq(profile.roleId, role.id))
+    .where(sql`${role.name} != 'Administrator'`);
+}
+
+export async function getDoctorForPatient(patientId: string) {
+  const result = await db
+    .select({ doctorId: doctorPatient.doctorId })
+    .from(doctorPatient)
+    .where(eq(doctorPatient.patientId, patientId));
+  return result[0]?.doctorId || null;
+}
+
+export async function getReportsByPatientId(patientId: string) {
+  return await db
+    .select({
+      id: report.id,
+      title: report.title,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      status: report.status,
+    })
+    .from(report)
+    .innerJoin(sample, eq(report.sampleId, sample.id))
+    .innerJoin(patient, eq(sample.patientId, patient.id))
+    .where(eq(patient.id, patientId))
+    .orderBy(report.createdAt);
+}
