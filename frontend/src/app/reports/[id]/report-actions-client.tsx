@@ -1,8 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
+const QRCode = dynamic(() => import("react-qr-code"), { ssr: false });
+
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import QRCode from "react-qr-code";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { deleteReport } from "@/actions/reports";
@@ -10,22 +12,25 @@ import { FileText, Edit, Trash2, QrCode, Copy, Download } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import React from "react";
+import StatusUpdate, { ReportStatus } from "@/components/reports/status-update";
 
 export default function ReportActions({
   reportId,
   formData,
   reportStatus,
+  reportCode,
 }: {
   reportId: string;
   formData: any;
-  reportStatus: string;
+  reportStatus: ReportStatus;
+  reportCode: string
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [qrSvg, setQrSvg] = useState<SVGSVGElement | null>(null);
   // The URL to view the report (for QR code)
-  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/${reportId}`;
+  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/view/${reportCode}`;
   const qrContainerId = `qr-container-${reportId}`;
 
   const handleEdit = () => {
@@ -72,8 +77,13 @@ export default function ReportActions({
     document.body.removeChild(link);
   };
 
+  const handleStatusUpdated = async () => {
+    router.refresh();
+  };
+
   return (
     <div className="space-y-4">
+     
       {reportStatus === "Finalized" && (
         <div className="flex flex-col items-center gap-2">
           <div className="bg-white p-2 rounded shadow" id={qrContainerId}>
@@ -81,7 +91,9 @@ export default function ReportActions({
               value={reportUrl}
               size={96}
             />
+            
           </div>
+          <span>Code: {reportCode}</span>
           <div className="flex gap-2 mt-2">
             <Button size="sm" variant="outline" onClick={handleCopyQr} className="flex items-center gap-1">
               <Copy className="h-4 w-4" /> Copy
@@ -94,6 +106,11 @@ export default function ReportActions({
 
         </div>
       )}
+       <StatusUpdate
+        reportId={reportId}
+        currentStatus={reportStatus}
+        onUpdate={handleStatusUpdated}
+      />
       <Button
         variant="outline"
         size="sm"

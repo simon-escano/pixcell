@@ -227,6 +227,11 @@ export async function getReportById(reportId: string) {
   return result[0];
 }
 
+export async function getReportByCode(code: string) {
+  const result = await db.select().from(report).where(eq(report.code, code));
+  return result[0] || null;
+}
+
 export async function getReportsByGeneratedBy(userId: string) {
   return await db
     .select({
@@ -246,7 +251,8 @@ export async function getReportsByGeneratedBy(userId: string) {
       generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
       generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name,
-      status: report.status
+      status: report.status,
+      testType: report.testType
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
@@ -474,6 +480,7 @@ export async function getAllReports() {
       generatedByImage: generatedByImage.imageUrl,
       generatedByRole: role.name,
       title: report.title,
+      testType: report.testType, // <-- Add this line
     })
     .from(report)
     .leftJoin(sample, eq(report.sampleId, sample.id))
