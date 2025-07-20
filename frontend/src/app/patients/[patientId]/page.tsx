@@ -1,11 +1,13 @@
 import Base from "@/components/base"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
 import { getPatientById, getReportCountByPatientId, getSamplesByPatientId } from "@/db/queries/select"
-import { Mail, Edit, FileText, TestTube } from "lucide-react"
-import { PatientActionRow } from "@/components/patients/patient-action-row"
+import { FileText, TestTube, Edit } from "lucide-react"
+import { UploadSampleDrawerForPatient } from "@/components/samples/upload-sample-drawer"
+import Link from "next/link";
 
 export default async function PatientPage({
   params,
@@ -19,81 +21,65 @@ export default async function PatientPage({
 
   return (
     <Base>
-      <div className="flex h-screen bg-gray-50">
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="bg-white border-b px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span>Patients</span>
-                <span>/</span>
-                <span className="text-gray-900 font-medium">
-                  {patientData.firstName} {patientData.lastName}
-                </span>
-              </div>
-              <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
-                <Edit className="size-4" />
-                Edit patient
-              </Button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-auto">
-            <div className="grid grid-cols-12 gap-6 p-6 h-full">
-              {/* Left Column - Patient Info */}
-              <div className="col-span-4 space-y-6">
-                {/* Patient Profile Card */}
-                <Card className="bg-gray-100">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center mb-6">
-                      <Avatar className="size-20 mb-4">
-                        <AvatarImage
-                          src={patientData.imageUrl || ""}
-                          alt={`${patientData.firstName} ${patientData.lastName}`}
-                        />
-                        <AvatarFallback className="text-xl">
-                          {patientData.firstName[0]}
-                          {patientData.lastName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <h2 className="text-xl font-semibold text-gray-900">
+      <div className="min-h-screen bg-slate-50/50">
+        <div className="container mx-auto p-6 max-w-7xl">
+          <div className="grid grid-cols-12 gap-6 h-[calc(100vh-3rem)]">
+            {/* Patient Information Panel */}
+            <div className="col-span-4">
+              <Card className="h-full shadow-sm border-0 bg-white">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12 ring-2 ring-slate-100">
+                      <AvatarImage
+                        src={patientData.imageUrl || ""}
+                        alt={`${patientData.firstName} ${patientData.lastName}`}
+                      />
+                      <AvatarFallback className="bg-purple-100 text-purple-700 text-base font-medium">
+                        {patientData.firstName[0]}
+                        {patientData.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-lg font-semibold text-slate-900 leading-tight">
                         {patientData.firstName} {patientData.lastName}
-                      </h2>
-                      <p className="text-gray-600 text-sm">{patientData.email}</p>
+                      </h1>
+                      <p className="text-xs text-slate-600 mt-0.5">{patientData.email}</p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardHeader>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{samples.length}</div>
-                        <div className="text-sm text-gray-600">Samples</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{reportCount}</div>
-                        <div className="text-sm text-gray-600">Reports</div>
-                      </div>
+                <CardContent className="space-y-4">
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-slate-50 rounded-lg p-2 text-center">
+                      <div className="text-base font-semibold text-slate-900">{samples.length}</div>
+                      <div className="text-xs text-slate-600">Samples</div>
                     </div>
+                    <div className="bg-slate-50 rounded-lg p-2 text-center">
+                      <div className="text-base font-semibold text-slate-900">{reportCount}</div>
+                      <div className="text-xs text-slate-600">Reports</div>
+                    </div>
+                  </div>
 
-                    <PatientActionRow
-                      patientId={patientId}
-                      patientName={`${patientData.firstName} ${patientData.lastName}`}
-                    />
-                  </CardContent>
-                </Card>
+                  <Separator />
 
-                {/* Patient Details */}
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                  {/* Patient Details - Smaller fonts */}
+                  <div className="space-y-2 text-xs">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                       <div>
-                        <div className="text-gray-600 mb-1">Gender</div>
-                        <div className="font-medium">Male</div>
+                        <span className="text-slate-500">Gender</span>
+                        <div className="font-medium text-slate-900">{patientData.sex || "Male"}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 mb-1">Birthday</div>
-                        <div className="font-medium">
+                        <span className="text-slate-500">Birthday</span>
+                        <div className="font-medium text-slate-900">
                           {new Date(patientData.birthDate).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -102,150 +88,147 @@ export default async function PatientPage({
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-600 mb-1">Phone number</div>
-                        <div className="font-medium">{patientData.contactNumber}</div>
+                        <span className="text-slate-500">Phone</span>
+                        <div className="font-medium text-slate-900">{patientData.contactNumber}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 mb-1">Address</div>
-                        <div className="font-medium">{patientData.address}</div>
+                        <span className="text-slate-500">Blood Type</span>
+                        <div className="font-medium text-slate-600">{patientData.bloodType}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 mb-1">Height</div>
-                        <div className="font-medium">{patientData.height} cm</div>
+                        <span className="text-slate-500">Height</span>
+                        <div className="font-medium text-slate-900">{patientData.height} cm</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 mb-1">Weight</div>
-                        <div className="font-medium">{patientData.weight} kg</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 mb-1">Blood Type</div>
-                        <div className="font-medium">{patientData.bloodType}</div>
+                        <span className="text-slate-500">Weight</span>
+                        <div className="font-medium text-slate-900">{patientData.weight} kg</div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    <div className="pt-1.5 border-t border-slate-100">
+                      <span className="text-slate-500">Address</span>
+                      <div className="font-medium text-slate-900">{patientData.address}</div>
+                    </div>
+                  </div>
 
-              {/* Middle Column - Samples */}
-              <div className="col-span-5">
-                <Card className="h-full">
-                  <CardHeader className="pb-4">
-                    <Tabs defaultValue="samples" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="samples">Samples</TabsTrigger>
-                        <TabsTrigger value="reports">Reports</TabsTrigger>
-                      </TabsList>
+                  <Separator />
 
-                      <TabsContent value="samples" className="mt-4">
-                        <div className="space-y-4">
-                          {samples.length > 0 ? (
-                            samples.map((sample) => (
-                              <div
-                                key={sample.id}
-                                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
-                                  <div>
-                                    <div className="font-medium text-gray-900">Sample #{sample.id}</div>
-                                    <div className="text-sm text-gray-600">
-                                      {new Date(sample.createdAt).toLocaleDateString("en-US", {
+                  {/* Action Buttons */}
+                  <div className="space-y-2">
+                    <UploadSampleDrawerForPatient
+                      patientId={patientId}
+                      className="bg-purple-600 hover:bg-purple-700 text-white w-full text-sm py-2"
+                    />
+                    <Link
+                      href={`/reports?search=${encodeURIComponent(patientData.firstName + ' ' + patientData.lastName)}`}
+                      className="w-full"
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-sm py-2 text-slate-600 hover:text-slate-900 bg-transparent"
+                      >
+                        View Reports
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Samples & Reports Panel */}
+            <div className="col-span-8">
+              <Card className="h-full shadow-sm border-0 bg-white">
+                <Tabs defaultValue="samples" className="h-full flex flex-col">
+                  {/* Header - No buttons */}
+                  <div className="p-4 border-b border-slate-100">
+                    <TabsList className="bg-slate-100 p-1">
+                      <TabsTrigger
+                        value="samples"
+                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-sm"
+                      >
+                        Samples ({samples.length})
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="reports"
+                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-sm"
+                      >
+                        Reports ({reportCount})
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 overflow-hidden">
+                    <TabsContent value="samples" className="h-full m-0 p-4">
+                      {samples.length > 0 ? (
+                        <div className="space-y-2 h-full overflow-auto">
+                          {samples.map((sample, index) => (
+                            <div
+                              key={sample.id}
+                              className="group flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-200"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-1 h-8 bg-purple-500 rounded-full"></div>
+                                <div>
+                                  <div className="font-medium text-slate-900 text-sm">
+                                    {sample.sampleName || `Sample #${String(index + 1).padStart(3, "0")}`}
+                                  </div>
+                                  {sample.capturedAt && (
+                                    <div className="text-xs text-slate-500 mt-0.5">
+                                      {new Date(sample.capturedAt).toLocaleDateString("en-US", {
                                         month: "short",
                                         day: "numeric",
                                         year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
                                       })}
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
+                              </div>
+                              <div className="flex items-center gap-2">
                                 <div className="text-right">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {sample.type || "Blood Sample"}
-                                  </div>
-                                  <div className="text-sm text-gray-600">Processing</div>
+                                  <div className="text-xs font-medium text-slate-900">Processing</div>
+                                  <div className="text-xs text-slate-500">In progress</div>
                                 </div>
-                                <Button variant="ghost" size="sm">
-                                  <FileText className="size-4" />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                                >
+                                  <FileText className="h-3 w-3" />
                                 </Button>
                               </div>
-                            ))
-                          ) : (
-                            <div className="text-center py-8 text-gray-500">
-                              <TestTube className="size-8 mx-auto mb-2 text-gray-400" />
-                              <p>No samples found</p>
                             </div>
-                          )}
+                          ))}
                         </div>
-                      </TabsContent>
-
-                      <TabsContent value="reports" className="mt-4">
-                        <div className="text-center py-8 text-gray-500">
-                          <FileText className="size-8 mx-auto mb-2 text-gray-400" />
-                          <p>No reports available</p>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                            <TestTube className="h-8 w-8 text-slate-400" />
+                          </div>
+                          <h3 className="text-base font-medium text-slate-900 mb-2">No samples yet</h3>
+                          <p className="text-slate-600 mb-4 max-w-sm leading-relaxed text-sm">
+                            Upload the first sample for this patient to begin analysis and generate reports.
+                          </p>
                         </div>
-                      </TabsContent>
-                    </Tabs>
-                  </CardHeader>
-                </Card>
-              </div>
+                      )}
+                    </TabsContent>
 
-              {/* Right Column - Files & Actions */}
-              <div className="col-span-3 space-y-6">
-                {/* Files/Documents */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Files / Documents</CardTitle>
-                      <Button variant="ghost" size="sm" className="text-blue-600">
-                        Add files
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="size-4 text-red-500" />
-                        <span className="text-sm">Blood tests.pdf</span>
+                    <TabsContent value="reports" className="h-full m-0 p-4">
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                          <FileText className="h-8 w-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-base font-medium text-slate-900 mb-2">No reports available</h3>
+                        <p className="text-slate-600 max-w-sm leading-relaxed text-sm">
+                          Reports will be generated automatically once samples are processed and analyzed.
+                        </p>
                       </div>
-                      <span className="text-xs text-gray-500">27 kb</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="size-4 text-blue-500" />
-                        <span className="text-sm">Medical prescriptions.pdf</span>
-                      </div>
-                      <span className="text-xs text-gray-500">9 kb</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="size-4 text-green-500" />
-                        <span className="text-sm">X-Ray results 2.pdf</span>
-                      </div>
-                      <span className="text-xs text-gray-500">27 kb</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
-                      <TestTube className="size-4 mr-2" />
-                      Add Sample
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
-                      <FileText className="size-4 mr-2" />
-                      Generate Report
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
-                      <Mail className="size-4 mr-2" />
-                      Send Message
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </Card>
             </div>
           </div>
         </div>
