@@ -548,3 +548,26 @@ export async function getDoctorForPatient(patientId: string) {
     .where(eq(doctorPatient.patientId, patientId));
   return result[0]?.doctorId || null;
 }
+
+export async function getReportsByPatientId(patientId: string) {
+  return await db
+    .select({
+      id: report.id,
+      title: report.title,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      status: report.status,
+    })
+    .from(report)
+    .innerJoin(sample, eq(report.sampleId, sample.id))
+    .innerJoin(patient, eq(sample.patientId, patient.id))
+    .where(eq(patient.id, patientId))
+    .orderBy(report.createdAt);
+}
