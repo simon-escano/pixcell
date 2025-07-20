@@ -60,7 +60,7 @@ const SamplePageWrapper = ({
               {sample.sampleName}
             </h1>
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant={"ghost"} className="cursor-pointer">
                   <Ellipsis className="text-muted-foreground" />
                 </Button>
