@@ -1,4 +1,4 @@
-import { patient, profile, report, role, sample, user, image, note, sample_image, session, feedback, doctorPatient } from "@/db/schema"
+import { patient, profile, report, role, sample, user, image, sample_image, session, feedback, doctorPatient } from "@/db/schema"
 import { eq, sql, desc } from "drizzle-orm"
 import { db } from "..";
 

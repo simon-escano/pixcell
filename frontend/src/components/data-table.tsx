@@ -285,7 +285,6 @@ export function DataTable<TData extends Record<string, any>>({
           // Format strings, numbers, etc.
           return (
             <div
-              className={key === "notes" ? "italic" : ""}
               style={
                 config?.maxWidth
                   ? {

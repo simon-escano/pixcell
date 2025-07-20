@@ -34,7 +34,6 @@ interface Patient {
   height: number;
   weight: number;
   bloodType: string;
-  notes: string | null;
   imageUrl: string | null;
   createdAt: Date;
 }
