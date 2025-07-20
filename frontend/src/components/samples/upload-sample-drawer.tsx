@@ -37,9 +37,8 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
     try {
       // If your uploadSampleAction needs to handle multiple files, you might need to modify it
       // For now, I'll assume you want to upload each file separately or modify the action
-      for (const file of files) {
-        await uploadSampleAction(selectedPatient, file, sampleName.trim());
-      }
+      await uploadSampleAction(selectedPatient, files, sampleName.trim());
+      
       toast.success(`${files.length} sample(s) uploaded successfully.`);
       setDrawerOpen(false);
       setFiles([]);
