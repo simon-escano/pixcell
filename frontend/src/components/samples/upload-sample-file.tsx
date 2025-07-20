@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { ImageUp, X, Camera } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import CameraModal from "@/app/camera/camera-client"
+import CameraModal from "@/app/samples/components/camera-client"
 
 interface FilePreview {
   file: File
