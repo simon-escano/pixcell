@@ -15,17 +15,19 @@ export default function ReportActions({
   reportId,
   formData,
   reportStatus,
+  reportCode,
 }: {
   reportId: string;
   formData: any;
   reportStatus: string;
+  reportCode: string
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [qrSvg, setQrSvg] = useState<SVGSVGElement | null>(null);
   // The URL to view the report (for QR code)
-  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/${reportId}`;
+  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/view/${reportCode}`;
   const qrContainerId = `qr-container-${reportId}`;
 
   const handleEdit = () => {
@@ -81,7 +83,9 @@ export default function ReportActions({
               value={reportUrl}
               size={96}
             />
+            
           </div>
+          <span>Code: {reportCode}</span>
           <div className="flex gap-2 mt-2">
             <Button size="sm" variant="outline" onClick={handleCopyQr} className="flex items-center gap-1">
               <Copy className="h-4 w-4" /> Copy

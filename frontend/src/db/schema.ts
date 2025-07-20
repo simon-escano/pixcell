@@ -114,6 +114,7 @@ export const report = pgTable("report", {
   patientId: uuid("patient_id").references(() => patient.id, { onUpdate: "cascade", onDelete: "cascade" }),
   testType: text("test_type"),
   status: reportStatusEnum("status"),
+  code: text('code'),
 });
 
 export const session = pgTable("session", {

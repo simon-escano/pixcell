@@ -242,6 +242,11 @@ export async function getReportById(reportId: string) {
   return result[0];
 }
 
+export async function getReportByCode(code: string) {
+  const result = await db.select().from(report).where(eq(report.code, code));
+  return result[0] || null;
+}
+
 export async function getReportsByGeneratedBy(userId: string) {
   return await db
     .select({
