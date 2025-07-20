@@ -17,6 +17,8 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const actionItems = [
     {
@@ -132,6 +134,9 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
             Create Report
           </Button>
         }
+        selectedRowIds={selectedIds}
+        onSelectedRowIdsChange={setSelectedIds}
+        onBulkDelete={() => setBatchDeleteOpen(true)}
       />
       <CustomAlertDialog
         open={deleteOpen}
@@ -157,6 +162,37 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
           } else {
             toast.error(res.error || "Failed to delete report.");
           }
+        }}
+        confirmText="Continue"
+        cancelText="Cancel"
+      />
+      <CustomAlertDialog
+        open={batchDeleteOpen}
+        onOpenChange={setBatchDeleteOpen}
+        title="Are you absolutely sure?"
+        description={
+          <>
+            This action cannot be undone. This will permanently delete {selectedIds.length} reports and remove all their data from our system.
+          </>
+        }
+        onConfirm={async () => {
+          const failed: { id: string, error: string }[] = [];
+          for (const id of selectedIds) {
+            const res = await deleteReport(id);
+            if (!res.success) {
+              failed.push({ id, error: res.error || 'Unknown error' });
+            }
+          }
+          if (failed.length > 0) {
+            toast.error(
+              failed.map(f => `ID: ${f.id} - ${f.error}`).join('\n')
+            );
+          } else {
+            toast.success("Selected reports deleted.");
+          }
+          setSelectedIds([]);
+          setBatchDeleteOpen(false);
+          router.refresh();
         }}
         confirmText="Continue"
         cancelText="Cancel"
