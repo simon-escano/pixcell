@@ -11,6 +11,7 @@ import { deleteReport } from "@/actions/reports";
 import { format } from "date-fns";
 import StatusUpdate from "./status-update";
 import UserButton from "../users/user-button";
+import { CirclePlus } from "lucide-react";
 
 const ReportsTable = ({ reports }: { reports: Report[] }) => {
   const router = useRouter();
@@ -46,11 +47,7 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
   return (
     <div>
       <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-2xl font-bold tracking-tight">Reports</h2>
-        <Button onClick={() => router.push("/reports/create")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Report
-        </Button>
+        
       </div>
       <DataTable
         data={reports}
@@ -129,6 +126,12 @@ const ReportsTable = ({ reports }: { reports: Report[] }) => {
         onRowClick={(report: any) => {
           router.push(`/reports/${report.id}`);
         }}
+        customHeaderContent={
+          <Button onClick={() => router.push("/reports/create")}>
+            <CirclePlus/>
+            Create Report
+          </Button>
+        }
       />
       <CustomAlertDialog
         open={deleteOpen}
