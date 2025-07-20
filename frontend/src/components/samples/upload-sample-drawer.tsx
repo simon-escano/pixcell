@@ -154,3 +154,71 @@ export default function UploadSampleDrawer({ patients }: { patients: any[] }) {
     </div>
   );
 }
+
+// New drawer for uploading samples for a specific patient
+export function UploadSampleDrawerForPatient({ patientId, className }: { patientId: string, className?: string }) {
+  const router = useRouter();
+  const [files, setFiles] = React.useState<File[]>([]);
+  const [sampleName, setSampleName] = React.useState<string>("");
+  const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
+
+  const handleSubmit = async () => {
+    if (!files.length || !sampleName.trim()) {
+      toast.error("Enter sample name and upload at least one sample.");
+      return;
+    }
+    try {
+      await uploadSampleAction(patientId, files, sampleName.trim());
+      toast.success(`${files.length} sample(s) uploaded successfully.`);
+      setDrawerOpen(false);
+      setFiles([]);
+      setSampleName("");
+      router.refresh();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerTrigger asChild>
+          <Button className={"bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground rounded-lg shadow-sm " + (className ?? "") }>
+            <ImageUp />
+            <span>Add Sample</span>
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>Add Sample</DrawerTitle>
+              <DrawerDescription>
+                Submit a sample for this patient
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4 p-4">
+              <Input
+                id="sampleName"
+                className="rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
+                placeholder="Enter sample name"
+                value={sampleName}
+                onChange={(e) => setSampleName(e.target.value)}
+              />
+              <UploadSampleFile onFilesChange={setFiles} files={files} />
+            </div>
+            <DrawerFooter className="flex w-full flex-row pt-0">
+              <DrawerClose asChild>
+                <Button variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+              </DrawerClose>
+              <Button onClick={handleSubmit} className="flex-1">
+                Submit ({files.length})
+              </Button>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+}

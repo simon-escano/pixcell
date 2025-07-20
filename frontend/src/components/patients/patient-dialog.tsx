@@ -31,12 +31,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, CirclePlus } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 
+type Doctor = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  userId: string;
+  imageUrl?: string | null;
+};
+
 type Props = {
   open?: boolean;
   setOpen?: (open: boolean) => void;
   mode?: "add" | "edit";
   existingPatient?: Patient | null;
   showTrigger?: boolean;
+  doctors?: Doctor[];
+  currentDoctorId?: string;
+  onDoctorChange?: (doctorId: string) => void;
 };
 
 export function PatientDialog({
@@ -45,6 +56,9 @@ export function PatientDialog({
   mode = "add",
   existingPatient = null,
   showTrigger = true,
+  doctors = [],
+  currentDoctorId = "",
+  onDoctorChange,
 }: Props) {
   const isControlled =
     controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -70,6 +84,7 @@ export function PatientDialog({
   const [file, setFile] = useState<File | null>(null);
 
   const [profile, setProfile] = useState<{ id: string } | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<string>(currentDoctorId || "");
 
   useEffect(() => {
     async function fetchProfile() {
@@ -87,6 +102,10 @@ export function PatientDialog({
     }
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    setSelectedDoctor(currentDoctorId || "");
+  }, [currentDoctorId]);
 
   useEffect(() => {
     if (existingPatient) {
@@ -141,6 +160,10 @@ export function PatientDialog({
           birthDate: date?.toISOString().slice(0, 10) || "",
           file: file ?? undefined,
         });
+        // Notify parent to update doctor assignment
+        if (onDoctorChange && selectedDoctor) {
+          await onDoctorChange(selectedDoctor);
+        }
         toast.success("Patient updated", { id: toastId });
         router.refresh();
       } else {
@@ -307,6 +330,22 @@ export function PatientDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Assigned Professional</Label>
+            <Select value={selectedDoctor} onValueChange={(val) => { setSelectedDoctor(val); onDoctorChange && onDoctorChange(val); }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Professional" />
+              </SelectTrigger>
+              <SelectContent>
+                {doctors.map((doc) => (
+                  <SelectItem key={doc.id} value={doc.id}>
+                    {doc.firstName} {doc.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>

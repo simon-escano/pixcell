@@ -102,7 +102,7 @@ export function DataTable<TData extends Record<string, any>>({
   onBulkDelete,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [globalFilter, setGlobalFilter] = React.useState(initialSearch);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(() => {
