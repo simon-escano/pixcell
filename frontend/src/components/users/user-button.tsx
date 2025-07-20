@@ -52,12 +52,21 @@ const UserButton = ({
         </AvatarFallback>
       </Avatar>
       <div className="flex w-full flex-1 flex-col truncate overflow-hidden text-left leading-tight">
-        <p className="mr-2 w-full truncate overflow-hidden text-[11px] font-semibold text-ellipsis whitespace-nowrap">
+        <p
+          className={
+            `mr-2 w-full truncate overflow-hidden text-ellipsis whitespace-nowrap ` +
+            (roleName === "Patient"
+              ? "text-[13px]"
+              : "text-[11px] font-semibold")
+          }
+        >
           {firstName} {lastName}
         </p>
-        <p className="text-muted-foreground w-full truncate overflow-hidden text-[9px] text-ellipsis whitespace-nowrap">
-          {roleName ? roleName : "Patient"}
-        </p>
+        {roleName && roleName !== "Patient" && (
+          <p className="text-muted-foreground w-full truncate overflow-hidden text-[9px] text-ellipsis whitespace-nowrap">
+            {roleName}
+          </p>
+        )}
       </div>
     </Button>
   );

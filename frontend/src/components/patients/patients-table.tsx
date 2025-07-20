@@ -195,7 +195,7 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
           { key: "address", enableSorting: false, maxWidth: 200 },
           { key: "contactNumber", enableSorting: false },
           {
-            key: "firstName", header:"Patient",
+            key: "firstName",
             customRender: (_: any, row?: any) => {
               // fallback: just render the first name if row is not available
               if (!row) return String(_);
