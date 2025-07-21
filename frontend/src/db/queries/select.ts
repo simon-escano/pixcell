@@ -201,7 +201,7 @@ export async function getProfileByUserId(userId: string) {
       userId: profile.userId,
       roleId: profile.roleId,
       imageId: profile.imageId,
-      imageUrl: image.imageUrl
+      imageUrl: image.imageUrl,
     })
     .from(profile)
     .leftJoin(image, eq(profile.imageId, image.id))

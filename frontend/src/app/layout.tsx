@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Suspense } from "react";
 import { Providers } from "./samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +39,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Suspense>
-            <Providers>{children}</Providers>
+            <SidebarProvider>
+              <Providers>{children}</Providers>
+            </SidebarProvider>
           </Suspense>
           <Toaster
             toastOptions={{

@@ -39,6 +39,7 @@ export async function getMetaSampleById(id: string): Promise<MetaSample | undefi
       sampleName: sample.sampleName,
       patientId: sample.patientId,
       createdById: sample.createdBy,
+      createdAt: sample.createdAt,
     })
     .from(sample)
     .where(eq(sample.id, id));
@@ -56,6 +57,7 @@ export async function getMetaSampleById(id: string): Promise<MetaSample | undefi
     sampleName: row.sampleName,
     patient,
     createdBy,
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : undefined,
   };
 }
 

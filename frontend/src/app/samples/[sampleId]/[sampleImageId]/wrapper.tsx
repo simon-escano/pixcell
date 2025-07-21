@@ -292,9 +292,16 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
             <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-blue-600" />
               Sample Images
-              <Badge variant="secondary" className="ml-auto">
+              <Badge variant="secondary">
                 {sampleImages.length}
               </Badge>
+              <div className="ml-auto">
+                <SampleDrawer sample={sample} patient={sample.patient} patients={[sample.patient]}>
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-md">
+                    <PlusIcon className="w-4 h-4" />
+                  </div>
+                </SampleDrawer>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col min-h-0 p-0">
@@ -302,13 +309,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               <Table>
                 <TableHeader className="bg-gray-50/50">
                   <TableRow>
-                    <TableHead className="w-16">
-                      <SampleDrawer sample={sample} patient={sample.patient} patients={[sample.patient]}>
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white flex w-10 h-10 cursor-pointer items-center justify-center rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-md">
-                          <PlusIcon className="w-4 h-4" />
-                        </div>
-                      </SampleDrawer>
-                    </TableHead>
+                    <TableHead className="w-16"></TableHead>
                     <TableHead className="text-xs font-medium text-gray-600">Preview</TableHead>
                     <TableHead className="text-xs font-medium text-gray-600">
                       <Ruler className="w-3 h-3 inline mr-1" />

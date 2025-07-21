@@ -76,6 +76,7 @@ export type DataTableProps<TData> = {
   getRowId?: (row: TData, index: number, parent?: any) => string;
   bulkActions?: (selectedRowIds: string[], selectedRows: any[]) => React.ReactNode;
   onBulkDelete?: (selectedRowIds: string[], selectedRows: TData[]) => void;
+  hideSearchInput?: boolean;
 };
 
 export function DataTable<TData extends Record<string, any>>({
@@ -100,6 +101,7 @@ export function DataTable<TData extends Record<string, any>>({
   getRowId,
   bulkActions,
   onBulkDelete,
+  hideSearchInput = false,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -438,17 +440,15 @@ export function DataTable<TData extends Record<string, any>>({
               Delete {(selectedRowIds ? selectedRowIds : []).length} Rows
             </Button>
           )}
-          <Input
-            placeholder={searchPlaceholder}
-            value={globalFilter}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            className="flex-grow min-w-[220px]"
-          />
+          {!hideSearchInput && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="flex-grow min-w-[220px]"
+            />
+          )}
         </div>
-
-
-        
-        
 
         {/* Wrap Columns dropdown and customHeaderContent in a flex-row with a small gap */}
         <div className="flex items-center gap-2">

@@ -70,7 +70,8 @@ export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
   sampleName: text("sample_name"),
-  createdBy: uuid("created_by").notNull().references(()=>user.id)
+  createdBy: uuid("created_by").notNull().references(()=>user.id),
+  createdAt: timestamp("created_at").defaultNow()
 });
 
 

@@ -9,6 +9,7 @@ export type MetaSample = {
   sampleName: string | null;
   patient: MetaPatient | undefined;
   createdBy: MetaProfile | undefined;
+  createdAt?: string;
 };
 
 export type MetaSampleImage = {
