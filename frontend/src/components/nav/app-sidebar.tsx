@@ -32,6 +32,7 @@ export async function AppSidebar({
   const recentSamples = await getRecentUploads();
 
   const profileRole = profileRoleData?.name || null;
+  const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -56,7 +57,7 @@ export async function AppSidebar({
       <NavSecondaryWrapper />
       <NavTertiary />
       <SidebarFooter>
-        <NavUser user={user} profile={profileData} role={profileRole} />
+        <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
       </SidebarFooter>
     </Sidebar>
   );
