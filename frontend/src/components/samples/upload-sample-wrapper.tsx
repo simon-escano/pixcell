@@ -9,12 +9,12 @@ export default async function UploadSampleWrapper() {
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
   const patients = await getAllPatientsForUser(profile.id, role.name);
-  return <SampleDrawer patients={patients}>
+  return <SampleDrawer trigger={
     <Button 
       className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full justify-start rounded-lg shadow-sm"
     >
       <ImageUp />
       Upload sample
     </Button>
-  </SampleDrawer>;
+  } />;
 }
