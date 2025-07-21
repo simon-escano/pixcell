@@ -1,31 +1,20 @@
+import Base from "@/components/base"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { getAllSamples, getSamplesByUserId } from "@/db/queries/select"
+import { getUser } from "@/lib/auth"
+import {
+  Activity,
+  AlertCircle,
+  Clock,
+  FileImage,
+  Plus,
+  TrendingUp
+} from "lucide-react"
 import type React from "react"
-import { getAllSamples } from "@/db/queries/select"
+import SampleBrowserClient from "../../components/samples/sample-browser-client"
 import SampleCard from "../../components/samples/sample-card"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./queries"
-import Base from "@/components/base"
-import { getUser } from "@/lib/auth"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Plus,
-  Search,
-  Filter,
-  Grid3X3,
-  List,
-  Calendar,
-  Users,
-  FileImage,
-  Activity,
-  TrendingUp,
-  Clock,
-  AlertCircle,
-} from "lucide-react"
-import { Suspense } from "react"
-import SampleBrowserClient from "../../components/samples/sample-browser-client"
 
 // Loading skeleton component
 const SampleCardSkeleton = () => (
@@ -118,8 +107,8 @@ const SampleGrid = async ({ samples, currentUser }: { samples: any[]; currentUse
 const SamplesPage = async () => {
   const currentUser = await getUser()
   const metaUser = await getMetaProfileByUserId(currentUser.id)
-  const samples = await getAllSamples()
-  const reports = await import("@/db/queries/select").then(m => m.getAllReports())
+  const samples = (metaUser?.role == "Administrator") ? await getAllSamples() : await getSamplesByUserId(currentUser.id);
+  const reports = (metaUser?.role == "Administrator") ? await import("@/db/queries/select").then(m => m.getAllReports()) : await import("@/db/queries/select").then(m => m.getAllReportsByUserId(currentUser.id))
 
   // Fetch meta sample and images for each sample
   const metaSamples = await Promise.all(samples.map(async (sample) => {
@@ -139,15 +128,17 @@ const SamplesPage = async () => {
   const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
   const samplesThisMonth = samples.filter((sample) => {
-    if (!sample.createdAt) return false;
-    const date = new Date(sample.createdAt);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    const date = 'createdAt' in sample ? sample.createdAt : sample.capturedAt;
+    if (!date) return false;
+    const dateObj = new Date(date);
+    return dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear;
   }).length;
 
   const samplesLastMonth = samples.filter((sample) => {
-    if (!sample.createdAt) return false;
-    const date = new Date(sample.createdAt);
-    return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
+    const date = 'createdAt' in sample ? sample.createdAt : sample.capturedAt;
+    if (!date) return false;
+    const dateObj = new Date(date);
+    return dateObj.getMonth() === lastMonth && dateObj.getFullYear() === lastMonthYear;
   }).length;
 
   const trendValue = samplesLastMonth === 0
@@ -156,8 +147,9 @@ const SamplesPage = async () => {
   const trendString = `${trendValue >= 0 ? "+" : ""}${trendValue.toFixed(0)}% this month`;
 
   const recentSamples = samples.filter((sample) => {
-    if (!sample.createdAt) return false;
-    const sampleDate = new Date(sample.createdAt);
+    const date = 'createdAt' in sample ? sample.createdAt : sample.capturedAt;
+    if (!date) return false;
+    const sampleDate = new Date(date);
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     return sampleDate > weekAgo;
