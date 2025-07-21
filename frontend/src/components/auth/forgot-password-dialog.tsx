@@ -20,14 +20,16 @@ export function ForgotPasswordDialog() {
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (formData: FormData) => {
+    console.log("FormData:", Object.fromEntries(formData));
     startTransition(async () => {
-      const { errorMessage } = await resetPasswordAction(formData);
-      if (!errorMessage) {
-        toast.success("Password reset email sent. Please check your inbox.");
-        setIsOpen(false);
-      } else {
-        toast.error(errorMessage);
+      const response = await resetPasswordAction(formData);
+      console.log("Reset action response:", response);
+      if (response.errorMessage) {
+        toast.error(response.errorMessage);
+        return;
       }
+      toast.success("Password reset email sent. Please check your inbox.");
+      setIsOpen(false);
     });
   };
 
@@ -45,12 +47,17 @@ export function ForgotPasswordDialog() {
             Enter your email address and we'll send you a link to reset your password.
           </DialogDescription>
         </DialogHeader>
-        <form action={handleSubmit} className="space-y-4">
+        <form
+          action={handleSubmit}
+          onSubmit={(e) => e.stopPropagation()} // Prevent bubbling to parent form
+          className="space-y-4"
+        >
           <Input
             name="email"
             type="email"
             placeholder="Enter your email"
             required
+            disabled={isPending}
           />
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? "Sending..." : "Send Reset Link"}
@@ -59,4 +66,4 @@ export function ForgotPasswordDialog() {
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,89 +16,102 @@ import toast from "react-hot-toast";
 import { Worm } from "lucide-react";
 import Link from "next/link";
 import { validatePassword } from "@/utils/password";
+import { Session, EmailOtpType } from "@supabase/supabase-js";
 
 export default function ResetPasswordPage() {
+  const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [isValidLink, setIsValidLink] = useState(false);
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    // Log all search params to debug
-    const params = Object.fromEntries(searchParams.entries());
-    console.log("All URL parameters:", params);
-
-    // Get the raw URL to check for any encoding issues
-    const rawUrl = window.location.href;
-    console.log("Raw URL:", rawUrl);
-
-    const type = searchParams.get("type");
-    const code = searchParams.get("code");
-    
-    console.log("Reset password parameters:", { type, code });
-    
-    // Check for required parameters
-    if (!type || !code) {
-      console.log("Missing required parameters");
+    if(!searchParams) {
+      console.log("searchParams is null");
       router.replace("/login");
       toast.error("Invalid password reset link");
       return;
     }
+    const type = searchParams.get("type") as EmailOtpType | null;
+    const token_hash = searchParams.get("token_hash");
+    console.log("Reset password parameters:", { type, token_hash, rawUrl: window.location.href });
 
-    // For password reset, we don't need to exchange the code
-    // We just need to verify that we have a valid code and type
-    if (type === "recovery" && code) {
-      // Get the email from the URL if available
-      const emailParam = searchParams.get("email");
-      if (emailParam) {
-        setEmail(emailParam);
-      } else {
-        // Try to get the email from the session
-        const supabase = createClient();
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session?.user?.email) {
-            setEmail(session.user.email);
-          }
-        });
-      }
-      setIsValidLink(true);
-    } else {
-      console.log("Invalid type or missing code");
-      router.replace("/login");
+    if (!type || !token_hash || type !== "recovery") {
+      console.log("Invalid or missing parameters");
       toast.error("Invalid password reset link");
+      router.replace("/login");
+      return;
     }
-  }, [searchParams, router]);
+
+    // Verify the OTP to establish a session
+    supabase.auth.verifyOtp({ type, token_hash }).then(({ error }) => {
+      console.log("Verify OTP response:", { error });
+      if (error) {
+        console.error("Verify OTP error:", error);
+        toast.error("Invalid or expired password reset link");
+        router.replace("/login");
+        return;
+      }
+
+      // Check session after verification
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        console.log("Session check after OTP:", { session, error });
+        if (error || !session?.user?.email) {
+          console.log("No valid session found");
+          toast.error("Unable to verify user session");
+          router.replace("/login");
+          return;
+        }
+        setEmail(session.user.email);
+        setIsValidLink(true);
+      });
+    });
+
+    // Listen for auth state changes (for debugging)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session: Session | null) => {
+        console.log("Auth state change:", { event, session });
+        if (event === "PASSWORD_RECOVERY" && session?.user?.email) {
+          setEmail(session.user.email);
+          setIsValidLink(true);
+        }
+      }
+    );
+
+    // Cleanup subscription
+    return () => {
+      // Only synchronous cleanup here
+      subscription.unsubscribe();
+    };
+  }, [searchParams, router, supabase]);
 
   const handleSubmit = async (formData: FormData) => {
     startTransition(async () => {
       try {
         const password = formData.get("password") as string;
         const confirmPassword = formData.get("confirmPassword") as string;
+        console.log("Submitting new password for:", email);
 
         if (password !== confirmPassword) {
           toast.error("Passwords do not match");
           return;
         }
 
-        // Validate password strength
         const validation = validatePassword(password);
         if (!validation.isValid) {
-          validation.errors.forEach(error => toast.error(error));
+          validation.errors.forEach((error) => toast.error(error));
           return;
         }
 
-        const supabase = createClient();
+        const { error } = await supabase.auth.updateUser({ password });
+        console.log("Update user response:", { error });
 
-        // Update the user's password using the recovery code
-        const { error } = await supabase.auth.updateUser({
-          password
-        });
+        if (error) {
+          throw new Error(error.message || "Failed to reset password");
+        }
 
-        if (error) throw error;
-
-        toast.success("Password has been reset successfully");
-        // Sign out the user to prevent auto-login
+        toast.success("Password updated successfully!");
         await supabase.auth.signOut();
         router.replace("/login");
       } catch (error: any) {
@@ -108,9 +121,7 @@ export default function ResetPasswordPage() {
     });
   };
 
-  if (!isValidLink) {
-    return null;
-  }
+  if (!isValidLink) return null;
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -130,10 +141,11 @@ export default function ResetPasswordPage() {
             <CardDescription>
               {email ? (
                 <span className="text-muted-foreground">
-                  Enter new password for <span className="font-medium text-foreground">{email}</span>
+                  Enter new password for{" "}
+                  <span className="font-medium text-foreground">{email}</span>
                 </span>
               ) : (
-                "Loading..."
+                "Enter your new password below"
               )}
             </CardDescription>
           </CardHeader>
@@ -173,4 +185,4 @@ export default function ResetPasswordPage() {
       </div>
     </div>
   );
-} 
+}
