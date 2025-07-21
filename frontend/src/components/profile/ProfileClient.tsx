@@ -1,12 +1,15 @@
 import dynamic from "next/dynamic";
 import ProfilePageLayout from "@/components/profile/ProfilePageLayout";
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 const PatientReportsList = dynamic(() => import("@/components/patients/patient-reports-list").then(m => m.PatientReportsList), { ssr: false });
 const EditUserDialogTrigger = dynamic(() => import("@/components/users/user-dialog-client"), { ssr: false });
 const EditPatientDialogTrigger = dynamic(() => import("@/components/patients/edit-patient-dialog-trigger").then(m => m.EditPatientDialogTrigger), { ssr: false });
 const UploadSampleDrawerForPatient = dynamic(() => import("@/components/samples/upload-sample-drawer").then(m => m.UploadSampleDrawerForPatient), { ssr: false });
+const AssignDoctorToPatient = dynamic(() => import("./AssignDoctorToPatient"), { ssr: false });
+const AssignPatientToDoctor = dynamic(() => import("./AssignPatientToDoctor"), { ssr: false });
 import { Button } from "@/components/ui/button";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 type ProfileClientProps =
   | ({
@@ -26,9 +29,28 @@ type ProfileClientProps =
       samples: any[];
       reports: any[];
       reportCount: number;
+      // Add doctors prop
+      doctors?: any[];
     });
 
 export default function ProfileClient(props: ProfileClientProps) {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentRole, setCurrentRole] = useState<string>("");
+
+  useEffect(() => {
+    async function fetchUserAndRole() {
+      const supabase = createClientComponentClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const res = await fetch(`/api/profile-with-role?userId=${user.id}`);
+        const { profile, role } = await res.json();
+        setCurrentUser(profile);
+        setCurrentRole(role?.name || "");
+      }
+    }
+    fetchUserAndRole();
+  }, []);
+
   if (props.type === "user") {
     const { user, profile, role, samples, reports, metaUser, patients = [] } = props;
     // Details section for user
@@ -77,6 +99,15 @@ export default function ProfileClient(props: ProfileClientProps) {
         )}
       </div>
     );
+    // Doctor can assign patients to self if viewing own profile
+    let actions = undefined;
+    if (
+      currentUser &&
+      currentRole.toLowerCase().includes("doctor") &&
+      currentUser.id === user.id
+    ) {
+      actions = <AssignPatientToDoctor />;
+    }
     return (
       <ProfilePageLayout
         entity={{ ...profile, email: user.email }}
@@ -89,10 +120,25 @@ export default function ProfileClient(props: ProfileClientProps) {
         patientsList={patients}
         patientsCount={patients.length}
         patients={patients}
+        actions={actions}
       />
     );
   } else if (props.type === "patient") {
     const { patient, metaPatient, samples, reports, reportCount } = props;
+    // [NEW] State for doctors
+    const [doctors, setDoctors] = useState<any[]>([]);
+    // [NEW] Stable fetchDoctors function
+    const fetchDoctors = useCallback(async () => {
+      if (patient?.id) {
+        const res = await fetch(`/api/patients/${patient.id}/doctors`);
+        if (res.ok) {
+          setDoctors(await res.json());
+        }
+      }
+    }, [patient?.id]);
+    useEffect(() => {
+      fetchDoctors();
+    }, [fetchDoctors]);
     // Details section for patient
     const details = (
       <div className="space-y-2 text-xs">
@@ -134,8 +180,9 @@ export default function ProfileClient(props: ProfileClientProps) {
         </div>
       </div>
     );
-    // Actions section for patient
-    const actions = (
+    // Admin can assign doctor to patient
+    
+    let actions = (
       <div className="space-y-2">
         <UploadSampleDrawerForPatient patientId={patient.id} />
         <form action={`/reports`} method="get">
@@ -151,6 +198,14 @@ export default function ProfileClient(props: ProfileClientProps) {
         </form>
       </div>
     );
+    if (currentRole === "Administrator") {
+      actions = (
+        <>
+          <AssignDoctorToPatient patientId={patient.id} onUpdate={fetchDoctors} />
+          {actions}
+        </>
+      );
+    }
     const reportList = <PatientReportsList reports={reports} />;
     return (
       <ProfilePageLayout
@@ -163,6 +218,9 @@ export default function ProfileClient(props: ProfileClientProps) {
         actions={actions}
         reportList={reportList}
         reportCount={reportCount}
+        // [NEW] Pass doctors as doctorsList
+        doctorsList={doctors}
+        doctorsCount={doctors.length}
       />
     );
   }
