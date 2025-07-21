@@ -8,6 +8,7 @@ from ultralytics import YOLO
 from llm import analyze_detections
 from typing import Dict, List, Any
 from collections import Counter
+import base64
 
 app = FastAPI()
 
@@ -21,14 +22,24 @@ app.add_middleware(
 
 
 model = None
+model_cache = {}
 
 @app.on_event("startup")
 def load_model():
     global model
-    model = YOLO("models/PixCellv1.pt")
-    print("model successfully loaded")
-    
+    try:
+        model = YOLO("models/PixCellv1.pt")
+        model_cache["anemia_detection_yolov8"] = model
+        print("Default model (anemia_detection_yolov8) successfully loaded")
+    except Exception as e:
+        print(f"Failed to load default model: {e}")
 
+# Map model_name to model file path
+MODEL_PATHS = {
+    "generic_detection_yolov8": "models/PixCellv1.pt",
+    "parasite_detection_yolov8": "models/parasite_detection_yolov8.onnx",
+    "anemia_detection_yolov8": "models/anemia_detection_yolov8.onnx",
+}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), model_name: str = Query("anemia_detection_yolov8")):
@@ -168,11 +179,37 @@ async def detect_and_analyze(
     Combined endpoint that runs detection once and returns both detection results and AI analysis.
     """
     try:
+        # Model selection logic
+        global model_cache
+        if model_name not in MODEL_PATHS:
+            return JSONResponse({
+                "success": False,
+                "error": f"Unknown model_name: {model_name}",
+                "detections": {},
+                "total_detections": 0,
+                "detection_details": [],
+                "ai_analysis": None
+            }, status_code=400)
+        if model_name not in model_cache:
+            try:
+                model_cache[model_name] = YOLO(MODEL_PATHS[model_name])
+                print(f"Model {model_name} loaded from {MODEL_PATHS[model_name]}")
+            except Exception as e:
+                return JSONResponse({
+                    "success": False,
+                    "error": f"Failed to load model {model_name}: {e}",
+                    "detections": {},
+                    "total_detections": 0,
+                    "detection_details": [],
+                    "ai_analysis": None
+                }, status_code=500)
+        yolo_model = model_cache[model_name]
+
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
         # Run model prediction only once
-        results = model.predict(image, save=False, save_txt=False)
+        results = yolo_model.predict(image, save=False, save_txt=False)
         result = results[0]
         
         class_names = []
@@ -183,14 +220,13 @@ async def detect_and_analyze(
                 cls = int(box.cls[0])
                 conf = float(box.conf[0])
                 xyxy = box.xyxy[0].tolist()
-                class_name = model.names[cls]
+                class_name = yolo_model.names[cls]
                 class_names.append(class_name)
                 detection_details.append({
                     "class": class_name,
                     "confidence": conf,
                     "bbox": xyxy
                 })
-                
                 print(f"Class: {class_name}, Confidence: {conf:.2f}, BBox: {xyxy}")
 
         # Use Counter for accurate counting
@@ -203,6 +239,9 @@ async def detect_and_analyze(
         img_bytes = io.BytesIO()
         img_pil.save(img_bytes, format="JPEG")
         img_bytes.seek(0)
+
+        # Encode processed image as base64
+        processed_image_base64 = base64.b64encode(img_bytes.getvalue()).decode("utf-8")
 
         # Perform AI analysis if detections found
         ai_analysis_result = None
@@ -220,6 +259,7 @@ async def detect_and_analyze(
             "total_detections": sum(class_counts.values()),
             "detection_details": detection_details,
             "ai_analysis": ai_analysis_result,
+            "processed_image_base64": processed_image_base64,
             "success": True
         })
         
@@ -230,6 +270,7 @@ async def detect_and_analyze(
             "detections": {},
             "total_detections": 0,
             "detection_details": [],
-            "ai_analysis": None
+            "ai_analysis": None,
+            "processed_image_base64": None
         })
     

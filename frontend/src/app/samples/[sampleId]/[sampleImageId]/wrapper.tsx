@@ -26,6 +26,9 @@ import { handleCopySampleId, handleDeleteSample } from "../../components/sample-
 import SampleDrawer from "@/components/samples/upload-sample-drawer";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import toast from "react-hot-toast";
+import React, { useState } from "react";
+import ReactMarkdown from 'react-markdown';
+import DetectionResultDialog from "@/components/DetectionResultDialog";
 
 interface SamplePageWrapperProps {
   currentUser: User;
@@ -62,6 +65,67 @@ const SamplePageWrapper = ({
   const router = useRouter();
   sample = sample!;
   const sampleId = useParams()?.sampleId;
+
+  // Detection state
+  const [selectedModel, setSelectedModel] = useState<string>("parasite_detection_yolov8");
+  const [detectionResults, setDetectionResults] = useState<any>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+
+  const handleDetect = async () => {
+    if (!selectedSampleImage?.imageUrl) {
+      toast.error("No image available for detection");
+      return;
+    }
+    setIsDetecting(true);
+    setDetectionResults(null);
+    setAiAnalysis(null);
+    setProcessedImageUrl(null);
+    setIsResultModalOpen(false);
+    try {
+      toast.loading("Sending image for detection...");
+      // Fetch the image as a blob
+      const imageBlob = await fetch(selectedSampleImage.imageUrl).then((res) => res.blob());
+      const formData = new FormData();
+      formData.append("file", imageBlob, "image.jpg");
+      // Call backend detection endpoint
+      const response = await fetch(
+        `http://127.0.0.1:8000/detect-and-analyze?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      if (!response.ok) throw new Error("Detection failed");
+      const resultData = await response.json();
+      if (resultData.success) {
+        setDetectionResults({
+          detections: resultData.detections,
+          total_detections: resultData.total_detections,
+          detection_details: resultData.detection_details,
+        });
+        if (resultData.ai_analysis && resultData.ai_analysis.success) {
+          setAiAnalysis(resultData.ai_analysis);
+        }
+        // Set processed image from base64 if available
+        if (resultData.processed_image_base64) {
+          setProcessedImageUrl(`data:image/jpeg;base64,${resultData.processed_image_base64}`);
+        }
+        toast.dismiss();
+        toast.success("Detection and analysis complete!");
+        setIsResultModalOpen(true);
+      } else {
+        throw new Error(resultData.error || "Detection failed");
+      }
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error("Detection failed: " + error.message);
+    } finally {
+      setIsDetecting(false);
+    }
+  };
 
   return (
     <div className="flex h-full w-full gap-4 p-6">
@@ -172,13 +236,13 @@ const SamplePageWrapper = ({
           </Table>
         </div>
         </div>
-        <div className="flex-1 rounded-md mb-4 border">
-        </div>
+        {/* Detection Results Container - removed, now in modal */}
+        {/* AI Analysis Container - removed, now in modal */}
         <div className="flex w-full items-center gap-2 p-2 border rounded-lg">
             <Select
-              disabled={false}
-              onValueChange={undefined}
-              value={undefined}
+              disabled={isDetecting}
+              onValueChange={setSelectedModel}
+              value={selectedModel}
             >
               <SelectTrigger className="h-full flex-1">
                 <SelectValue placeholder="Choose model" />
@@ -196,12 +260,21 @@ const SamplePageWrapper = ({
               </SelectContent>
             </Select>
             <Button
-              onClick={undefined}
+              onClick={handleDetect}
+              disabled={isDetecting}
             >
               <Search />
-              Detect
+              {isDetecting ? "Detecting..." : "Detect"}
             </Button>
         </div>
+        {/* Results Modal */}
+        <DetectionResultDialog
+          open={isResultModalOpen}
+          onOpenChange={setIsResultModalOpen}
+          detectionResults={detectionResults}
+          aiAnalysis={aiAnalysis}
+          processedImageUrl={processedImageUrl}
+        />
       </div>
     </div>
   );

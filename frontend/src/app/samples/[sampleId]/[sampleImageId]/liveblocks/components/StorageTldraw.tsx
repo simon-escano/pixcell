@@ -15,74 +15,93 @@ import { MetaSampleImage } from "../../../../types";
 import { Avatars } from "./Avatars";
 import { useStorageStore } from "./useStorageStore";
 import { User } from "@supabase/supabase-js";
+import { useEffect, useRef } from "react";
 
 interface StorageTldrawProps {
   sampleImage: MetaSampleImage;
   currentUser: User;
+  processedImageUrl?: string | null;
 }
 
 export function StorageTldraw({
   sampleImage,
   currentUser,
+  processedImageUrl,
 }: StorageTldrawProps) {
   const id = useSelf((me) => me.id);
   const info = useSelf((me) => me.info);
   const { resolvedTheme } = useTheme();
-
   const store = useStorageStore({
     user: { id, color: info.color, name: info.name },
   });
-
   const shapeId = createShapeId(sampleImage.id);
+  const editorRef = useRef<Editor | null>(null);
 
-  const insertSampleImage = (editor: Editor) => {
+  const insertSampleImage = (editor: Editor, imageSrc: string) => {
     const imageWidth = sampleImage.metadata.width;
     const imageHeight = sampleImage.metadata.height;
     const assetId = AssetRecordType.createId(sampleImage.id);
-    if (editor.getShape(shapeId) === undefined) {
-      const wasReadonly = editor.getInstanceState().isReadonly;
-      
-      if (wasReadonly) {
-        editor.updateInstanceState({ isReadonly: false });
-      }
-      
-      editor
-        .createAssets([
-          {
-            id: assetId,
-            type: "image",
-            typeName: "asset",
-            props: {
-              name: "sampleImage",
-              src: sampleImage.imageUrl,
-              w: imageWidth,
-              h: imageHeight,
-              mimeType: "image/png",
-              isAnimated: false,
-            },
-            meta: {},
-          },
-        ])
-        .createShape({
-          id: shapeId,
+    // Always remove old shape and asset
+    if (editor.getShape(shapeId)) {
+      editor.deleteShape(shapeId);
+    }
+    if (editor.getAsset(assetId)) {
+      editor.deleteAssets([assetId]);
+    }
+    const wasReadonly = editor.getInstanceState().isReadonly;
+    if (wasReadonly) {
+      editor.updateInstanceState({ isReadonly: false });
+    }
+    editor
+      .createAssets([
+        {
+          id: assetId,
           type: "image",
-          isLocked: true,
-          x: (window.innerWidth - imageWidth) / 2,
-          y: (window.innerHeight - imageHeight) / 2,
+          typeName: "asset",
           props: {
-            assetId,
+            name: "sampleImage",
+            src: imageSrc,
             w: imageWidth,
             h: imageHeight,
+            mimeType: "image/png",
+            isAnimated: false,
           },
-        })
-        .zoomToFit({ animation: { duration: 100 } });
-      
-      if (wasReadonly) {
-        editor.updateInstanceState({ isReadonly: true });
-      }
+          meta: {},
+        },
+      ])
+      .createShape({
+        id: shapeId,
+        type: "image",
+        isLocked: true,
+        x: (window.innerWidth - imageWidth) / 2,
+        y: (window.innerHeight - imageHeight) / 2,
+        props: {
+          assetId,
+          w: imageWidth,
+          h: imageHeight,
+        },
+      })
+      .zoomToFit({ animation: { duration: 100 } });
+    if (wasReadonly) {
+      editor.updateInstanceState({ isReadonly: true });
     }
   };
 
+  useEffect(() => {
+    if (!editorRef.current) return;
+    const editor = editorRef.current;
+    const assetId = AssetRecordType.createId(sampleImage.id);
+    // Remove old shape and asset if they exist
+    if (editor.getShape(shapeId)) {
+      editor.deleteShape(shapeId);
+    }
+    if (editor.getAsset(assetId)) {
+      editor.deleteAssets([assetId]);
+    }
+    // Insert new image
+    insertSampleImage(editor, (processedImageUrl ? processedImageUrl : sampleImage.imageUrl || ""));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processedImageUrl, sampleImage.imageUrl]);
 
   return (
     <div className="h-full w-full">
@@ -91,6 +110,7 @@ export function StorageTldraw({
         options={{ maxPages: 1 }}
         store={store}
         onMount={(editor) => {
+          editorRef.current = editor;
           editor.user.updateUserPreferences({
             colorScheme: resolvedTheme === "dark" ? "dark" : "light",
           });
@@ -125,8 +145,7 @@ export function StorageTldraw({
             }
             return;
           });
-
-          insertSampleImage(editor);
+          insertSampleImage(editor, (processedImageUrl ? processedImageUrl : sampleImage.imageUrl || ""));
         }}
         overrides={{
           tools: (_editor, tools) => {
@@ -142,7 +161,6 @@ export function StorageTldraw({
           DebugPanel: null,
           PageMenu: null,
           MainMenu: null,
-
           StylePanel: () => (
             <div
               style={{

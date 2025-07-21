@@ -59,6 +59,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.5.2",
+    "react-markdown": "^10.1.0",
     "react-markup": "^2.0.0",
     "react-phone-number-input": "^3.4.12",
     "react-qr-code": "^2.0.18",
