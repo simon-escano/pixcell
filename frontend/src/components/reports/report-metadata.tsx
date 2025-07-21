@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CustomAlertDialog } from "@/components/custom-alert-dialog"
 import {
   FileText,
   AlertCircle,
@@ -21,23 +20,22 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
-import React from "react"
 
 function StatusBadge({ status }: { status: string }) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "Draft":
-        return { color: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: Clock }
+        return { color: "bg-yellow-50 text-yellow-700 border-yellow-200", icon: Clock }
       case "Finalized":
-        return { color: "bg-green-100 text-green-800 border-green-200", icon: CheckCircle2 }
+        return { color: "bg-green-50 text-green-700 border-green-200", icon: CheckCircle2 }
       case "UNDER_REVIEW":
-        return { color: "bg-blue-100 text-blue-800 border-blue-200", icon: Eye }
+        return { color: "bg-blue-50 text-blue-700 border-blue-200", icon: Eye }
       case "REJECTED":
-        return { color: "bg-red-100 text-red-800 border-red-200", icon: XCircle }
+        return { color: "bg-red-50 text-red-700 border-red-200", icon: XCircle }
       case "ARCHIVED":
-        return { color: "bg-gray-100 text-gray-800 border-gray-200", icon: Shield }
+        return { color: "bg-muted text-muted-foreground border-border", icon: Shield }
       default:
-        return { color: "bg-gray-100 text-gray-800 border-gray-200", icon: AlertCircle }
+        return { color: "bg-muted text-muted-foreground border-border", icon: AlertCircle }
     }
   }
 
@@ -125,24 +123,23 @@ export default function ReportMetadata({ reportData }: { reportData: any }) {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600">Status</span>
+              <span className="text-sm font-medium text-muted-foreground">Status</span>
               <StatusBadge status={reportData.formData.status || "Finalized"} />
             </div>
-
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600">Test Type</span>
-              <span className="text-sm text-gray-900">{reportData.formData.testType}</span>
+              <span className="text-sm font-medium text-muted-foreground">Test Type</span>
+              <span className="text-sm text-foreground">{reportData.formData.testType}</span>
             </div>
-
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600">Report Code</span>
-              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">{reportData.reportCode || "N/A"}</span>
+              <span className="text-sm font-medium text-muted-foreground">Report Code</span>
+              <span className="text-sm font-mono bg-muted text-muted-foreground px-2 py-1 rounded">
+                {reportData.reportCode || "N/A"}
+              </span>
             </div>
-
             {reportData.formData.createdAt && (
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-600">Created</span>
-                <span className="text-sm text-gray-900 flex items-center gap-1">
+                <span className="text-sm font-medium text-muted-foreground">Created</span>
+                <span className="text-sm text-foreground flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {format(new Date(reportData.formData.createdAt), "MMM dd, yyyy")}
                 </span>
@@ -153,25 +150,25 @@ export default function ReportMetadata({ reportData }: { reportData: any }) {
           {/* Patient Info */}
           {reportData.selectedPatient && (
             <>
-              <div className="border-t pt-4">
-                <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-3">
+              <div className="border-t border-border pt-4">
+                <h4 className="font-medium text-foreground flex items-center gap-2 mb-3">
                   <User className="h-4 w-4" />
                   Patient Information
                 </h4>
                 <div className="space-y-2 pl-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Name</span>
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm font-medium text-muted-foreground">Name</span>
+                    <span className="text-sm text-foreground">
                       {reportData.selectedPatient.firstName} {reportData.selectedPatient.lastName}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Blood Type</span>
-                    <span className="text-sm text-gray-900">{reportData.selectedPatient.bloodType}</span>
+                    <span className="text-sm font-medium text-muted-foreground">Blood Type</span>
+                    <span className="text-sm text-foreground">{reportData.selectedPatient.bloodType}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Sex</span>
-                    <span className="text-sm text-gray-900">{reportData.selectedPatient.sex}</span>
+                    <span className="text-sm font-medium text-muted-foreground">Sex</span>
+                    <span className="text-sm text-foreground">{reportData.selectedPatient.sex}</span>
                   </div>
                 </div>
               </div>
@@ -181,26 +178,26 @@ export default function ReportMetadata({ reportData }: { reportData: any }) {
           {/* Sample Info */}
           {reportData.selectedSample && (
             <>
-              <div className="border-t pt-4">
-                <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-3">
+              <div className="border-t border-border pt-4">
+                <h4 className="font-medium text-foreground flex items-center gap-2 mb-3">
                   <TestTube className="h-4 w-4" />
                   Sample Information
                 </h4>
                 <div className="space-y-2 pl-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Sample Name</span>
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm font-medium text-muted-foreground">Sample Name</span>
+                    <span className="text-sm text-foreground">
                       {reportData.selectedSample.sampleName || `Sample ${reportData.selectedSample.id?.slice(0, 8)}`}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Created By</span>
-                    <span className="text-sm text-gray-900">{reportData.doctorName}</span>
+                    <span className="text-sm font-medium text-muted-foreground">Created By</span>
+                    <span className="text-sm text-foreground">{reportData.doctorName}</span>
                   </div>
                   {reportData.selectedSample.capturedAt && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Captured</span>
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm font-medium text-muted-foreground">Captured</span>
+                      <span className="text-sm text-foreground">
                         {format(new Date(reportData.selectedSample.capturedAt), "MMM dd, yyyy")}
                       </span>
                     </div>
@@ -212,40 +209,21 @@ export default function ReportMetadata({ reportData }: { reportData: any }) {
         </CardContent>
       </Card>
 
-      {/* Security Notice */}
-      <Card>
-        <CardContent className="pt-6">
-          <CustomAlertDialog
-            title={<span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Secure Access</span>}
-            description={
-              <div className="space-y-2">
-                <p className="font-medium">Secure Access</p>
-                <p className="text-sm">
-                  This report is accessed securely and all viewing activity is logged for security purposes.
-                </p>
-              </div>
-            }
-            confirmText="OK"
-            onConfirm={() => {}}
-          />
-        </CardContent>
-      </Card>
-
       {/* Healthcare Provider Info */}
       <Card>
         <CardContent className="pt-6">
           <div className="text-center space-y-3">
-            <div className="mx-auto w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <Building className="h-5 w-5 text-blue-600" />
+            <div className="mx-auto w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <Building className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">PixCell</h4>
-              <p className="text-sm text-gray-600">123 Medical Center Dr.</p>
-              <p className="text-sm text-gray-600">+1 (555) 123-4567</p>
+              <h4 className="font-medium text-foreground">PixCell</h4>
+              <p className="text-sm text-muted-foreground">123 Medical Center Dr.</p>
+              <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
   )
-} 
+}
