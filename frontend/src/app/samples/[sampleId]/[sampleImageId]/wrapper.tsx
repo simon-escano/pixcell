@@ -361,7 +361,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               <Badge variant="secondary">{sampleImages.length}</Badge>
               <div className="ml-auto">
                 <SampleDrawer patients={[sample.patient]} sample={sample} patient={sample.patient}>
-                  <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all shadow-md">
+                  <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
                     <PlusIcon className="w-4 h-4" />
                   </div>
                 </SampleDrawer>
@@ -501,7 +501,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               <Button
                 onClick={handleDetect}
                 disabled={isDetecting || isBatchDetecting}
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
+                className="w-full text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
                 size="lg"
               >
                 {isDetecting ? (
