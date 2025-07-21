@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import {
 const Header = () => {
   const pathname = usePathname();
   const pathArray = [" ", ...pathname.split("/").filter(Boolean)];
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const formatSegment = (segment: string) => {
     if (!segment) return "PixCell";
@@ -83,13 +83,22 @@ const Header = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setTheme("light")}>
-              Light
+              <div className="flex items-center justify-between w-full">
+                Light
+                {theme === "light" && <Check className="h-4 w-4" />}
+              </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme("dark")}>
-              Dark
+              <div className="flex items-center justify-between w-full">
+                Dark
+                {theme === "dark" && <Check className="h-4 w-4" />}
+              </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme("system")}>
-              System
+              <div className="flex items-center justify-between w-full">
+                System
+                {theme === "system" && <Check className="h-4 w-4" />}
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

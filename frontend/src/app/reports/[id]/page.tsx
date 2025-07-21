@@ -26,7 +26,7 @@ function ReportPageSkeleton() {
   return (
     <Base>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-8 py-8">
           {/* Header Skeleton */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
@@ -159,7 +159,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
   return (
     <Base>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
             {/* Title and Actions */}
