@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,6 +48,7 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
   const [showAssignedOnly, setShowAssignedOnly] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedPatients, setSelectedPatients] = useState<string[]>([])
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchDoctorIdAndPatients() {
@@ -111,6 +113,7 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
         })
         toast.success("Patient unassigned successfully")
       }
+      router.refresh();
     } catch (error) {
       // Revert optimistic update on error
       if (checked) {
@@ -155,6 +158,7 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
       })
       setSelectedPatients([])
       setBulkMode(false)
+      router.refresh();
     } catch (error) {
       toast.error(`Failed to ${assign ? "assign" : "unassign"} patients`, { id: toastId })
     } finally {
