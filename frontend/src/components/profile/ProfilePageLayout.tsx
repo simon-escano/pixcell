@@ -32,6 +32,7 @@ import {
   XCircle,
 } from "lucide-react"
 import UserButton from "../users/user-button";
+import UploadSampleDrawerForPatient from "../samples/upload-sample-drawer";
 
 export interface ProfilePageLayoutProps {
   entity: any // user or patient
@@ -47,6 +48,9 @@ export interface ProfilePageLayoutProps {
   patientsList?: ReactNode // for users with patients
   patientsCount?: number // for users with patients
   patients?: any[]; // <-- add this
+  // [NEW]
+  doctorsList?: any[]; // for patients with doctors
+  doctorsCount?: number;
 }
 
 // Enhanced Empty State Component
@@ -231,6 +235,36 @@ const PatientItem = ({ patient, index, onClick }: { patient: any; index: number;
   </button>
 )
 
+// [NEW] Enhanced Doctor Item Component
+const DoctorItem = ({ doctor, index, onClick }: { doctor: any; index: number; onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="group flex items-center justify-between p-4 bg-gradient-to-r from-card to-muted/30 hover:from-muted/50 hover:to-chart-3/10 dark:from-card dark:to-muted/20 dark:hover:from-muted/30 dark:hover:to-chart-3/10 rounded-xl transition-all duration-300 border-2 border-border/30 hover:border-chart-3/30 dark:border-border/20 dark:hover:border-chart-3/40 w-full text-left shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+  >
+    <div className="flex items-center gap-4">
+      <Avatar className="h-10 w-10 ring-2 ring-chart-3/30">
+        <AvatarImage src={doctor.imageUrl || ""} alt={`${doctor.firstName} ${doctor.lastName}`} />
+        <AvatarFallback className="bg-chart-3/20 text-chart-3 text-sm font-medium">
+          {doctor.firstName?.[0]}
+          {doctor.lastName?.[0]}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <div className="font-semibold text-foreground text-base mb-1">
+          {doctor.firstName} {doctor.lastName}
+        </div>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <User className="w-3 h-3" />
+            ID: {doctor.id?.slice(0, 8)}...
+          </div>
+        </div>
+      </div>
+    </div>
+    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-chart-3 transition-colors" />
+  </button>
+)
+
 export default function ProfilePageLayout({
   entity,
   samples,
@@ -245,8 +279,12 @@ export default function ProfilePageLayout({
   patientsList,
   patientsCount,
   patients,
+  // [NEW]
+  doctorsList,
+  doctorsCount,
 }: ProfilePageLayoutProps) {
   const router = useRouter()
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Search and filter states
   const [samplesSearch, setSamplesSearch] = useState("")
@@ -256,6 +294,7 @@ export default function ProfilePageLayout({
   const [reportsFilter, setReportsFilter] = useState("all")
   const [samplesSort, setSamplesSort] = useState("newest")
   const [reportsSort, setReportsSort] = useState("newest")
+  const [doctorsSearch, setDoctorsSearch] = useState("");
 
   // Calculate some stats
   const recentSamples = samples.filter((sample) => {
@@ -315,6 +354,13 @@ export default function ProfilePageLayout({
       `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(patientsSearch.toLowerCase()) ||
       patient.email.toLowerCase().includes(patientsSearch.toLowerCase()),
   )
+
+  // [NEW] Filtered doctors
+  const safeDoctorsList: any[] = Array.isArray(doctorsList) ? doctorsList : [];
+  const filteredDoctors = safeDoctorsList.filter(
+    (doctor: any) =>
+      `${doctor.firstName} ${doctor.lastName}`.toLowerCase().includes(doctorsSearch.toLowerCase())
+  );
 
   // Remove the code that attaches patient to each sample
   // Remove the UserButton for sample.patient in the SampleItem component
@@ -475,6 +521,16 @@ export default function ProfilePageLayout({
                         Patients{typeof patientsCount === "number" ? ` (${patientsCount})` : ""}
                       </TabsTrigger>
                     )}
+                    {/* [NEW] Doctors tab for patients */}
+                    {doctorsList && (
+                      <TabsTrigger
+                        value="doctors"
+                        className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-chart-3 data-[state=active]:to-chart-3/80 data-[state=active]:text-white data-[state=active]:shadow-lg px-4 py-2 text-sm font-medium transition-all"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Doctors{typeof doctorsCount === "number" ? ` (${doctorsCount})` : ""}
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </div>
 
@@ -523,15 +579,6 @@ export default function ProfilePageLayout({
                               />
                             ))}
                           </div>
-                        ) : samples.length === 0 ? (
-                          <EmptyState
-                            icon={TestTube}
-                            title="No samples yet"
-                            description="Upload your first sample to begin analysis and generate comprehensive reports with AI-powered detection."
-                            actionLabel="Upload Sample"
-                            onAction={() => router.push("/samples/upload")}
-                            gradient="bg-gradient-to-br from-chart-1 to-chart-1/80"
-                          />
                         ) : (
                           <EmptyState
                             icon={Search}
@@ -597,15 +644,6 @@ export default function ProfilePageLayout({
                             />
                           ))}
                         </div>
-                      ) : reports.length === 0 ? (
-                        <EmptyState
-                          icon={FileText}
-                          title="No reports generated"
-                          description="Reports will appear here once you analyze your samples. Start by uploading samples and running AI detection."
-                          actionLabel="View Samples"
-                          onAction={() => router.push("/samples")}
-                          gradient="bg-gradient-to-br from-chart-2 to-chart-2/80"
-                        />
                       ) : (
                         <EmptyState
                           icon={Search}
@@ -651,6 +689,46 @@ export default function ProfilePageLayout({
                             icon={Search}
                             title="No patients found"
                             description="Try adjusting your search terms to find the patients you're looking for."
+                            gradient="bg-gradient-to-br from-muted-foreground to-muted-foreground/80"
+                          />
+                        )}
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  {/* [NEW] Doctors Tab */}
+                  {doctorsList && (
+                    <TabsContent value="doctors" className="h-full m-0 flex flex-col">
+                      {/* Search Bar */}
+                      <div className="p-4 border-b border-border bg-muted/20 dark:bg-muted/10">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                          <Input
+                            placeholder="Search doctors..."
+                            value={doctorsSearch}
+                            onChange={(e) => setDoctorsSearch(e.target.value)}
+                            className="pl-10 bg-card border-border/50"
+                          />
+                        </div>
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 overflow-hidden p-4">
+                        {filteredDoctors.length > 0 ? (
+                          <div className="space-y-3 h-full overflow-auto custom-scrollbar">
+                            {filteredDoctors.map((doctor: any, index: number) => (
+                              <DoctorItem
+                                key={`${doctor.id}-${index}`}
+                                doctor={doctor}
+                                index={index}
+                                onClick={() => router.push(`/users/${doctor.id}`)}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <EmptyState
+                            icon={Search}
+                            title="No doctors found"
+                            description="Try adjusting your search terms to find the doctors you're looking for."
                             gradient="bg-gradient-to-br from-muted-foreground to-muted-foreground/80"
                           />
                         )}
