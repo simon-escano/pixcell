@@ -1,4 +1,6 @@
+'use client';
 import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +18,8 @@ export interface ProfilePageLayoutProps {
   sampleList?: ReactNode; // custom sample list (optional)
   reportList: ReactNode; // report list (required)
   reportCount?: number; // for patients
+  patientsList?: ReactNode; // for users with patients
+  patientsCount?: number; // for users with patients
 }
 
 export default function ProfilePageLayout({
@@ -29,7 +33,10 @@ export default function ProfilePageLayout({
   sampleList,
   reportList,
   reportCount,
+  patientsList,
+  patientsCount,
 }: ProfilePageLayoutProps) {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 max-w-7xl">
@@ -100,6 +107,14 @@ export default function ProfilePageLayout({
                     >
                       Reports ({reportCount ?? reports.length})
                     </TabsTrigger>
+                    {patientsList && (
+                      <TabsTrigger
+                        value="patients"
+                        className="data-[state=active]:bg-card data-[state=active]:shadow-sm px-3 py-1.5 text-sm"
+                      >
+                        Patients{typeof patientsCount === 'number' ? ` (${patientsCount})` : ''}
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </div>
                 {/* Content */}
@@ -109,9 +124,11 @@ export default function ProfilePageLayout({
                       samples.length > 0 ? (
                         <div className="space-y-2 h-full overflow-auto">
                           {samples.map((sample, index) => (
-                            <div
+                            <button
                               key={`${sample.id}-${index}`}
-                              className="group flex items-center justify-between p-3 bg-muted hover:bg-muted/80 rounded-lg transition-all duration-200 border border-transparent hover:border-border"
+                              className="group flex items-center justify-between p-3 bg-muted hover:bg-muted/80 rounded-lg transition-all duration-200 border border-transparent hover:border-border w-full text-left"
+                              onClick={() => router.push(`/samples/${sample.id}`)}
+                              type="button"
                             >
                               <div className="flex items-center gap-3">
                                 <div className="w-1 h-8 bg-primary rounded-full"></div>
@@ -132,13 +149,8 @@ export default function ProfilePageLayout({
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <div className="text-right">
-                                  <div className="text-xs font-medium text-card-foreground">Processing</div>
-                                  <div className="text-xs text-muted-foreground">In progress</div>
-                                </div>
-                              </div>
-                            </div>
+                             
+                            </button>
                           ))}
                         </div>
                       ) : (
@@ -157,6 +169,11 @@ export default function ProfilePageLayout({
                   <TabsContent value="reports" className="h-full m-0 p-4">
                     {reportList}
                   </TabsContent>
+                  {patientsList && (
+                    <TabsContent value="patients" className="h-full m-0 p-4">
+                      {patientsList}
+                    </TabsContent>
+                  )}
                 </div>
               </Tabs>
             </Card>

@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { getProfileByUserId, getReportsByGeneratedBy, getRoleById, getSamplesByUserId, getUserById } from "@/db/queries/select";
+import { getProfileByUserId, getReportsByGeneratedBy, getRoleById, getSamplesByUserId, getUserById, getAllPatientsForUser } from "@/db/queries/select";
 import { getMetaProfileByUserId, getMetaSampleImagesBySampleId } from "@/app/samples/queries";
 import UserProfileClient from "./UserProfileClient";
 
@@ -15,6 +15,9 @@ export default async function UserPage({
   const reports = await getReportsByGeneratedBy(userId);
   const role = (await getRoleById(profile.roleId)).name;
   const metaUser = await getMetaProfileByUserId(userId);
+
+  // Fetch patients for this user
+  const patients = await getAllPatientsForUser(profile.id, role);
 
   // Fetch sample images for each sample
   const samplesWithImages = await Promise.all(
@@ -33,6 +36,7 @@ export default async function UserPage({
         samples={samplesWithImages}
         reports={reports}
         metaUser={metaUser}
+        patients={patients}
       />
     </Base>
   );
