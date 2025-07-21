@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ReactMarkdown from "react-markdown"
 import { Eye, Brain, AlertCircle, CheckCircle2, ImageIcon, BarChart3 } from "lucide-react"
+import { useRouter } from "next/navigation"
 // import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface DetectionResultDialogProps {
@@ -15,6 +16,8 @@ interface DetectionResultDialogProps {
   detectionResults: any
   aiAnalysis: any
   processedImageUrl: string | null
+  patientId?: string
+  sampleId?: string
 }
 
 const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
@@ -23,7 +26,11 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   detectionResults,
   aiAnalysis,
   processedImageUrl,
+  patientId,
+  sampleId,
 }) => {
+  const router = useRouter();
+
   const getDetectionColor = (index: number) => {
     const colors = [
       "bg-blue-100 text-blue-800 border-blue-200",
@@ -40,6 +47,21 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
 
   // Batch mode: detectionResults.per_image exists
   const isBatch = detectionResults && detectionResults.per_image;
+
+  // Handler for generating report in batch mode
+  const handleGenerateReport = () => {
+    if (isBatch) {
+      console.log("Saving to localStorage:", { detectionResults, aiAnalysis, patientId, sampleId });
+      localStorage.setItem("batchDetectionReportData", JSON.stringify({
+        detectionResults,
+        aiAnalysis,
+        patientId,
+        sampleId,
+      }));
+      // Redirect to report creation page
+      router.push("/reports/ai-generate");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,6 +103,15 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                         )}
                       </div>
                     ))}
+                  </div>
+                  {/* Generate Report Button for Batch Mode */}
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={handleGenerateReport}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all"
+                    >
+                      Generate Report
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -129,31 +129,88 @@ export default function ImprovedReportForm({
   const [showTableEditor, setShowTableEditor] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [formData, setFormData] = useState<ReportFormData>({
-    title: initialFormData?.title || "",
-    testType: ["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
-      initialFormData?.testType || "",
-    )
-      ? initialFormData?.testType || ""
-      : initialFormData?.testType === "other"
-        ? "other"
-        : ["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
-              initialFormData?.testType || "",
-            )
-          ? initialFormData?.testType || ""
-          : initialFormData?.testType || "",
-    content: initialFormData?.content || "",
-    isAiGenerated: initialFormData?.isAiGenerated || false,
-    customTestType:
-      initialFormData?.testType &&
-      !["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
-        initialFormData?.testType || "",
-      )
-        ? initialFormData?.testType
-        : "",
-  })
+  const [formData, setFormData] = useState<ReportFormData>(() => {
+    if (initialFormData) {
+      return {
+        title: initialFormData.title || "",
+        testType: ["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
+          initialFormData.testType || ""
+        )
+          ? initialFormData.testType || ""
+          : initialFormData.testType === "other"
+            ? "other"
+            : initialFormData.testType || "",
+        content: initialFormData.content || "",
+        isAiGenerated: initialFormData.isAiGenerated || false,
+        customTestType: initialFormData.testType &&
+          !["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
+            initialFormData.testType
+          )
+          ? initialFormData.testType
+          : "",
+      };
+    }
+    return {
+      title: "",
+      testType: "",
+      content: "",
+      isAiGenerated: false,
+      customTestType: "",
+    };
+  });
 
-  const [reportContent, setReportContent] = useState<ReportContent>(initialReportContent || { text: "", tables: [] })
+  const [reportContent, setReportContent] = useState<ReportContent>(() => {
+    if (initialReportContent) {
+      console.log("Using initialReportContent:", initialReportContent);
+      return initialReportContent;
+    }
+    return { text: "", tables: [] };
+  });
+
+  useEffect(() => {
+    console.log("Props changed - initialFormData:", initialFormData);
+    console.log("Props changed - initialReportContent:", initialReportContent);
+    
+    if (initialFormData) {
+      setFormData({
+        title: initialFormData.title || "",
+        testType: ["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
+          initialFormData.testType || ""
+        )
+          ? initialFormData.testType || ""
+          : initialFormData.testType === "other"
+            ? "other"
+            : initialFormData.testType || "",
+        content: initialFormData.content || "",
+        isAiGenerated: initialFormData.isAiGenerated || false,
+        customTestType: initialFormData.testType &&
+          !["Blood Test", "Urine Test", "Tissue Analysis", "Microscopy", "Culture Test"].includes(
+            initialFormData.testType
+          )
+          ? initialFormData.testType
+          : "",
+      });
+    }
+    
+    if (initialReportContent) {
+      console.log("Setting reportContent from initialReportContent:", initialReportContent);
+      setReportContent(initialReportContent);
+    }
+  }, [initialFormData, initialReportContent]);
+
+  useEffect(() => {
+    if (initialPatientId && patients.some(p => p.id === initialPatientId)) {
+      console.log("Setting initial patient ID:", initialPatientId);
+      setSelectedPatientId(initialPatientId);
+    }
+  }, [initialPatientId, patients]);
+  
+  useEffect(() => {
+    if (initialSampleId && samples.some(s => s.id === initialSampleId)) {
+      console.log("Setting initial sample ID:", initialSampleId);
+      setSelectedSampleId(initialSampleId);
+    }
+  }, [initialSampleId, samples]);
 
   // Calculate form completion progress
   const calculateProgress = () => {

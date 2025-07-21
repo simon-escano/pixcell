@@ -349,6 +349,8 @@ const SamplePageWrapper = ({
           detectionResults={batchDetectionResults}
           aiAnalysis={batchAiAnalysis}
           processedImageUrl={null}
+          patientId={sample.patient?.id}
+          sampleId={sample.id}
         />
       </div>
     </div>
