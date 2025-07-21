@@ -139,16 +139,28 @@ export const logoutAction = async () => {
 
 export const resetPasswordAction = async (formData: FormData) => {
   try {
-    const email = formData.get("email") as string;
+    const email = (formData.get("email") as string)?.trim();
+    console.log("EMAIL:", email);
+
+    // Validate email
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { errorMessage: "Please provide a valid email address" };
+    }
+
     const auth = await getSupabaseAuth();
 
-    const { error } = await auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery`,
-    });
-    if (error) throw error;
+    const { data, error } = await auth.resetPasswordForEmail(email 
+    ,{redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery`,}
+    );
+    console.log("Supabase response:", { data, error });
+
+    if (error) {
+      throw new Error(error.message || "Failed to send reset email");
+    }
 
     return { errorMessage: null };
   } catch (error) {
+    console.error("Supabase error:", error);
     return { errorMessage: getErrorMessage(error) };
   }
 };
