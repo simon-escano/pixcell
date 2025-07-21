@@ -96,7 +96,7 @@ export default function ReportPreview({
   const PAGE_HEIGHT = 1123;
   // --- Improved block-based pagination ---
   // Each paragraph = 1 block, each table = 4 blocks, 8 blocks per page
-  const BLOCKS_PER_PAGE = 9;
+  const BLOCKS_PER_PAGE = 2;
   const TABLE_BLOCK_SIZE = 3;
   // Split text into paragraphs (empty lines or \n\n)
   const text = formData.content || "";
@@ -288,7 +288,7 @@ export default function ReportPreview({
             </div>
           )}
           {/* Main Content: mixed text and tables */}
-          <div className="mb-6 flex-1 overflow-auto">
+          <div className="mb-6 flex-1 overflow-hidden">
             {pageContent.map((block, idx) =>
               block.type === 'text' ? (
                 <div key={idx} className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-800 leading-relaxed mb-4">

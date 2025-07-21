@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
+import AiGeneratedNoticeClient from "./ai-generated-notice-client"
 
 // Loading component
 function ReportPageSkeleton() {
@@ -222,20 +223,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
 
               {/* AI Generated Notice */}
               {report.isAiGenerated && (
-                <CustomAlertDialog
-                  title={
-                    <span className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4" />
-                      AI Generated Report
-                    </span>
-                  }
-                  description={
-                    "This report was generated using AI assistance. Please review all content carefully before finalizing."
-                  }
-                  onConfirm={async () => {}}
-                  confirmText="OK"
-                  cancelText=""
-                />
+                <AiGeneratedNoticeClient />
               )}
             </div>
           </div>

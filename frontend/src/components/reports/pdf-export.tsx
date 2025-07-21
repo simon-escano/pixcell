@@ -253,7 +253,7 @@ const formatDateTime = (date: Date) => {
 const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps) => {
   // --- Pagination logic ---
   // Each paragraph = 1 block, each table = 3 blocks, 9 blocks per page
-  const BLOCKS_PER_PAGE = 9;
+  const BLOCKS_PER_PAGE = 2;
   const TABLE_BLOCK_SIZE = 3;
   // Split text into paragraphs (empty lines or \n\n)
   const text = formData.content || "";
