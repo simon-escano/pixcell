@@ -295,9 +295,13 @@ const SamplePageWrapper = ({
           </Table>
         </div>
         </div>
-        {/* Detection Results Container - removed, now in modal */}
-        {/* AI Analysis Container - removed, now in modal */}
-        <div className="flex w-full items-center gap-2 p-2 border rounded-lg">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="w-full" variant="outline">
+              AI Actions
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-72 p-2 flex flex-col gap-2">
             <Select
               disabled={isDetecting || isBatchDetecting}
               onValueChange={setSelectedModel}
@@ -321,19 +325,22 @@ const SamplePageWrapper = ({
             <Button
               onClick={handleDetect}
               disabled={isDetecting || isBatchDetecting}
+              className="w-full"
             >
-              <Search />
+              <Search className="mr-2" />
               {isDetecting ? "Detecting..." : "Detect"}
             </Button>
             <Button
               onClick={handleBatchDetect}
               disabled={isDetecting || isBatchDetecting}
               variant="secondary"
+              className="w-full"
             >
-              <Search />
+              <Search className="mr-2" />
               {isBatchDetecting ? "Detecting All..." : "Detect All in Sample"}
             </Button>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {/* Results Modal */}
         <DetectionResultDialog
           open={isResultModalOpen}
