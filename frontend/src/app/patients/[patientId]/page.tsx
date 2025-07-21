@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId } from "@/db/queries/select"
 import { FileText, TestTube, Edit } from "lucide-react"
-import { UploadSampleDrawerForPatient } from "@/components/samples/upload-sample-drawer"
+import UploadSampleDrawerForPatient from "@/components/samples/upload-sample-drawer"
 import { useRouter } from "next/navigation";
 import { EditPatientDialogTrigger } from "@/components/patients/edit-patient-dialog-trigger";
 import { PatientReportsList } from "@/components/patients/patient-reports-list";
@@ -123,8 +123,11 @@ export default async function PatientPage({
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <UploadSampleDrawerForPatient
-                      patientId={patientId}
-                      className="bg-purple-600 hover:bg-purple-700 text-white w-full text-sm py-2"
+                      trigger={
+                        <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full text-sm py-2">
+                          Upload Sample
+                        </Button>
+                      }
                     />
                     <form action={`/reports`} method="get">
                       <input type="hidden" name="search" value={`${patientData.firstName} ${patientData.lastName}`} />

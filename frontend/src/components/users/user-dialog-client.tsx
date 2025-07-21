@@ -33,7 +33,7 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
       <Button
         variant="ghost"
         size="sm"
-        className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
+        className="text-muted-foreground hover:text-card-foreground hover:bg-muted h-8 w-8 p-0"
         onClick={() => setOpen(true)}
         aria-label="Edit User"
       >
