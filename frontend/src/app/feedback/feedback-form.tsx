@@ -82,9 +82,8 @@ export function FeedbackForm() {
       const formData = new FormData(formRef.current!);
       const result = await submitFeedback(formData);
       if (result.success) {
-        toast.success("Feedback submitted successfully!");
-        router.refresh();
-        formRef.current?.reset();
+        
+
         setOverallExperience("");
         setInterfaceUsability("");
         setAiAccuracy("");
@@ -95,6 +94,16 @@ export function FeedbackForm() {
         setTechnicalIssues("");
         setRecommendation("");
         setAdditionalComments("");
+        toast.success("Feedback submitted successfully!");
+
+        formRef.current?.reset();
+
+        // Scroll after DOM updates (form collapse)
+        setTimeout(() => {
+          formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100); // 100ms is usually enough
+
+        router.refresh();
       } else {
         toast.error(result.error || "Failed to submit feedback");
       }
