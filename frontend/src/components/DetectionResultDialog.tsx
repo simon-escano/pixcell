@@ -49,18 +49,9 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid")
 
-  const getDetectionColor = (index: number) => {
-    const colors = [
-      "bg-primary/10 text-primary border-primary/20",
-      "bg-secondary/10 text-secondary border-secondary/20",
-      "bg-accent/10 text-accent-foreground border-accent/20",
-      "bg-muted text-muted-foreground border-muted-foreground/20",
-      "bg-primary/5 text-primary border-primary/10",
-      "bg-secondary/5 text-secondary border-secondary/10",
-      "bg-accent/5 text-accent-foreground border-accent/10",
-      "bg-destructive/10 text-destructive border-destructive/20",
-    ]
-    return colors[index % colors.length]
+  // Consistent neutral styling for all detected objects
+  const getDetectionStyle = () => {
+    return "bg-muted/50 text-foreground border-border hover:bg-muted/70"
   }
 
   // Batch mode: detectionResults.per_image exists
@@ -105,7 +96,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           Image {index + 1}
         </div>
       </div>
-
       {imageData.detections && Object.keys(imageData.detections).length > 0 && (
         <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-sm">
           <CardHeader className="pb-3">
@@ -116,10 +106,10 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {Object.entries(imageData.detections).map(([cls, count], detIndex) => (
+              {Object.entries(imageData.detections).map(([cls, count]) => (
                 <div
                   key={cls}
-                  className={`${getDetectionColor(detIndex)} px-3 py-2.5 rounded-lg border text-sm flex items-center justify-between transition-all hover:shadow-sm`}
+                  className={`${getDetectionStyle()} px-3 py-2.5 rounded-lg border text-sm flex items-center justify-between transition-all hover:shadow-sm`}
                 >
                   <span className="capitalize font-medium">{cls.replace("_", " ")}</span>
                   <Badge variant="secondary" className="bg-background/80 text-xs font-semibold">
@@ -143,7 +133,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
             <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-secondary/90" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
-
             <DialogHeader className="relative z-10">
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -167,7 +156,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
               </p>
             </DialogHeader>
           </div>
-
           {/* Content */}
           <div className="flex-1 overflow-hidden">
             {isBatch ? (
@@ -197,7 +185,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                     </TabsTrigger>
                   </TabsList>
                 </div>
-
                 <div className="flex-1 min-h-0 overflow-hidden">
                   <TabsContent value="overview" className="h-full m-0">
                     <ScrollArea className="h-full p-6">
@@ -229,7 +216,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                 <div className="text-accent-foreground/80 text-sm font-medium">Object Types</div>
                               </div>
                             </div>
-
                             {detectionResults.detections && (
                               <div className="space-y-4">
                                 <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
@@ -237,10 +223,10 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                   Detected Objects Across All Images
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                  {Object.entries(detectionResults.detections).map(([cls, count], index) => (
+                                  {Object.entries(detectionResults.detections).map(([cls, count]) => (
                                     <div
                                       key={cls}
-                                      className={`${getDetectionColor(index)} px-4 py-4 rounded-xl border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}
+                                      className={`${getDetectionStyle()} px-4 py-4 rounded-xl border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}
                                     >
                                       <span className="font-semibold capitalize">{cls.replace("_", " ")}</span>
                                       <Badge
@@ -254,7 +240,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                 </div>
                               </div>
                             )}
-
                             <div className="flex justify-end mt-8">
                               <Button
                                 onClick={handleGenerateReport}
@@ -270,7 +255,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       </div>
                     </ScrollArea>
                   </TabsContent>
-
                   <TabsContent value="images" className="h-full m-0 flex flex-col">
                     {/* Enhanced View Mode Toggle */}
                     <div className="px-6 py-4 border-b border-border/50 bg-card/30 backdrop-blur-sm flex items-center justify-between flex-shrink-0">
@@ -299,7 +283,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                         </Button>
                       </div>
                     </div>
-
                     <div className="flex-1 min-h-0">
                       <ScrollArea className="h-full">
                         {viewMode === "grid" ? (
@@ -345,13 +328,11 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                   <ChevronRight className="w-4 h-4" />
                                 </Button>
                               </div>
-
                               <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-lg">
                                 <CardContent className="p-6">
                                   <SingleImageView imageData={images[selectedImageIndex]} index={selectedImageIndex} />
                                 </CardContent>
                               </Card>
-
                               {/* Enhanced Thumbnail Navigation */}
                               <div className="flex justify-center">
                                 <div className="flex gap-3 overflow-x-auto pb-2 px-2">
@@ -380,7 +361,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       </ScrollArea>
                     </div>
                   </TabsContent>
-
                   <TabsContent value="analysis" className="h-full m-0">
                     <ScrollArea className="h-full p-6">
                       {aiAnalysis && (
@@ -444,7 +424,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       </CardContent>
                     </Card>
                   )}
-
                   {/* Enhanced Single Image Detection Results */}
                   {detectionResults && (
                     <Card className="bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-border/50 shadow-lg">
@@ -463,7 +442,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                             {detectionResults.total_detections} Total Detections
                           </div>
                         </div>
-
                         {detectionResults.detections && (
                           <div className="space-y-4">
                             <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
@@ -471,10 +449,10 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                               Detected Objects
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {Object.entries(detectionResults.detections).map(([cls, count], index) => (
+                              {Object.entries(detectionResults.detections).map(([cls, count]) => (
                                 <div
                                   key={cls}
-                                  className={`${getDetectionColor(index)} px-4 py-4 rounded-xl border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}
+                                  className={`${getDetectionStyle()} px-4 py-4 rounded-xl border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}
                                 >
                                   <span className="font-semibold capitalize">{cls.replace("_", " ")}</span>
                                   <Badge
@@ -491,7 +469,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       </CardContent>
                     </Card>
                   )}
-
                   {/* Enhanced Single Image AI Analysis */}
                   {aiAnalysis && (
                     <Card className="bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border-border/50 shadow-lg">
@@ -528,7 +505,6 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
               </ScrollArea>
             )}
           </div>
-
           {/* Enhanced Footer */}
           <div className="p-6 bg-card/50 backdrop-blur-sm border-t border-border/50 rounded-b-2xl">
             <DialogFooter>
