@@ -103,10 +103,18 @@ export default function ProfileClient(props: ProfileClientProps) {
     let actions = undefined;
     if (
       currentUser &&
-      currentRole.toLowerCase().includes("doctor") &&
-      currentUser.id === user.id
+      (
+        currentRole.toLowerCase().includes("doctor") && currentUser.id === user.id
+      )
     ) {
       actions = <AssignPatientToDoctor />;
+    }
+    // Show AssignPatientToDoctor for administrators as well
+    if (
+      currentUser &&
+      currentRole === "Administrator"
+    ) {
+      actions = <AssignPatientToDoctor doctorId={profile.id} />;
     }
     return (
       <ProfilePageLayout
