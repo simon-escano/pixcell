@@ -11,7 +11,20 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "react-hot-toast"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Search, Users, UserCheck, UserX, Loader2, CheckCircle2, AlertCircle, Mail, Phone, Calendar, Filter, UserPlus, Sparkles } from 'lucide-react'
+import {
+  Search,
+  Users,
+  UserCheck,
+  UserX,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Mail,
+  Phone,
+  Calendar,
+  Filter,
+  Sparkles,
+} from "lucide-react"
 
 interface Patient {
   id: string
@@ -40,7 +53,6 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
       setLoading(true)
       try {
         let useDoctorId = propDoctorId
-
         if (!useDoctorId) {
           const supabase = createClientComponentClient()
           const {
@@ -71,15 +83,13 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
         setLoading(false)
       }
     }
-
     fetchDoctorIdAndPatients()
   }, [propDoctorId])
 
   const handleToggle = async (patientId: string, checked: boolean) => {
     if (!doctorId) return
-
     setUpdating(patientId)
-    
+
     // Optimistic update
     if (checked) {
       setAssignedPatientIds((prev) => [...prev, patientId])
@@ -116,7 +126,6 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
 
   const handleBulkAssign = async (assign: boolean) => {
     if (!doctorId || selectedPatients.length === 0) return
-
     setLoading(true)
     const toastId = toast.loading(`${assign ? "Assigning" : "Unassigning"} ${selectedPatients.length} patients...`)
 
@@ -170,31 +179,27 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
 
   // Loading skeleton
   const PatientSkeleton = () => (
-    <Card className="animate-pulse">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-4 h-4 bg-muted rounded"></div>
-          <div className="w-10 h-10 bg-muted rounded-full"></div>
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-3 bg-muted rounded w-1/2"></div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-center gap-3 p-3 border rounded-lg animate-pulse">
+      <div className="w-4 h-4 bg-muted rounded"></div>
+      <div className="w-8 h-8 bg-muted rounded-full"></div>
+      <div className="flex-1 space-y-1">
+        <div className="h-3 bg-muted rounded w-3/4"></div>
+        <div className="h-2 bg-muted rounded w-1/2"></div>
+      </div>
+    </div>
   )
 
   if (loading) {
     return (
       <Card className="w-full">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-muted rounded animate-pulse"></div>
-            <div className="h-6 bg-muted rounded w-48 animate-pulse"></div>
+            <div className="w-5 h-5 bg-muted rounded animate-pulse"></div>
+            <div className="h-5 bg-muted rounded w-40 animate-pulse"></div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
+        <CardContent className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
             <PatientSkeleton key={i} />
           ))}
         </CardContent>
@@ -203,211 +208,219 @@ export default function AssignPatientToDoctor({ doctorId: propDoctorId }: { doct
   }
 
   return (
-    <Card className="w-full shadow-lg border-2 border-border/50 bg-card/80 backdrop-blur-sm">
-      <CardContent className="p-6">
-        {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          Assign Patients
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Compact Search and Filter */}
+        <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search patients by name or email..."
+              placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-background border-border/50"
+              className="pl-9 h-9"
             />
           </div>
           <Button
             variant={showAssignedOnly ? "default" : "outline"}
+            size="sm"
             onClick={() => setShowAssignedOnly(!showAssignedOnly)}
-            className="flex items-center gap-2"
+            className="h-9"
           >
             <Filter className="w-4 h-4" />
-            {showAssignedOnly ? "Show All" : "Assigned Only"}
           </Button>
         </div>
 
-        {/* Bulk Actions */}
+        {/* Compact Bulk Actions */}
         {bulkMode && (
-          <Card className="mb-6 bg-muted/30 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <div>
-                    <div className="font-medium">Bulk Actions Mode</div>
-                    <div className="text-sm text-muted-foreground">
-                      {selectedPatients.length} patients selected
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAssign(true)}
-                    disabled={selectedPatients.length === 0}
-                  >
-                    <UserCheck className="w-4 h-4 mr-2" />
-                    Assign Selected
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAssign(false)}
-                    disabled={selectedPatients.length === 0}
-                  >
-                    <UserX className="w-4 h-4 mr-2" />
-                    Unassign Selected
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">{selectedPatients.length} selected</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkAssign(true)}
+                disabled={selectedPatients.length === 0}
+              >
+                <UserCheck className="w-4 h-4 mr-1" />
+                Assign
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkAssign(false)}
+                disabled={selectedPatients.length === 0}
+              >
+                <UserX className="w-4 h-4 mr-1" />
+                Unassign
+              </Button>
+            </div>
+          </div>
         )}
 
-        {/* Patient List */}
+        {/* Compact Patient List */}
         {filteredPatients.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/10 rounded-full flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
               {patients.length === 0 ? (
-                <Users className="h-10 w-10 text-muted-foreground" />
+                <Users className="h-6 w-6 text-muted-foreground" />
               ) : (
-                <Search className="h-10 w-10 text-muted-foreground" />
+                <Search className="h-6 w-6 text-muted-foreground" />
               )}
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="font-medium text-foreground mb-1">
               {patients.length === 0 ? "No patients available" : "No patients found"}
             </h3>
-            <p className="text-muted-foreground max-w-md">
+            <p className="text-sm text-muted-foreground max-w-sm">
               {patients.length === 0
-                ? "There are no patients in the system yet. Patients will appear here once they are registered."
-                : "Try adjusting your search terms or filters to find the patients you're looking for."}
+                ? "Patients will appear here once they are registered."
+                : "Try adjusting your search terms or filters."}
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-[400px] pr-4">
-            <div className="space-y-3">
+          <ScrollArea className="h-[320px] w-full">
+            <div className="space-y-2 w-full">
               {filteredPatients.map((patient) => {
                 const isAssigned = assignedPatientIds.includes(patient.id)
                 const isUpdating = updating === patient.id
                 const isSelected = selectedPatients.includes(patient.id)
 
                 return (
-                  <Card
+                  <div
                     key={patient.id}
-                    className={`transition-all duration-200 hover:shadow-md ${
+                    className={`flex items-center gap-2 p-3 border rounded-lg transition-colors ${
                       isAssigned
-                        ? "bg-gradient-to-r from-chart-4/10 to-chart-4/5 border-chart-4/30"
-                        : "bg-card hover:bg-muted/30"
+                        ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800/30"
+                        : "hover:bg-muted/50"
                     } ${isSelected ? "ring-2 ring-primary/50" : ""}`}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        {/* Checkbox */}
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            checked={bulkMode ? isSelected : isAssigned}
-                            onCheckedChange={(checked) => {
-                              if (bulkMode) {
-                                if (checked) {
-                                  setSelectedPatients((prev) => [...prev, patient.id])
-                                } else {
-                                  setSelectedPatients((prev) => prev.filter((id) => id !== patient.id))
-                                }
-                              } else {
-                                handleToggle(patient.id, !!checked)
-                              }
-                            }}
-                            disabled={isUpdating}
-                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                          {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-                        </div>
+                    {/* Checkbox - Fixed width */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Checkbox
+                        checked={bulkMode ? isSelected : isAssigned}
+                        onCheckedChange={(checked) => {
+                          if (bulkMode) {
+                            if (checked) {
+                              setSelectedPatients((prev) => [...prev, patient.id])
+                            } else {
+                              setSelectedPatients((prev) => prev.filter((id) => id !== patient.id))
+                            }
+                          } else {
+                            handleToggle(patient.id, !!checked)
+                          }
+                        }}
+                        disabled={isUpdating}
+                      />
+                      {isUpdating && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+                    </div>
 
-                        {/* Avatar */}
-                        <Avatar className="h-12 w-12 ring-2 ring-border">
-                          <AvatarImage src={patient.imageUrl || ""} alt={`${patient.firstName} ${patient.lastName}`} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                            {patient.firstName[0]}
-                            {patient.lastName[0]}
-                          </AvatarFallback>
-                        </Avatar>
+                    {/* Avatar - Fixed width */}
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarImage src={patient.imageUrl || ""} alt={`${patient.firstName} ${patient.lastName}`} />
+                      <AvatarFallback className="text-xs">
+                        {patient.firstName[0]}
+                        {patient.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
 
-                        {/* Patient Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-foreground">
-                              {patient.firstName} {patient.lastName}
-                            </h4>
-                            {isAssigned && (
-                              <Badge variant="secondary" className="bg-chart-4/20 text-chart-4 text-xs">
-                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                Assigned
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Mail className="w-3 h-3" />
-                              {patient.email}
-                            </div>
-                            {patient.phone && (
-                              <div className="flex items-center gap-1">
-                                <Phone className="w-3 h-3" />
-                                {patient.phone}
-                              </div>
-                            )}
-                            {patient.dateOfBirth && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(patient.dateOfBirth).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Status Indicator */}
-                        <div className="flex items-center">
-                          {isAssigned ? (
-                            <div className="flex items-center gap-1 text-chart-4">
-                              <CheckCircle2 className="w-5 h-5" />
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <AlertCircle className="w-5 h-5" />
-                            </div>
-                          )}
-                        </div>
+                    {/* Patient Info - Flexible width with proper truncation */}
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-1 mb-1 flex-wrap">
+                        <span className="font-medium text-sm truncate max-w-[120px]">
+                          {patient.firstName} {patient.lastName}
+                        </span>
+                        {isAssigned && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 flex-shrink-0"
+                          >
+                            <CheckCircle2 className="w-2.5 h-2.5 mr-1" />
+                            Assigned
+                          </Badge>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1 truncate">
+                          <Mail className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{patient.email}</span>
+                        </div>
+                        {patient.phone && (
+                          <div className="flex items-center gap-1 truncate">
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{patient.phone}</span>
+                          </div>
+                        )}
+                        {patient.dateOfBirth && (
+                          <div className="flex items-center gap-1 truncate">
+                            <Calendar className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{new Date(patient.dateOfBirth).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status Indicator - Fixed width */}
+                    <div className="flex-shrink-0">
+                      {isAssigned ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
                 )
               })}
             </div>
           </ScrollArea>
         )}
 
-        {/* Summary */}
+        {/* Compact Summary */}
         {filteredPatients.length > 0 && (
           <>
-            <Separator className="my-4" />
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div>
-                Showing {filteredPatients.length} of {patients.length} patients
+            <Separator />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                {filteredPatients.length} of {patients.length} patients
                 {searchTerm && ` matching "${searchTerm}"`}
-              </div>
-              <div className="flex items-center gap-4">
+              </span>
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-chart-4 rounded-full"></div>
-                  Assigned ({assignedCount})
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Assigned ({assignedCount})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-                  Unassigned ({totalCount - assignedCount})
+                  <span>Unassigned ({totalCount - assignedCount})</span>
                 </div>
               </div>
             </div>
           </>
+        )}
+
+        {/* Toggle Bulk Mode */}
+        {filteredPatients.length > 0 && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setBulkMode(!bulkMode)
+                setSelectedPatients([])
+              }}
+              className="text-xs"
+            >
+              {bulkMode ? "Exit Bulk Mode" : "Bulk Actions"}
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
