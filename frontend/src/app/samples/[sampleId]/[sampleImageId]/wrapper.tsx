@@ -74,6 +74,11 @@ const SamplePageWrapper = ({
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
+  const [batchDetectionResults, setBatchDetectionResults] = useState<any>(null);
+  const [batchAiAnalysis, setBatchAiAnalysis] = useState<any>(null);
+  const [isBatchDetecting, setIsBatchDetecting] = useState(false);
+  const [isBatchResultModalOpen, setIsBatchResultModalOpen] = useState(false);
+
   const handleDetect = async () => {
     if (!selectedSampleImage?.imageUrl) {
       toast.error("No image available for detection");
@@ -124,6 +129,60 @@ const SamplePageWrapper = ({
       toast.error("Detection failed: " + error.message);
     } finally {
       setIsDetecting(false);
+    }
+  };
+
+  const handleBatchDetect = async () => {
+    if (!sampleImages.length) {
+      toast.error("No images in sample");
+      return;
+    }
+    setIsBatchDetecting(true);
+    setBatchDetectionResults(null);
+    setBatchAiAnalysis(null);
+    setIsBatchResultModalOpen(false);
+    try {
+      toast.loading("Sending all images for batch detection...");
+      // Fetch all images as blobs
+      const files: File[] = [];
+      for (const img of sampleImages) {
+        if (!img.imageUrl) continue;
+        const blob = await fetch(img.imageUrl).then((res) => res.blob());
+        files.push(new File([blob], "image.jpg", { type: blob.type }));
+      }
+      if (!files.length) throw new Error("No valid images to send");
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+      // Call backend batch detection endpoint
+      const response = await fetch(
+        `http://127.0.0.1:8000/detect-and-analyze-batch?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      if (!response.ok) throw new Error("Batch detection failed");
+      const resultData = await response.json();
+      if (resultData.success) {
+        setBatchDetectionResults({
+          detections: resultData.total_counts,
+          total_detections: resultData.total_detections,
+          per_image: resultData.results,
+        });
+        if (resultData.ai_analysis && resultData.ai_analysis.success) {
+          setBatchAiAnalysis(resultData.ai_analysis);
+        }
+        toast.dismiss();
+        toast.success("Batch detection and analysis complete!");
+        setIsBatchResultModalOpen(true);
+      } else {
+        throw new Error(resultData.error || "Batch detection failed");
+      }
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error("Batch detection failed: " + error.message);
+    } finally {
+      setIsBatchDetecting(false);
     }
   };
 
@@ -240,7 +299,7 @@ const SamplePageWrapper = ({
         {/* AI Analysis Container - removed, now in modal */}
         <div className="flex w-full items-center gap-2 p-2 border rounded-lg">
             <Select
-              disabled={isDetecting}
+              disabled={isDetecting || isBatchDetecting}
               onValueChange={setSelectedModel}
               value={selectedModel}
             >
@@ -261,10 +320,18 @@ const SamplePageWrapper = ({
             </Select>
             <Button
               onClick={handleDetect}
-              disabled={isDetecting}
+              disabled={isDetecting || isBatchDetecting}
             >
               <Search />
               {isDetecting ? "Detecting..." : "Detect"}
+            </Button>
+            <Button
+              onClick={handleBatchDetect}
+              disabled={isDetecting || isBatchDetecting}
+              variant="secondary"
+            >
+              <Search />
+              {isBatchDetecting ? "Detecting All..." : "Detect All in Sample"}
             </Button>
         </div>
         {/* Results Modal */}
@@ -274,6 +341,14 @@ const SamplePageWrapper = ({
           detectionResults={detectionResults}
           aiAnalysis={aiAnalysis}
           processedImageUrl={processedImageUrl}
+        />
+        {/* Batch Results Modal */}
+        <DetectionResultDialog
+          open={isBatchResultModalOpen}
+          onOpenChange={setIsBatchResultModalOpen}
+          detectionResults={batchDetectionResults}
+          aiAnalysis={batchAiAnalysis}
+          processedImageUrl={null}
         />
       </div>
     </div>

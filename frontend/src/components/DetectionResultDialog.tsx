@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ReactMarkdown from "react-markdown"
 import { Eye, Brain, AlertCircle, CheckCircle2, ImageIcon, BarChart3 } from "lucide-react"
+// import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface DetectionResultDialogProps {
   open: boolean
@@ -37,6 +38,9 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
     return colors[index % colors.length]
   }
 
+  // Batch mode: detectionResults.per_image exists
+  const isBatch = detectionResults && detectionResults.per_image;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="!w-[90vw] !max-w-6xl w-full p-0 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl shadow-2xl border-0">
@@ -54,22 +58,29 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
 
           {/* Content */}
           <div className="p-6 overflow-y-auto flex-1 space-y-6">
-            {/* Processed Image */}
-            {processedImageUrl && (
+            {/* Processed Images Grid for Batch Mode */}
+            {isBatch && detectionResults && detectionResults.per_image && (
               <Card className="border-2 border-dashed border-blue-200 bg-white/50 backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2 text-gray-700">
                     <ImageIcon className="w-5 h-5 text-blue-600" />
-                    Processed Image
+                    Processed Images (All)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative overflow-hidden rounded-lg border-2 border-gray-200">
-                    <img
-                      src={processedImageUrl || "/placeholder.svg"}
-                      alt="Processed"
-                      className="w-full max-h-80 object-contain bg-gray-50"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {detectionResults.per_image.map((img: any, idx: number) => (
+                      <div key={idx} className="flex flex-col items-center">
+                        <div className="mb-1 font-semibold text-sm text-gray-700">Image {idx + 1}</div>
+                        {img.processed_image_base64 && (
+                          <img
+                            src={`data:image/jpeg;base64,${img.processed_image_base64}`}
+                            alt={`Processed ${idx + 1}`}
+                            className="w-full max-h-60 object-contain rounded border"
+                          />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -85,30 +96,62 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-semibold text-lg shadow-lg">
-                      <CheckCircle2 className="w-5 h-5 inline mr-2" />
-                      {detectionResults.total_detections} Total Detections
-                    </div>
-                  </div>
-
-                  {detectionResults.detections && (
-                    <div>
-                      <h4 className="font-semibold text-gray-700 mb-4 text-lg">Detected Objects:</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {Object.entries(detectionResults.detections).map(([cls, count], index) => (
-                          <div
-                            key={cls}
-                            className={`${getDetectionColor(index)} px-4 py-3 rounded-lg border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow`}
-                          >
-                            <span className="font-medium capitalize">{cls.replace("_", " ")}</span>
-                            <Badge variant="secondary" className="bg-white/80 text-gray-700 font-bold">
-                              {count as number}
-                            </Badge>
-                          </div>
-                        ))}
+                  {isBatch ? (
+                    <>
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-semibold text-lg shadow-lg">
+                          <CheckCircle2 className="w-5 h-5 inline mr-2" />
+                          {detectionResults.total_detections} Total Detections (All Images)
+                        </div>
                       </div>
-                    </div>
+                      {detectionResults.detections && (
+                        <div>
+                          <h4 className="font-semibold text-gray-700 mb-4 text-lg">Detected Objects (All Images):</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(detectionResults.detections).map(([cls, count], index) => (
+                              <div
+                                key={cls}
+                                className={`${getDetectionColor(index)} px-4 py-3 rounded-lg border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow`}
+                              >
+                                <span className="font-medium capitalize">{cls.replace("_", " ")}</span>
+                                <Badge variant="secondary" className="bg-white/80 text-gray-700 font-bold">
+                                  {count as number}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {/* Per-image results accordion */}
+                      {/* TODO: Restore Accordion UI for per-image results when Accordion component is available */}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-semibold text-lg shadow-lg">
+                          <CheckCircle2 className="w-5 h-5 inline mr-2" />
+                          {detectionResults.total_detections} Total Detections
+                        </div>
+                      </div>
+                      {detectionResults.detections && (
+                        <div>
+                          <h4 className="font-semibold text-gray-700 mb-4 text-lg">Detected Objects:</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(detectionResults.detections).map(([cls, count], index) => (
+                              <div
+                                key={cls}
+                                className={`${getDetectionColor(index)} px-4 py-3 rounded-lg border-2 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow`}
+                              >
+                                <span className="font-medium capitalize">{cls.replace("_", " ")}</span>
+                                <Badge variant="secondary" className="bg-white/80 text-gray-700 font-bold">
+                                  {count as number}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>
