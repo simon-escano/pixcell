@@ -86,8 +86,9 @@ export default function ProfileClient(props: ProfileClientProps) {
         editDialogTrigger={<EditUserDialogTrigger user={user} profile={profile} role={role} />}
         details={details}
         reportList={reportList}
-        patientsList={patientsList}
+        patientsList={patients}
         patientsCount={patients.length}
+        patients={patients}
       />
     );
   } else if (props.type === "patient") {
