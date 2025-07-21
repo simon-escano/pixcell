@@ -185,7 +185,7 @@ export default function ReportPreview({
   // --- Render current page ---
   const pageContent = pages[pageIdx] || [];
   return (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Report Preview</h3>
         <div className="flex items-center space-x-4">
@@ -225,7 +225,7 @@ export default function ReportPreview({
         </div>
       </div>
       {/* Navigation Controls */}
-      <div className="mb-2 flex gap-2 items-center">
+      <div className="mb-2 justify-center flex gap-2 items-center">
         <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.max(0, p - 1))} disabled={pageIdx === 0}>Prev</Button>
         <span>Page {pageIdx + 1} of {totalPages}</span>
         <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.min(totalPages - 1, p + 1))} disabled={pageIdx === totalPages - 1}>Next</Button>

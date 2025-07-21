@@ -189,9 +189,6 @@ const ReportItem = ({ report, index, onClick }: { report: any; index: number; on
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <Download className="w-4 h-4" />
-        </Button>
         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-chart-2 transition-colors" />
       </div>
     </div>
