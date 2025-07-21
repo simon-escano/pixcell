@@ -96,8 +96,8 @@ export async function getAllPatientsForUser(profileId: string, roleName: string)
         imageId: patient.imageId,
         imageUrl: image.imageUrl
       })
-      .from(patient)
-      .innerJoin(doctorPatient, eq(doctorPatient.patientId, patient.id))
+      .from(doctorPatient)
+      .innerJoin(patient, eq(doctorPatient.patientId, patient.id))
       .leftJoin(image, eq(patient.imageId, image.id))
       .where(eq(doctorPatient.doctorId, profileId));
   }
