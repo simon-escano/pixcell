@@ -47,7 +47,7 @@ export function EditPatientDialogTrigger({ patient }: { patient: any }) {
       <Button
         variant="ghost"
         size="sm"
-        className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
+        className="text-foreground hover:text-primary hover:bg-muted h-8 w-8 p-0"
         onClick={() => setOpen(true)}
         aria-label="Edit Patient"
       >

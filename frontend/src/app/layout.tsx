@@ -41,9 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Suspense>
-            <SidebarProvider>
-              <Providers>{children}</Providers>
-            </SidebarProvider>
+            <Providers>{children}</Providers>
           </Suspense>
           <Toaster
             toastOptions={{
