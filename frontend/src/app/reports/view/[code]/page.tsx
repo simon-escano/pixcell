@@ -47,7 +47,7 @@ function ReportViewSkeleton() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto p-8">
         {/* Header Skeleton */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -181,7 +181,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
       <div className="min-h-screen bg-[var(--background)] relative">
         {/* Public Header */}
         <PublicHeader reportData={reportData} code={code} />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto p-8">
           {/* Report Header */}
           <ReportHeader reportData={reportData} code={code} />
           {/* Main Content */}

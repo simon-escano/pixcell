@@ -81,7 +81,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
       parasite_detection_yolov8: {
         name: "Parasite Detection",
         icon: <Activity className="w-4 h-4" />,
-        color: "bg-red-500",
+        color: "bg-destructive",
         description: "Detects parasites in blood samples",
       },
       anemia_detection_yolov8: {
@@ -93,7 +93,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
       malaria_detection_yolov8: {
         name: "Malaria Detection",
         icon: <Zap className="w-4 h-4" />,
-        color: "bg-purple-500",
+        color: "bg-secondary",
         description: "Detects malaria parasites",
       },
     }
@@ -227,33 +227,33 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
   const currentModel = getModelInfo(selectedModel)
 
   return (
-    <div className="flex h-full w-full gap-6 p-6 bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="flex h-full w-full gap-6 p-6 bg-gradient-to-br from-background to-muted/20">
       {/* Main Image Container */}
-      <div className="flex-1 overflow-hidden rounded-xl border-2 border-white shadow-xl bg-white">
+      <div className="flex-1 overflow-hidden rounded-xl border-2 border-border shadow-xl bg-card">
         <SampleImageContainer currentUser={currentUser} sampleImage={selectedSampleImage!} />
       </div>
 
       {/* Enhanced Sidebar */}
       <div className="flex h-full flex-col w-[350px] space-y-4 min-h-0">
         {/* Sample Info Card */}
-        <Card className="bg-white/80 backdrop-blur-sm border-2 border-white shadow-lg p-2">
+        <Card className="bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg p-2">
           <CardHeader className="pb-1 px-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-1">
-                <FileImage className="w-5 h-5 text-blue-600" />
+              <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-1">
+                <FileImage className="w-5 h-5 text-primary" />
                 {sample.sampleName}
               </CardTitle>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-gray-100">
-                    <Ellipsis className="h-4 w-4 text-gray-500" />
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
+                    <Ellipsis className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => handleCopySampleId(sample)}>Copy Sample ID</DropdownMenuItem>
                   {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") && (
                     <DropdownMenuItem
-                      className="text-red-500 hover:text-red-700"
+                      className="text-destructive hover:text-destructive/80"
                       onClick={() => handleDeleteSample(sample, router)}
                     >
                       Delete Sample
@@ -266,20 +266,20 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
           <CardContent className="space-y-2 px-2 pb-2 pt-1">
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-0.5">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created By</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Created By</p>
                 <ProfileCard profile={sample.createdBy!} />
               </div>
               <div className="space-y-0.5">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Patient</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Patient</p>
                 <ProfileCard profile={sample.patient!} />
               </div>
             </div>
-            <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            <div className="flex items-center justify-between pt-1 border-t border-border">
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
                 <ImageIcon className="w-3 h-3 mr-1" />
                 {sampleImages.length} Images
               </Badge>
-              <Badge variant="outline" className="text-gray-600">
+              <Badge variant="outline" className="text-muted-foreground">
                 ID: {sample.id.slice(0, 8)}...
               </Badge>
             </div>
@@ -287,18 +287,16 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
         </Card>
 
         {/* Images Table Card */}
-        <Card className="flex flex-col flex-1 min-h-0 bg-white/80 backdrop-blur-sm border-2 border-white shadow-lg overflow-hidden">
-          <CardHeader className="pb-3 bg-gradient-to-r from-gray-50 to-blue-50">
-            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-blue-600" />
+        <Card className="flex flex-col flex-1 min-h-0 bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg overflow-hidden">
+          <CardHeader className="pb-3 bg-gradient-to-r from-muted/50 to-primary/5">
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-primary" />
               Sample Images
-              <Badge variant="secondary">
-                {sampleImages.length}
-              </Badge>
+              <Badge variant="secondary">{sampleImages.length}</Badge>
               <div className="ml-auto">
                 <SampleDrawer
                   trigger={
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-md">
+                    <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all shadow-md">
                       <PlusIcon className="w-4 h-4" />
                     </div>
                   }
@@ -309,15 +307,15 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
           <CardContent className="flex-1 flex flex-col min-h-0 p-0">
             <ScrollArea className="flex-1 min-h-0">
               <Table>
-                <TableHeader className="bg-gray-50/50">
+                <TableHeader className="bg-muted/30">
                   <TableRow>
                     <TableHead className="w-16"></TableHead>
-                    <TableHead className="text-xs font-medium text-gray-600">Preview</TableHead>
-                    <TableHead className="text-xs font-medium text-gray-600">
+                    <TableHead className="text-xs font-medium text-muted-foreground">Preview</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">
                       <Ruler className="w-3 h-3 inline mr-1" />
                       Size
                     </TableHead>
-                    <TableHead className="text-xs font-medium text-gray-600">
+                    <TableHead className="text-xs font-medium text-muted-foreground">
                       <Calendar className="w-3 h-3 inline mr-1" />
                       Date
                     </TableHead>
@@ -328,8 +326,8 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                     <ContextMenu key={sampleImage.id}>
                       <ContextMenuTrigger asChild>
                         <TableRow
-                          className={`cursor-pointer hover:bg-blue-50/50 transition-colors ${
-                            sampleImage.id == selectedSampleImage.id ? "bg-blue-100/50 border-l-4 border-blue-500" : ""
+                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${
+                            sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
                           }`}
                           onClick={() => {
                             router.push(`/samples/${sampleId}/${sampleImage.id}`)
@@ -338,26 +336,26 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                           <TableCell className="p-2">
                             <div className="relative">
                               <img
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
+                                className="w-12 h-12 rounded-lg object-cover border-2 border-border shadow-sm"
                                 src={sampleImage.imageUrl! || "/placeholder.svg"}
                                 alt="Sample"
                               />
                               {sampleImage.id == selectedSampleImage.id && (
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                                  <Eye className="w-2 h-2 text-white" />
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                                  <Eye className="w-2 h-2 text-primary-foreground" />
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs text-gray-600">
+                          <TableCell className="text-xs text-muted-foreground">
                             <Badge variant="outline" className="text-xs">
                               {sampleImage.metadata.type}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-xs text-gray-500">
+                          <TableCell className="text-xs text-muted-foreground">
                             {sampleImage.metadata.width} × {sampleImage.metadata.height}
                           </TableCell>
-                          <TableCell className="text-xs text-gray-500">
+                          <TableCell className="text-xs text-muted-foreground">
                             {new Date(sampleImage.capturedAt).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
@@ -372,7 +370,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                           Copy Sample Image ID
                         </ContextMenuItem>
                         <ContextMenuItem
-                          className="text-red-500 focus:text-red-700"
+                          className="text-destructive focus:text-destructive/80"
                           onClick={async () => {
                             await handleDeleteSampleImage(sampleImage.id, sample.id, router)
                           }}
@@ -389,20 +387,20 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
         </Card>
 
         {/* Enhanced AI Actions Card */}
-        <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 shadow-lg p-2">
+        <Card className="bg-gradient-to-br from-secondary/10 to-primary/5 border-2 border-secondary/20 shadow-lg p-2">
           <CardHeader className="pb-1 px-2">
-            <CardTitle className="text-base font-semibold text-purple-800 flex items-center gap-1">
+            <CardTitle className="text-base font-semibold text-secondary-foreground flex items-center gap-1">
               <Bot className="w-5 h-5" />
               AI Analysis
-              <Sparkles className="w-4 h-4 text-purple-600 ml-auto" />
+              <Sparkles className="w-4 h-4 text-secondary ml-auto" />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 px-2 pb-2 pt-1">
             {/* Model Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Detection Model</label>
+              <label className="text-sm font-medium text-foreground">Detection Model</label>
               <Select disabled={isDetecting || isBatchDetecting} onValueChange={setSelectedModel} value={selectedModel}>
-                <SelectTrigger className="bg-white border-purple-200 focus:border-purple-400">
+                <SelectTrigger className="bg-card border-secondary/20 focus:border-secondary">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${currentModel.color}`} />
                     <SelectValue placeholder="Choose model" />
@@ -411,7 +409,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                 <SelectContent>
                   <SelectItem value="parasite_detection_yolov8">
                     <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-red-500" />
+                      <Activity className="w-4 h-4 text-destructive" />
                       Parasite Detection
                     </div>
                   </SelectItem>
@@ -423,28 +421,26 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                   </SelectItem>
                   <SelectItem value="malaria_detection_yolov8">
                     <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-purple-500" />
+                      <Zap className="w-4 h-4 text-secondary" />
                       Malaria Detection
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">{currentModel.description}</p>
+              <p className="text-xs text-muted-foreground">{currentModel.description}</p>
             </div>
-
             <Separator />
-
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
                 onClick={handleDetect}
                 disabled={isDetecting || isBatchDetecting}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium shadow-lg hover:shadow-xl transition-all"
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
                 size="lg"
               >
                 {isDetecting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
                     Analyzing...
                   </>
                 ) : (
@@ -454,17 +450,16 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                   </>
                 )}
               </Button>
-
               <Button
                 onClick={handleBatchDetect}
                 disabled={isDetecting || isBatchDetecting}
                 variant="outline"
-                className="w-full border-2 border-purple-200 hover:bg-purple-50 text-purple-700 font-medium bg-transparent"
+                className="w-full border-2 border-secondary/20 hover:bg-secondary/10 text-secondary-foreground font-medium bg-transparent"
                 size="lg"
               >
                 {isBatchDetecting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin mr-2" />
                     Analyzing All...
                   </>
                 ) : (
@@ -475,12 +470,11 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                 )}
               </Button>
             </div>
-
             {/* Status Indicator */}
             {(isDetecting || isBatchDetecting) && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-blue-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                   <span className="text-sm font-medium">
                     {isDetecting ? "Processing single image..." : "Processing batch analysis..."}
                   </span>
@@ -498,7 +492,6 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
           aiAnalysis={aiAnalysis}
           processedImageUrl={processedImageUrl}
         />
-
         <DetectionResultDialog
           open={isBatchResultModalOpen}
           onOpenChange={setIsBatchResultModalOpen}
