@@ -8,16 +8,16 @@ export function PatientReportsList({ reports }: { reports: any[] }) {
       {reports.map((report, index) => (
         <div
           key={report.id}
-          className="group flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all duration-200 border border-transparent hover:border-slate-200"
+          className="group flex items-center justify-between p-3 bg-muted hover:bg-muted/80 rounded-lg transition-all duration-200 border border-transparent hover:border-border"
         >
           <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-slate-400 rounded-full"></div>
+            <div className="w-1 h-8 bg-primary rounded-full"></div>
             <div>
-              <div className="font-medium text-slate-900 text-sm">
+              <div className="font-medium text-card-foreground text-sm">
                 {report.title || `Report #${String(index + 1).padStart(3, "0")}`}
               </div>
               {report.createdAt && (
-                <div className="text-xs text-slate-500 mt-0.5">
+                <div className="text-xs text-muted-foreground mt-0.5">
                   {new Date(report.createdAt).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -31,7 +31,7 @@ export function PatientReportsList({ reports }: { reports: any[] }) {
           </div>
           <div className="flex items-center gap-2">
             <div className="text-right">
-              <div className="text-xs font-medium text-slate-900">{report.status || "Ready"}</div>
+              <div className="text-xs font-medium text-card-foreground">{report.status || "Ready"}</div>
             </div>
             <Button
               variant="ghost"

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CameraModal from "@/app/samples/components/camera-client"
+import CameraModal from "@/components/samples/camera-client";
 
 export default function CameraSidebarButton() {
   const [open, setOpen] = useState(false);

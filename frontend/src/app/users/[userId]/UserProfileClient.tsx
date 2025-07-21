@@ -29,16 +29,16 @@ export default function UserProfileClient({
     <div className="space-y-2 text-xs">
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         <div>
-          <span className="text-slate-500">Phone</span>
-          <div className="font-medium text-slate-900">{user.phone || "-"}</div>
+          <span className="text-muted-foreground">Phone</span>
+          <div className="font-medium text-card-foreground">{user.phone || "-"}</div>
         </div>
         <div>
-          <span className="text-slate-500">Email</span>
-          <div className="font-medium text-slate-900">{user.email}</div>
+          <span className="text-muted-foreground">Email</span>
+          <div className="font-medium text-card-foreground">{user.email}</div>
         </div>
         <div>
-          <span className="text-slate-500">Role</span>
-          <div className="font-medium text-slate-900">{role}</div>
+          <span className="text-muted-foreground">Role</span>
+          <div className="font-medium text-card-foreground">{role}</div>
         </div>
       </div>
     </div>

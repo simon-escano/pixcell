@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Suspense } from "react";
 import { Providers } from "./samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import ClientServiceWorkerRegister from "@/components/ClientServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body suppressHydrationWarning={true} className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClientServiceWorkerRegister />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -39,9 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Suspense>
-            <SidebarProvider>
-              <Providers>{children}</Providers>
-            </SidebarProvider>
+            <Providers>{children}</Providers>
           </Suspense>
           <Toaster
             toastOptions={{
