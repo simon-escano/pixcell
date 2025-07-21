@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { MetaProfile, MetaSample, MetaSampleImage } from "../../app/samples/types";
 import ProfileCard from "./profile-card";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useEffect } from "react";
 
 export const handleCopySampleId = (sample: MetaSample) => {
     navigator.clipboard.writeText(sample.id);
@@ -49,6 +50,16 @@ interface SampleCardProps {
 }
 
 const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
+  // Prefetch images in browser cache
+  useEffect(() => {
+    sampleImages.forEach(img => {
+      if (img.imageUrl && img.imageUrl !== "/placeholder.svg") {
+        const image = new window.Image();
+        image.src = img.imageUrl;
+      }
+    });
+  }, [sampleImages]);
+
   // Get all images we need to display (max 3)
   const displayImages = sampleImages.slice(0, 3);
   const remainingCount = Math.max(0, sampleImages.length - 3);

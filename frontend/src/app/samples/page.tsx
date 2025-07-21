@@ -201,16 +201,7 @@ const SamplesPage = async () => {
   return (
     <Base>
       <div className="min-h-screen" style={{ background: "var(--background)" }}>
-        {/* Header Section */}
-        <div className=" backdrop-blur-sm  sticky top-0 z-10" >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Sample
-                </Button>
-          </div>
-        </div>
+     
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Section */}
@@ -256,21 +247,9 @@ const SamplesPage = async () => {
 
           {/* Search and Filter Bar + Samples Grid (Client) */}
           <SampleBrowserClient samples={metaSamples} currentUser={metaUser!} />
-
-        
-
           {/* Load More Button */}
         </div>
 
-        {/* Floating Action Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <Button
-            size="lg"
-            className="rounded-full w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-2xl hover:shadow-3xl transition-all hover:scale-110"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        </div>
       </div>
     </Base>
   )
