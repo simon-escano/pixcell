@@ -2,6 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
   Ellipsis,
   PlusIcon,
@@ -16,6 +17,9 @@ import {
   Users,
   FileImage,
   Activity,
+  Share2,
+  Copy,
+  Link,
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import ProfileCard from "../../../../components/samples/profile-card"
@@ -28,11 +32,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
 import { handleCopySampleId, handleDeleteSample } from "../../../../components/samples/sample-card"
 import SampleDrawer from "@/components/samples/upload-sample-drawer"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
 import toast from "react-hot-toast"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import DetectionResultDialog from "@/components/DetectionResultDialog"
 
 interface SamplePageWrapperProps {
@@ -63,6 +68,17 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
   const router = useRouter()
   sample = sample!
   const sampleId = useParams()?.sampleId
+
+  // Share dialog state
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [currentUrl, setCurrentUrl] = useState("")
+
+  // Get current URL when component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentUrl(window.location.href)
+    }
+  }, [])
 
   // Detection state
   const [selectedModel, setSelectedModel] = useState<string>("parasite_detection_yolov8")
@@ -100,6 +116,16 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
     return models[modelName as keyof typeof models] || models.parasite_detection_yolov8
   }
 
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(currentUrl)
+      toast.success("Link copied to clipboard!")
+      setIsShareDialogOpen(false)
+    } catch (error) {
+      toast.error("Failed to copy link")
+    }
+  }
+
   const handleDetect = async () => {
     if (!selectedSampleImage?.imageUrl) {
       toast.error("No image available for detection")
@@ -131,6 +157,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
       if (!response.ok) throw new Error("Detection failed")
 
       const resultData = await response.json()
+
       if (resultData.success) {
         setDetectionResults({
           detections: resultData.detections,
@@ -199,6 +226,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
       if (!response.ok) throw new Error("Batch detection failed")
 
       const resultData = await response.json()
+
       if (resultData.success) {
         setBatchDetectionResults({
           detections: resultData.total_counts,
@@ -243,24 +271,61 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                 <FileImage className="w-5 h-5 text-primary" />
                 {sample.sampleName}
               </CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
-                    <Ellipsis className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleCopySampleId(sample)}>Copy Sample ID</DropdownMenuItem>
-                  {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") && (
-                    <DropdownMenuItem
-                      className="text-destructive hover:text-destructive/80"
-                      onClick={() => handleDeleteSample(sample, router)}
-                    >
-                      Delete Sample
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-1">
+                {/* Share Button */}
+                <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
+                      <Share2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Link className="w-5 h-5 text-primary" />
+                        Share Sample
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Share this sample with others by copying the link below:
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <div className="grid flex-1 gap-2">
+                          <Input id="link" value={currentUrl} readOnly className="bg-muted/50 border-border" />
+                        </div>
+                        <Button onClick={handleCopyUrl} size="sm" className="px-3">
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+                        <Eye className="w-4 h-4" />
+                        <span>Anyone with this link can view this sample</span>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Existing Dropdown Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
+                      <Ellipsis className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleCopySampleId(sample)}>Copy Sample ID</DropdownMenuItem>
+                    {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") && (
+                      <DropdownMenuItem
+                        className="text-destructive hover:text-destructive/80"
+                        onClick={() => handleDeleteSample(sample, router)}
+                      >
+                        Delete Sample
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-2 px-2 pb-2 pt-1">
@@ -429,7 +494,9 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               </Select>
               <p className="text-xs text-muted-foreground">{currentModel.description}</p>
             </div>
+
             <Separator />
+
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
@@ -450,6 +517,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                   </>
                 )}
               </Button>
+
               <Button
                 onClick={handleBatchDetect}
                 disabled={isDetecting || isBatchDetecting}
@@ -470,6 +538,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                 )}
               </Button>
             </div>
+
             {/* Status Indicator */}
             {(isDetecting || isBatchDetecting) && (
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
@@ -492,6 +561,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
           aiAnalysis={aiAnalysis}
           processedImageUrl={processedImageUrl}
         />
+
         <DetectionResultDialog
           open={isBatchResultModalOpen}
           onOpenChange={setIsBatchResultModalOpen}
