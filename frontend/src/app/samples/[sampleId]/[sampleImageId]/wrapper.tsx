@@ -39,6 +39,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import toast from "react-hot-toast"
 import { useState, useEffect } from "react"
 import DetectionResultDialog from "@/components/DetectionResultDialog"
+import { patient } from "@/db/schema"
 
 interface SamplePageWrapperProps {
   currentUser: User
@@ -359,13 +360,11 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               Sample Images
               <Badge variant="secondary">{sampleImages.length}</Badge>
               <div className="ml-auto">
-                <SampleDrawer
-                  trigger={
-                    <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all shadow-md">
-                      <PlusIcon className="w-4 h-4" />
-                    </div>
-                  }
-                />
+                <SampleDrawer patients={[sample.patient]} sample={sample} patient={sample.patient}>
+                  <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-primary/90 hover:to-secondary/90 transition-all shadow-md">
+                    <PlusIcon className="w-4 h-4" />
+                  </div>
+                </SampleDrawer>
               </div>
             </CardTitle>
           </CardHeader>
