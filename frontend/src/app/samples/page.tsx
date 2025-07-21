@@ -1,6 +1,6 @@
 import type React from "react"
 import { getAllSamples } from "@/db/queries/select"
-import SampleCard from "./components/sample-card"
+import SampleCard from "../../components/samples/sample-card"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./queries"
 import Base from "@/components/base"
 import { getUser } from "@/lib/auth"
@@ -25,7 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { Suspense } from "react"
-import SampleBrowserClient from "./components/sample-browser-client"
+import SampleBrowserClient from "../../components/samples/sample-browser-client"
 
 // Loading skeleton component
 const SampleCardSkeleton = () => (

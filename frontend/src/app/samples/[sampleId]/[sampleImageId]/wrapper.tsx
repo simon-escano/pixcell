@@ -18,7 +18,7 @@ import {
   Activity,
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
-import ProfileCard from "../../components/profile-card"
+import ProfileCard from "../../../../components/samples/profile-card"
 import type { MetaSample, MetaSampleImage } from "../../types"
 import SampleImageContainer from "./sample-image-container"
 import type { User } from "@supabase/supabase-js"
@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { handleCopySampleId, handleDeleteSample } from "../../components/sample-card"
+import { handleCopySampleId, handleDeleteSample } from "../../../../components/samples/sample-card"
 import SampleDrawer from "@/components/samples/upload-sample-drawer"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
 import toast from "react-hot-toast"
@@ -296,11 +296,13 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                 {sampleImages.length}
               </Badge>
               <div className="ml-auto">
-                <SampleDrawer sample={sample} patient={sample.patient} patients={[sample.patient]}>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-md">
-                    <PlusIcon className="w-4 h-4" />
-                  </div>
-                </SampleDrawer>
+                <SampleDrawer
+                  trigger={
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all shadow-md">
+                      <PlusIcon className="w-4 h-4" />
+                    </div>
+                  }
+                />
               </div>
             </CardTitle>
           </CardHeader>

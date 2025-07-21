@@ -10,7 +10,7 @@ import {
 import { CircleOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { MetaProfile, MetaSample, MetaSampleImage } from "../types";
+import { MetaProfile, MetaSample, MetaSampleImage } from "../../app/samples/types";
 import ProfileCard from "./profile-card";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 

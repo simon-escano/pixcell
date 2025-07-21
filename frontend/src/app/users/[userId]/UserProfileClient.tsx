@@ -5,7 +5,7 @@ import React from "react";
 
 const PatientReportsList = dynamic(() => import("@/components/patients/patient-reports-list").then(m => m.PatientReportsList), { ssr: false });
 const EditUserDialogTrigger = dynamic(() => import("@/components/users/user-dialog-client"), { ssr: false });
-const SampleCard = dynamic(() => import("@/app/samples/components/sample-card"), { ssr: false });
+const SampleCard = dynamic(() => import("@/components/samples/sample-card"), { ssr: false });
 
 type UserProfileClientProps = {
   user: any;
