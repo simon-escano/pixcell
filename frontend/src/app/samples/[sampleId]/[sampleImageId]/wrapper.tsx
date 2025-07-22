@@ -354,7 +354,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
 
         {/* Images Table Card */}
         <Card className="flex flex-col flex-1 min-h-0 bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg overflow-hidden">
-          <CardHeader className="pb-3 bg-gradient-to-r from-muted/50 to-primary/5">
+          <CardHeader>
             <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-primary" />
               Sample Images
