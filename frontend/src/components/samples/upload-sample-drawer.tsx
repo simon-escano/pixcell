@@ -88,29 +88,31 @@ export default function SampleDrawer({
     );
 
     try {
-      // In edit mode, always append new files to the sample
       if (isEditMode) {
         await editSampleAction(sample.id, files);
-      } else {
-        await uploadSampleAction(selectedPatient, files, sampleName.trim());
-      }
-
-      const successText = isEditMode ? 'saved' : 'uploaded';
-      toast.success(`${files.length} sample(s) ${successText} successfully.`, {
-        id: uploadingToast,
-      });
-      setDrawerOpen(false);
-
-      // Only reset form in upload mode, or clear new files in edit mode
-      if (!isEditMode) {
+        toast.success(`${files.length} sample(s) saved successfully.`, {
+          id: uploadingToast,
+        });
+        setDrawerOpen(false);
         setFiles([]);
-        setSampleName("");
-        setSelectedPatient("");
+        router.refresh();
       } else {
-        setFiles([]); // Only clear new files, keep previous images
+        const result = await uploadSampleAction(selectedPatient, files, sampleName.trim());
+        if (result && result.success && result.sampleId) {
+          toast.success(`${files.length} sample(s) uploaded successfully.`, {
+            id: uploadingToast,
+          });
+          setDrawerOpen(false);
+          setFiles([]);
+          setSampleName("");
+          setSelectedPatient("");
+          // Redirect to the new sample page
+          router.push(`/samples/${result.sampleId}`);
+          return;
+        } else {
+          toast.error("Failed to upload sample.", { id: uploadingToast });
+        }
       }
-
-      router.refresh();
     } catch (error) {
       toast.error(getErrorMessage(error), {
         id: uploadingToast,
