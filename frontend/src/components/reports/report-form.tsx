@@ -32,23 +32,9 @@ import { Progress } from "@/components/ui/progress"
 import ImprovedReportPreview from "./report-preview";
 
 // Types (keeping the same as original)
-import type { Role } from "@/db/schema"
-
-export interface Patient {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  contactNumber: string
-  address: string
-  height: number
-  weight: number
-  sex: string
-  bloodType: string
-  birthDate: string
-  createdAt: Date
-  imageUrl?: string | null
-}
+import type { Patient, Role } from "@/db/schema"
+import { PatientSearchCombobox } from "../patients/patient-search-combobox"
+import { MetaPatient } from "@/app/samples/types"
 
 export interface Profile {
   id: string
@@ -98,7 +84,7 @@ interface ReportFormProps {
   onSubmit: (data: any) => Promise<any>
   initialFormData?: ReportFormData
   initialReportContent?: ReportContent
-  patients: Patient[]
+  patients: MetaPatient[]
   profiles: Profile[]
   role: Role
   currentUserId: string
@@ -432,35 +418,14 @@ export default function ImprovedReportForm({
                       <Label htmlFor="patient" className="text-sm font-medium">
                         Patient *
                       </Label>
-                      <Select
+                      <PatientSearchCombobox
+                        patients={patients}
                         value={selectedPatientId}
-                        onValueChange={(value) => {
-                          setSelectedPatientId(value)
+                        onChange={(id: string) => {
+                          setSelectedPatientId(id)
                           if (errors.patient) setErrors((prev) => ({ ...prev, patient: "" }))
                         }}
-                      >
-                        <SelectTrigger aria-invalid={!!errors.patient}>
-                          <SelectValue placeholder="Select a patient" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {patients.map((patient) => (
-                            <SelectItem key={patient.id} value={patient.id}>
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
-                                  {patient.firstName[0]}
-                                  {patient.lastName[0]}
-                                </div>
-                                <div>
-                                  <div className="font-medium text-foreground">
-                                    {patient.firstName} {patient.lastName}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">{patient.email}</div>
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                       {errors.patient && (
                         <p className="text-sm text-destructive flex items-center gap-1">
                           <AlertCircle className="h-3 w-3" />
@@ -475,7 +440,7 @@ export default function ImprovedReportForm({
                       </Label>
                       <Select
                         value={selectedSampleId}
-                        onValueChange={(value) => {
+                        onValueChange={(value: React.SetStateAction<string>) => {
                           setSelectedSampleId(value)
                           if (errors.sample) setErrors((prev) => ({ ...prev, sample: "" }))
                         }}
@@ -525,7 +490,7 @@ export default function ImprovedReportForm({
                         <div className="flex items-center justify-between">
                           <div>
                             <strong className="text-foreground">
-                              {selectedPatient.firstName} {selectedPatient.lastName}
+                              {selectedPatient.fullName}
                             </strong>
                             <div className="text-sm text-muted-foreground mt-1">
                               {selectedPatient.sex} • {selectedPatient.bloodType} • {selectedPatient.email}
@@ -577,7 +542,7 @@ export default function ImprovedReportForm({
                       </Label>
                       <Select
                         value={formData.testType}
-                        onValueChange={(value) => {
+                        onValueChange={(value: string) => {
                           handleInputChange("testType", value)
                           if (errors.testType) setErrors((prev) => ({ ...prev, testType: "" }))
                         }}
@@ -741,25 +706,21 @@ export default function ImprovedReportForm({
               )}
 
               {/* Form Actions */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col sm:flex-row justify-end gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.push("/reports")}
-                      disabled={isLoading}
-                      className="order-2 sm:order-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isLoading || progress < 100} className="order-1 sm:order-2">
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {mode === "edit" ? "Update Report" : "Create Report"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col sm:flex-row justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/reports")}
+                  disabled={isLoading}
+                  className="order-2 sm:order-1"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading || progress < 100} className="order-1 sm:order-2">
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {mode === "edit" ? "Update Report" : "Create Report"}
+                </Button>
+              </div>
             </form>
           </div>
 

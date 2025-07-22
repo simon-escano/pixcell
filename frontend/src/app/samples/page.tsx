@@ -1,37 +1,17 @@
 import Base from "@/components/base"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { getAllSamples, getSamplesByUserId } from "@/db/queries/select"
+import { getAllPatientsForUser, getAllSamples, getSamplesByUserId } from "@/db/queries/select"
 import { getUser } from "@/lib/auth"
 import {
   Activity,
   AlertCircle,
   Clock,
   FileImage,
-  Plus,
   TrendingUp
 } from "lucide-react"
 import type React from "react"
 import SampleBrowserClient from "../../components/samples/sample-browser-client"
-import SampleCard from "../../components/samples/sample-card"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./queries"
-
-// Loading skeleton component
-const SampleCardSkeleton = () => (
-  <Card className="animate-pulse">
-    <CardContent className="p-4">
-      <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-        <div className="flex gap-2">
-          <div className="h-6 bg-gray-200 rounded w-12"></div>
-          <div className="h-6 bg-gray-200 rounded w-16"></div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
 
 // Stats card component
 const StatsCard = ({
@@ -69,46 +49,19 @@ const StatsCard = ({
   </Card>
 )
 
-// Sample grid component
-const SampleGrid = async ({ samples, currentUser }: { samples: any[]; currentUser: any }) => {
-  if (samples.length === 0) {
-    return (
-      <Card className="col-span-full bg-white/50 backdrop-blur-sm border-2 border-dashed border-gray-300">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <FileImage className="w-16 h-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-600 mb-2">No samples found</h3>
-          <p className="text-gray-500 text-center mb-6 max-w-md">
-            Get started by creating your first sample. Upload images and begin your analysis journey.
-          </p>
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-            <Plus className="w-4 h-4 mr-2" />
-            Create First Sample
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <>
-      {samples.map(async (sample) => {
-        const metaSample = await getMetaSampleById(sample.id)
-        const metaSampleImages = await getMetaSampleImagesBySampleId(sample.id)
-        return (
-          <div key={sample.id} className="group">
-            <SampleCard currentUser={currentUser} sampleImages={metaSampleImages} sample={metaSample!} />
-          </div>
-        )
-      })}
-    </>
-  )
-}
-
 const SamplesPage = async () => {
   const currentUser = await getUser()
   const metaUser = await getMetaProfileByUserId(currentUser.id)
   const samples = (metaUser?.role == "Administrator") ? await getAllSamples() : await getSamplesByUserId(currentUser.id);
   const reports = (metaUser?.role == "Administrator") ? await import("@/db/queries/select").then(m => m.getAllReports()) : await import("@/db/queries/select").then(m => m.getAllReportsByUserId(currentUser.id))
+  let patientsRaw = await getAllPatientsForUser(metaUser?.id!, metaUser?.role!);
+  // Map to MetaPatient type
+  let patients = patientsRaw.map((p: any) => ({
+    ...p,
+    fullName: `${p.firstName} ${p.lastName}`,
+    role: p.role ?? "Patient",
+    createdBy: p.createdBy ?? metaUser?.id ?? "",
+  }));
 
   // Fetch meta sample and images for each sample
   const metaSamples = await Promise.all(samples.map(async (sample) => {
@@ -238,7 +191,7 @@ const SamplesPage = async () => {
           </div>
 
           {/* Search and Filter Bar + Samples Grid (Client) */}
-          <SampleBrowserClient samples={metaSamples} currentUser={metaUser!} />
+          <SampleBrowserClient samples={metaSamples} currentUser={metaUser!} patients={patients} />
           {/* Load More Button */}
         </div>
 

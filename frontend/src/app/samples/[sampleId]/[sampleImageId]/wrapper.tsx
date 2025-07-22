@@ -360,7 +360,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
               Sample Images
               <Badge variant="secondary">{sampleImages.length}</Badge>
               <div className="ml-auto">
-                <SampleDrawer patients={[sample.patient]} sample={sample} patient={sample.patient}>
+                <SampleDrawer patients={[sample.patient!]} sample={sample} patient={sample.patient}>
                   <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
                     <PlusIcon className="w-4 h-4" />
                   </div>
