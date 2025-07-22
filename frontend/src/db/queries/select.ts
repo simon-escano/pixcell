@@ -1,5 +1,5 @@
 import { doctorPatient, feedback, image, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from "..";
 
 import { createClient } from '@supabase/supabase-js';
@@ -47,60 +47,64 @@ export async function getAllProfiles() {
   return await db.select().from(profile);
 }
 
-/**
- * Get all patients for the current user.
- * If the user is an administrator, return all patients.
- * If the user is a doctor, return only assigned patients (via doctor_patient).
- * @param profileId - The current user's profile id
- * @param roleName - The current user's role name (e.g., 'Administrator')
- */
-export async function getAllPatientsForUser(profileId: string, roleName: string) {
+export async function getAllPatientsForUser(
+  profileId: string,
+  roleName: string,
+  withSamplesOnly = false
+) {
+  const baseSelection = {
+    id: patient.id,
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    email: patient.email,
+    contactNumber: patient.contactNumber,
+    address: patient.address,
+    height: patient.height,
+    weight: patient.weight,
+    sex: patient.sex,
+    bloodType: patient.bloodType,
+    birthDate: patient.birthDate,
+    createdAt: patient.createdAt,
+    imageId: patient.imageId,
+    imageUrl: image.imageUrl,
+    createdBy: patient.createdBy
+  };
+
+  let query;
+
   if (roleName === "Administrator") {
-    // Return all patients
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl,
-        createdBy: patient.createdBy
-      })
+    query = db
+      .select(baseSelection)
       .from(patient)
       .leftJoin(image, eq(patient.imageId, image.id));
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId));
+    }
   } else {
-    // Return only patients assigned to this doctor
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl
-      })
+    query = db
+      .select(baseSelection)
       .from(doctorPatient)
       .innerJoin(patient, eq(doctorPatient.patientId, patient.id))
       .leftJoin(image, eq(patient.imageId, image.id))
       .where(eq(doctorPatient.doctorId, profileId));
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId));
+    }
   }
+
+  const results = await query;
+
+  // Deduplicate by patient.id
+  const seen = new Set();
+  const unique = results.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  return unique;
 }
 
 export async function getPatientById(id: string) {
@@ -148,26 +152,50 @@ export async function getSamplesByPatientId(id: string) {
 }
 
 export async function getSamplesByUserId(userId: string) {
-  return await db
+  const directSamples = db
     .select({
       id: sample.id,
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
       imageId: sampleImage.imageId,
-      imageUrl: sampleImg.imageUrl
+      imageUrl: sampleImg.imageUrl,
     })
     .from(sample)
     .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
     .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
     .where(eq(sample.createdBy, userId));
+
+  const patientSamples = db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      uploadedBy: sampleImage.uploadedBy,
+      metadata: sampleImage.metadata,
+      capturedAt: sampleImage.capturedAt,
+      imageId: sampleImage.imageId,
+      imageUrl: sampleImg.imageUrl,
+    })
+    .from(doctorPatient)
+    .innerJoin(sample, eq(doctorPatient.patientId, sample.patientId))
+    .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
+    .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
+    .where(eq(doctorPatient.doctorId, userId));
+
+  const [direct, patients] = await Promise.all([directSamples, patientSamples]);
+
+  const seen = new Set<string>();
+  return [...direct, ...patients].filter((s) => {
+    if (seen.has(s.id)) return false;
+    seen.add(s.id);
+    return true;
+  });
 }
-
-
 
 export async function getSampleById(id: string) {
   const result = await db
@@ -575,6 +603,16 @@ export async function getDoctorForPatient(patientId: string) {
     .from(doctorPatient)
     .where(eq(doctorPatient.patientId, patientId));
   return result[0]?.doctorId || null;
+}
+
+export async function isDoctorAssociatedWithPatient(doctorId: string, patientId: string): Promise<boolean> {
+  const result = await db
+    .select({ id: doctorPatient.id })
+    .from(doctorPatient)
+    .where(and(eq(doctorPatient.doctorId, doctorId), eq(doctorPatient.patientId, patientId)))
+    .limit(1);
+
+  return result.length > 0;
 }
 
 export async function getReportsByPatientId(patientId: string) {

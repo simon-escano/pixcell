@@ -42,10 +42,10 @@ import DetectionResultDialog from "@/components/DetectionResultDialog"
 import { patient } from "@/db/schema"
 
 interface SamplePageWrapperProps {
-  currentUser: User
   sample: MetaSample | undefined
   sampleImages: MetaSampleImage[]
   selectedSampleImageId: string
+  canEdit?: boolean;
 }
 
 async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, router: any) {
@@ -64,7 +64,7 @@ async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, 
   }
 }
 
-const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleImageId }: SamplePageWrapperProps) => {
+const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdit }: SamplePageWrapperProps) => {
   const selectedSampleImage = sampleImages.find((img) => img.id === selectedSampleImageId) || sampleImages[0]
   const router = useRouter()
   sample = sample!
@@ -259,7 +259,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
     <div className="flex h-full w-full gap-6 p-6 bg-gradient-to-br from-background to-muted/20">
       {/* Main Image Container */}
       <div className="flex-1 overflow-hidden rounded-xl border-2 border-border shadow-xl bg-card">
-        <SampleImageContainer currentUser={currentUser} sampleImage={selectedSampleImage!} />
+        <SampleImageContainer sampleImage={selectedSampleImage!} canEdit={canEdit} />
       </div>
 
       {/* Enhanced Sidebar */}
@@ -316,7 +316,7 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleCopySampleId(sample)}>Copy Sample ID</DropdownMenuItem>
-                    {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") && (
+                    {canEdit && (
                       <DropdownMenuItem
                         className="text-destructive hover:text-destructive/80"
                         onClick={() => handleDeleteSample(sample, router)}
@@ -354,18 +354,20 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
 
         {/* Images Table Card */}
         <Card className="flex flex-col flex-1 min-h-0 bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg overflow-hidden">
-          <CardHeader className="pb-3 bg-gradient-to-r from-muted/50 to-primary/5">
+          <CardHeader>
             <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-primary" />
               Sample Images
               <Badge variant="secondary">{sampleImages.length}</Badge>
-              <div className="ml-auto">
-                <SampleDrawer patients={[sample.patient]} sample={sample} patient={sample.patient}>
-                  <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
-                    <PlusIcon className="w-4 h-4" />
-                  </div>
-                </SampleDrawer>
-              </div>
+              {canEdit && (
+                <div className="ml-auto">
+                  <SampleDrawer patients={[sample.patient!]} sample={sample} patient={sample.patient}>
+                    <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
+                      <PlusIcon className="w-4 h-4" />
+                    </div>
+                  </SampleDrawer>
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col min-h-0 p-0">
@@ -433,14 +435,17 @@ const SamplePageWrapper = ({ currentUser, sample, sampleImages, selectedSampleIm
                         >
                           Copy Sample Image ID
                         </ContextMenuItem>
-                        <ContextMenuItem
-                          className="text-destructive focus:text-destructive/80"
-                          onClick={async () => {
-                            await handleDeleteSampleImage(sampleImage.id, sample.id, router)
-                          }}
-                        >
-                          Delete Sample Image
-                        </ContextMenuItem>
+                        {
+                          canEdit && (
+                          <ContextMenuItem
+                            className="text-destructive focus:text-destructive/80"
+                            onClick={async () => {
+                              await handleDeleteSampleImage(sampleImage.id, sample.id, router)
+                            }}
+                          >
+                            Delete Sample Image
+                          </ContextMenuItem>)
+                        }
                       </ContextMenuContent>
                     </ContextMenu>
                   ))}

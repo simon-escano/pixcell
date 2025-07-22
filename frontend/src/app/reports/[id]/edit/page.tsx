@@ -1,10 +1,9 @@
+import { getMetaProfileByUserId } from "@/app/samples/queries";
 import Base from "@/components/base";
-import { getReportById, getPatientById, getSampleById, getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleById } from "@/db/queries/select";
-import { getUser } from "@/lib/auth";
-import { updateReport } from "@/actions/reports";
-import { notFound, redirect } from "next/navigation";
-import CreateReportForm from "@/components/reports/create-report-form";
 import EditReportForm from "@/components/reports/edit-report-form";
+import { getAllPatientsForUser, getAllProfiles, getReportById } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
+import { notFound } from "next/navigation";
 
 // We'll inline the edit form logic here for now, but ideally this would be a shared component
 export default async function EditReportPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,9 +13,15 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
   if (!report) return notFound();
 
   const user = await getUser();
-  const profile = await getProfileByUserId(user.id);
-  const role = await getRoleById(profile.roleId);
-  const patients = await getAllPatientsForUser(profile.id, role.name);
+  const profile = await getMetaProfileByUserId(user.id);
+  const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role, true);
+  let patients = patientsRaw.map((p: any) => ({
+    ...p,
+    fullName: `${p.firstName} ${p.lastName}`,
+    role: p.role ?? "Patient",
+    createdBy: p.createdBy ?? profile?.id ?? "",
+  }));
+  
   let profiles = (await getAllProfiles()).map((p: any) => {
     if (p.imageId === null) {
       const { imageId, ...rest } = p;
@@ -55,7 +60,7 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
             patients={patients}
             currentUserId={user.id}
             profiles={profiles}
-            role={role}
+            role={profile!.role}
             initialFormData={initialFormData}
             initialReportContent={initialReportContent}
             reportId={reportId}

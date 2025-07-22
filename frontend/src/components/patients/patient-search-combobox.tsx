@@ -1,122 +1,113 @@
-"use client";
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+"use client"
 
-import { cn } from "@/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Patient } from "@/db/schema";
-import { isMetaPatient } from "@/app/samples/types";
+import { MetaPatient } from "@/app/samples/types"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/utils"
+import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from "react"
+
+export const getPatientInitials = (patient: MetaPatient) => {
+  if (!patient.fullName) return ""
+  const names = patient.fullName.split(" ")
+  if (names.length === 1) {
+    return names[0].charAt(0).toUpperCase()
+  }
+  return names.map((name) => name.charAt(0).toUpperCase()).join("")
+}
 
 export function PatientSearchCombobox({
   patients,
   value,
   onChange,
 }: {
-  patients: Patient[];
-  value: string;
-  onChange: (id: string) => void;
+  patients: MetaPatient[]
+  value: string
+  onChange: (id: string) => void
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [open, setOpen] = React.useState(false)
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const [patientImages, setPatientImages] = React.useState<Record<string, string | null>>({})
 
   const filteredPatients = patients.filter((p) => {
-    const term = searchTerm.toLowerCase().trim();
-    if (term === "") return true;
-
+    const term = searchTerm.toLowerCase().trim()
+    if (term === "") return true
     const individualMatch =
-      p.firstName.toLowerCase().includes(term) ||
-      p.lastName.toLowerCase().includes(term) ||
-      p.email.toLowerCase().includes(term);
+      p.fullName.toLowerCase().includes(term) ||
+      p.email.toLowerCase().includes(term)
 
-    const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
-    const fullNameMatch = fullName.includes(term);
+    const fullNameMatch = p.fullName.includes(term)
 
-    const searchTerms = term.split(/\s+/);
+    const searchTerms = term.split(/\s+/)
     const multiTermMatch = searchTerms.every(
       (term) =>
-        p.firstName.toLowerCase().includes(term) ||
-        p.lastName.toLowerCase().includes(term) ||
+        p.fullName.toLowerCase().includes(term) ||
         p.email.toLowerCase().includes(term),
-    );
+    )
 
-    return individualMatch || fullNameMatch || multiTermMatch;
-  });
+    return individualMatch || fullNameMatch || multiTermMatch
+  })
 
-  const selected = patients.find((p) => p.id === value);
-  let selectedName;
-  if (isMetaPatient(selected)) {
-    selectedName = `${selected.fullName}`
-  } else {
-    selectedName = `${selected?.firstName} ${selected?.lastName}`;
-  }
+  const selected = patients.find((p) => p.id === value)
+  let selectedName = selected?.fullName
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild disabled={patients.length == 1}>
+      <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between bg-transparent"
         >
-          {selected
-            ? `${selectedName} (${selected.email})`
-            : "Select a patient..."}
-          <ChevronsUpDown className="opacity-50" />
+          <div className="flex items-center gap-2">
+            {selected && (
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={patientImages[selected.id] || undefined} alt={selectedName} />
+                <AvatarFallback className="text-xs">{getPatientInitials(selected)}</AvatarFallback>
+              </Avatar>
+            )}
+            <span className="truncate">{selected ? `${selectedName} (${selected.email})` : "Select a patient..."}</span>
+          </div>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent className="w-[400px] p-0">
         <Command>
-          <CommandInput
-            placeholder="Search a patient..."
-            value={searchTerm}
-            onValueChange={setSearchTerm}
-          />
+          <CommandInput placeholder="Search a patient..." value={searchTerm} onValueChange={setSearchTerm} />
           <CommandList>
             <CommandEmpty>No patient found.</CommandEmpty>
             <CommandGroup>
               {filteredPatients.map((patient) => {
-                let patientName;
-                if (isMetaPatient(patient)) {
-                  patientName = `${patient.fullName}`
-                } else {
-                  patientName = `${patient.firstName} ${patient.lastName}`;
-                }
+                console.log(patient.fullName)
                 return (
-                <CommandItem
-                  key={patient.id}
-                  value={`${patientName} ${patient.email}`.toLowerCase()}
-                  onSelect={() => {
-                    onChange(patient.id);
-                    setOpen(false);
-                  }}
-                >
-                  {`${patientName} (${patient.email})`}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === patient.id ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              )})}
+                  <CommandItem
+                    key={patient.id}
+                    value={`${patient.fullName} ${patient.email}`.toLowerCase()}
+                    onSelect={() => {
+                      onChange(patient.id)
+                      setOpen(false)
+                    }}
+                    className="flex items-center gap-3 p-3"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={patientImages[patient.id] || undefined} alt={patient.fullName} />
+                      <AvatarFallback className="text-sm">{getPatientInitials(patient)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="font-medium truncate">{patient.fullName}</span>
+                      <span className="text-sm text-muted-foreground truncate">{patient.email}</span>
+                    </div>
+                    <Check className={cn("h-4 w-4 shrink-0", value === patient.id ? "opacity-100" : "opacity-0")} />
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

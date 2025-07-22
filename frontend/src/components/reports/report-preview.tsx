@@ -9,23 +9,9 @@ import { format } from "date-fns";
 import type { Role } from "@/db/schema";
 import { pdf } from '@react-pdf/renderer';
 import { ReportPDF } from './pdf-export';
-
-// Copied from create-report-form.tsx
-interface Patient {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  contactNumber: string;
-  address: string;
-  height: number;
-  weight: number;
-  sex: string;
-  bloodType: string;
-  birthDate: string;
-  createdAt: Date;
-  imageUrl?: string | null;
-}
+import { MetaPatient } from "@/app/samples/types";
+import { get } from "http";
+import { getPatientInitials } from "../patients/patient-search-combobox";
 
 interface TableData {
   id: string;
@@ -61,7 +47,7 @@ interface ReportPreviewProps {
     customTestType?: string;
   };
   reportContent: ReportContent;
-  selectedPatient?: Patient;
+  selectedPatient?: MetaPatient;
   selectedSample?: Sample;
   doctorName: string;
   doctorRole: Role;
@@ -133,7 +119,7 @@ export default function ReportPreview({
   useEffect(() => { setPageIdx(0); }, [formData.content, reportContent.tables]);
   // --- Header/Footer components ---
   const reportId = selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A";
-  const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : "N/A";
+  const patientName = selectedPatient ? `${selectedPatient.fullName}` : "N/A";
 
   const Header = () => (
     <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-gray-300">
@@ -158,12 +144,12 @@ export default function ReportPreview({
         {selectedPatient && selectedPatient.imageUrl ? (
           <img 
             src={selectedPatient.imageUrl} 
-            alt={`${selectedPatient.firstName} ${selectedPatient.lastName}`}
+            alt={`${selectedPatient.fullName}`}
             className="w-full h-full object-cover"
           />
         ) : selectedPatient ? (
           <span className="text-gray-600 font-semibold text-lg">
-            {selectedPatient.firstName[0]}{selectedPatient.lastName[0]}
+            {getPatientInitials(selectedPatient)}
           </span>
         ) : (
           <span className="text-gray-400">👤</span>

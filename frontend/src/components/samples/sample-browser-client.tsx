@@ -1,46 +1,26 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { DataTable } from "@/components/data-table"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
-  Search,
+  FileImage,
   Grid3X3,
   List,
-  Calendar,
-  Users,
-  Activity,
-  FileImage,
   Plus,
-  TrendingUp,
-  AlertCircle,
-  Clock,
+  Search,
+  TrendingUp
 } from "lucide-react"
+import { useMemo, useState } from "react"
 import SampleCard from "./sample-card"
-import { DataTable } from "@/components/data-table"
+import SampleDrawer from "./upload-sample-drawer"
+import { MetaPatient } from "@/app/samples/types"
 
-// Loading skeleton component
-const SampleCardSkeleton = () => (
-  <Card className="animate-pulse">
-    <CardContent className="p-4">
-      <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-        <div className="flex gap-2">
-          <div className="h-6 bg-gray-200 rounded w-12"></div>
-          <div className="h-6 bg-gray-200 rounded w-16"></div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
 
-export default function SampleBrowserClient({ samples, currentUser }: { samples: any[]; currentUser: any }) {
+export default function SampleBrowserClient({ samples, currentUser, patients }: { samples: any[]; currentUser: any, patients: MetaPatient[] }) {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [sort, setSort] = useState("newest")
@@ -103,17 +83,17 @@ export default function SampleBrowserClient({ samples, currentUser }: { samples:
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search samples by name, patient, doctor, or ID..."
-                className="pl-10 bg-white border-gray-200 focus:border-blue-400"
+                className="pl-10 bg-card border focus:border-blue-400"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-3">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40 bg-white">
+                <SelectTrigger className="w-40 bg-card">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -125,7 +105,7 @@ export default function SampleBrowserClient({ samples, currentUser }: { samples:
               </Select>
 
               <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger className="w-40 bg-white">
+                <SelectTrigger className="w-40 bg-card">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -166,17 +146,19 @@ export default function SampleBrowserClient({ samples, currentUser }: { samples:
         <>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-6">
           {filteredSamples.length === 0 ? (
-            <Card className="col-span-full bg-white/50 backdrop-blur-sm border-2 border-dashed border-gray-300">
+            <Card className="col-span-full bg-card/50 backdrop-blur-sm border-2 border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <FileImage className="w-16 h-16 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-600 mb-2">No samples found</h3>
-                <p className="text-gray-500 text-center mb-6 max-w-md">
+                <FileImage className="w-16 h-16 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold text-muted-foreground mb-2">No samples found</h3>
+                <p className="text-muted-foreground text-center mb-6 max-w-md">
                   Get started by creating your first sample. Upload images and begin your analysis journey.
                 </p>
-                <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Sample
-                </Button>
+                <SampleDrawer patients={patients}>
+                  <Button className="self-center bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Sample
+                  </Button>
+                </SampleDrawer>
               </CardContent>
             </Card>
           ) : (

@@ -4,22 +4,8 @@ import { Document, Page, Text, View, StyleSheet, pdf, Image } from '@react-pdf/r
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import toast from "react-hot-toast";
-
-interface Patient {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  contactNumber: string;
-  address: string;
-  height: number;
-  weight: number;
-  sex: string;
-  bloodType: string;
-  birthDate: string;
-  createdAt: Date;
-  imageUrl?: string | null;
-}
+import { MetaPatient } from '@/app/samples/types';
+import { getPatientInitials } from '../patients/patient-search-combobox';
 
 interface Sample {
   id: string;
@@ -60,7 +46,7 @@ interface PDFExportProps {
     customTestType?: string;
   };
   reportContent: ReportContent;
-  selectedPatient: Patient | undefined;
+  selectedPatient: MetaPatient | undefined;
   selectedSample: Sample | undefined;
   doctorName: string;
   doctorRole: Role;
@@ -316,7 +302,7 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
                   />
                 ) : selectedPatient ? (
                   <Text style={styles.patientInitials}>
-                    {selectedPatient.firstName[0]}{selectedPatient.lastName[0]}
+                    {getPatientInitials(selectedPatient)}
                   </Text>
                 ) : (
                   <Text style={styles.patientInitials}>👤</Text>
@@ -408,7 +394,7 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
           )}
           <View style={styles.footer} fixed>
             <View>
-              <Text>PID {selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A"} | {selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : "N/A"}</Text>
+              <Text>PID {selectedSample ? selectedSample.id.slice(0, 8).toUpperCase() : "N/A"} | {selectedPatient ? `${selectedPatient.fullName}` : "N/A"}</Text>
               <Text>IMPORTANT NOTICE: For result interpretation, please consult your primary physician.</Text>
             </View>
             <View>

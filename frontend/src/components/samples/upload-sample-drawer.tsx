@@ -1,7 +1,9 @@
 "use client";
+import { ImageUp, Loader2 } from "lucide-react";
 import * as React from "react";
-import { ImageUp, Camera, Loader2 } from "lucide-react";
 
+import { editSampleAction, uploadSampleAction } from "@/actions/samples";
+import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/samples/types";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -13,38 +15,19 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PatientSearchCombobox } from "@/components/patients/patient-search-combobox";
-import UploadSampleFile from "./upload-sample-file";
-import toast from "react-hot-toast";
-import { editSampleAction, uploadSampleAction } from "@/actions/samples";
 import { getErrorMessage } from "@/utils";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { Input } from "../ui/input";
-import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/samples/types";
+import UploadSampleFile from "./upload-sample-file";
+import { PatientSearchCombobox } from "../patients/patient-search-combobox";
 
 interface SampleDrawerProps {
-  patients: any[];
+  patients: MetaPatient[];
   sample?: MetaSample;
   patient?: MetaPatient;
   children?: React.ReactNode;
 }
-
-// Helper function to convert MetaSampleImage to File-like object for display
-const createFileFromSampleImage = (sampleImage: MetaSampleImage): File => {
-  // Create a mock File object from the sample image
-  // You might need to adjust this based on your MetaSampleImage structure
-  const blob = new Blob([], { type: 'image/jpeg' }); // Empty blob, just for display
-  const file = new File([blob], sampleImage.imageUrl || 'sample-image.jpg', {
-    type: 'image/jpeg'
-  });
-  
-  // Add custom properties for existing images
-  (file as any).isExisting = true;
-  (file as any).imageId = sampleImage.id;
-  (file as any).imageUrl = sampleImage.imageUrl;
-  
-  return file;
-};
 
 export default function SampleDrawer({ 
   patients, 

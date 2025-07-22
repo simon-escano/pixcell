@@ -1,7 +1,8 @@
+import Base from "@/components/base";
+import { isDoctorAssociatedWithPatient } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
 import SamplePageWrapper from "./wrapper";
-import Base from "@/components/base";
 
 const SampleImagePage = async ({
   params,
@@ -12,15 +13,19 @@ const SampleImagePage = async ({
   const sample = await getMetaSampleById(sampleId);
   const sampleImages = await getMetaSampleImagesBySampleId(sample!.id);
   const currentUser = await getUser();
+  const isDoctorAssociated = await isDoctorAssociatedWithPatient(currentUser.id, sample!.patient?.id!);
+
+  const canEdit = currentUser.role === "Administrator" || isDoctorAssociated || sample!.createdBy?.id === currentUser.id;
 
   return (
     <Base>
-    <SamplePageWrapper
-      currentUser={currentUser}
-      sample={sample}
-      sampleImages={sampleImages}
-      selectedSampleImageId={sampleImageId}
-    /></Base>
+      <SamplePageWrapper
+        sample={sample}
+        sampleImages={sampleImages}
+        selectedSampleImageId={sampleImageId}
+        canEdit={canEdit}
+      />
+    </Base>
   );
 };
 
