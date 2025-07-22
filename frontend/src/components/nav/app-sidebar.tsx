@@ -19,6 +19,7 @@ import {
 import { getUser } from "@/lib/auth";
 import Link from "next/link";
 import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
+import PixCellLogo from "../pixcell-logo";
 
 export async function AppSidebar({
   ...props
@@ -36,7 +37,7 @@ export async function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                
+                <PixCellLogo />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">PixCell</span>
                 </div>
