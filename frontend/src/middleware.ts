@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createMiddlewareClient({ req: request, res: response });
   const { data: { user } } = await supabase.auth.getUser();
-  const unprotectedPaths = ["/login", "/signup", "/reset-password"];
+  const unprotectedPaths = ["/login", "/signup", "/reset-password","/reports/view"];
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
   if (user && isUnprotectedPath) {
