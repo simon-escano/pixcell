@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { MetaPatient } from "@/app/samples/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PDFExport } from "./pdf-export";
-import { FileText, Calendar, Worm, TestTube, Phone, Mail } from "lucide-react";
-import { format } from "date-fns";
 import type { Role } from "@/db/schema";
 import { pdf } from '@react-pdf/renderer';
-import { ReportPDF } from './pdf-export';
-import { MetaPatient } from "@/app/samples/types";
-import { get } from "http";
+import { format } from "date-fns";
+import { Calendar, FileText, TestTube } from "lucide-react";
+import { useEffect, useState } from "react";
 import { getPatientInitials } from "../patients/patient-search-combobox";
+import { PDFExport, ReportPDF } from "./pdf-export";
 
 interface TableData {
   id: string;

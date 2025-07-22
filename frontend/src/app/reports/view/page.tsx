@@ -2,31 +2,30 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import PixCellLogo from "@/components/pixcell-logo"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
-  Search,
-  QrCode,
-  FileText,
-  Shield,
-  Clock,
   AlertCircle,
-  CheckCircle2,
   ArrowRight,
-  Scan,
+  CheckCircle2,
+  Clock,
+  FileText,
   KeyRound,
-  Worm,
-  Sun,
   Moon,
+  QrCode,
+  Search,
+  Shield,
+  Sun
 } from "lucide-react"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function ImprovedReportViewPage() {
   const [code, setCode] = useState("")
@@ -95,21 +94,19 @@ export default function ImprovedReportViewPage() {
       </div>
       <div className="w-full max-w-2xl space-y-8">
         {/* Centered PixCell Logo and Text */}
-        <div className="flex flex-col items-center justify-center mt-8 mb-2">
-          <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square w-24 h-24 items-center justify-center rounded-2xl mb-4">
-            <Worm className="w-16 h-16" />
-          </div>
-          <h1 className="text-4xl font-extrabold text-foreground tracking-tight">PixCell</h1>
+        <div className="flex gap-4 items-center justify-center mt-8 mb-8">
+          <PixCellLogo className="size-12 mb-2" />
+          <h1 className="text-4xl font-medium text-foreground tracking-tight">PixCell</h1>
         </div>
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <FileText className="h-8 w-8 text-primary" />
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-4">
+            <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <FileText className="size-6 text-primary" />
+            </div>
+            <h1 className="text-3xl text-foreground">View Medical Report</h1>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">View Medical Report</h1>
-            <p className="text-muted-foreground mt-2">Enter your report code to access your medical report securely</p>
-          </div>
+          <p className="text-muted-foreground mt-2">Enter your report code to access your medical report securely</p>
         </div>
 
         {/* Main Form Card */}
