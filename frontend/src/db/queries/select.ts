@@ -47,60 +47,64 @@ export async function getAllProfiles() {
   return await db.select().from(profile);
 }
 
-/**
- * Get all patients for the current user.
- * If the user is an administrator, return all patients.
- * If the user is a doctor, return only assigned patients (via doctor_patient).
- * @param profileId - The current user's profile id
- * @param roleName - The current user's role name (e.g., 'Administrator')
- */
-export async function getAllPatientsForUser(profileId: string, roleName: string) {
+export async function getAllPatientsForUser(
+  profileId: string,
+  roleName: string,
+  withSamplesOnly = false
+) {
+  const baseSelection = {
+    id: patient.id,
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    email: patient.email,
+    contactNumber: patient.contactNumber,
+    address: patient.address,
+    height: patient.height,
+    weight: patient.weight,
+    sex: patient.sex,
+    bloodType: patient.bloodType,
+    birthDate: patient.birthDate,
+    createdAt: patient.createdAt,
+    imageId: patient.imageId,
+    imageUrl: image.imageUrl,
+    createdBy: patient.createdBy
+  };
+
+  let query;
+
   if (roleName === "Administrator") {
-    // Return all patients
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl,
-        createdBy: patient.createdBy
-      })
+    query = db
+      .select(baseSelection)
       .from(patient)
       .leftJoin(image, eq(patient.imageId, image.id));
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId));
+    }
   } else {
-    // Return only patients assigned to this doctor
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl
-      })
+    query = db
+      .select(baseSelection)
       .from(doctorPatient)
       .innerJoin(patient, eq(doctorPatient.patientId, patient.id))
       .leftJoin(image, eq(patient.imageId, image.id))
       .where(eq(doctorPatient.doctorId, profileId));
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId));
+    }
   }
+
+  const results = await query;
+
+  // Deduplicate by patient.id
+  const seen = new Set();
+  const unique = results.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  return unique;
 }
 
 export async function getPatientById(id: string) {

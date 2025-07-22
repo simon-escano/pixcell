@@ -5,6 +5,7 @@ import { addReport } from "@/actions/reports";
 import { Role } from "@/db/schema";
 import { useEffect, useState } from "react";
 import type { ReportContent, ReportFormData, TableData } from "./report-form";
+import { MetaPatient } from "@/app/samples/types";
 
 interface Patient {
   id: string;
@@ -46,7 +47,7 @@ interface Sample {
 }
 
 interface CreateReportFormProps {
-  patients: Patient[];
+  patients: MetaPatient[];
   currentUserId: string;
   profiles: Profile[];
   role: Role;

@@ -9,7 +9,13 @@ export default async function AiGenerateReportPage() {
   const role = await getRoleById(profile.roleId);
   
   // Get patients based on user role
-  const patients = await getAllPatientsForUser(profile.id, role.name);
+  const patientsRaw = await getAllPatientsForUser(profile.id, role.name, true);
+  let patients = patientsRaw.map((p: any) => ({
+    ...p,
+    fullName: `${p.firstName} ${p.lastName}`,
+    role: p.role ?? "Patient",
+    createdBy: p.createdBy ?? profile?.id ?? "",
+  }));
   let profiles = (await getAllProfiles()).map((p: any) => {
     if (p.imageId === null) {
       const { imageId, ...rest } = p;
