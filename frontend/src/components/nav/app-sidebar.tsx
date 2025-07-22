@@ -1,8 +1,7 @@
+import { Worm } from "lucide-react";
 import type * as React from "react";
-import { Command, Worm } from "lucide-react";
 
 import { NavMain } from "@/components/nav/nav-main";
-import { NavRecents } from "@/components/nav/nav-recents";
 import { NavTertiary } from "@/components/nav/nav-tertiary";
 import { NavUser } from "@/components/nav/nav-user";
 import {
@@ -14,13 +13,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { getUser } from "@/lib/auth";
 import {
   getProfileByUserId,
-  getRecentUploads,
-  getRoleById,
+  getRoleById
 } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
+import Link from "next/link";
 import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
 
 export async function AppSidebar({
@@ -29,7 +27,6 @@ export async function AppSidebar({
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
-  const recentSamples = await getRecentUploads();
 
   const profileRole = profileRoleData?.name || null;
   const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };

@@ -1,31 +1,15 @@
 "use client";
 
 import {
-  ChevronRight,
-  ImageUp,
-  MailIcon,
-  PlusCircleIcon,
-  Settings,
-  UserCog,
-  UsersRound,
-  type LucideIcon,
+  UsersRound
 } from "lucide-react";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
