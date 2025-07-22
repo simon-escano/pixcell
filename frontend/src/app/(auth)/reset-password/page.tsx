@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import PixCellLogo from "@/components/pixcell-logo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/client";
-import toast from "react-hot-toast";
-import { Worm } from "lucide-react";
-import Link from "next/link";
 import { validatePassword } from "@/utils/password";
-import { Session, EmailOtpType } from "@supabase/supabase-js";
+import { EmailOtpType, Session } from "@supabase/supabase-js";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import toast from "react-hot-toast";
 
 export default function ResetPasswordPage() {
   const supabase = createClient();
@@ -130,9 +130,7 @@ export default function ResetPasswordPage() {
           href="/"
           className="flex items-center gap-2 self-center font-medium"
         >
-          <div className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-md">
-            <Worm className="size-4" />
-          </div>
+          <PixCellLogo />
           PixCell
         </Link>
         <Card>
