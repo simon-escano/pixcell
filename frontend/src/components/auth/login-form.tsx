@@ -56,9 +56,15 @@ export function LoginForm({
             handleClickLoginButton(formData);
           }}>
             <div className="grid gap-6">
+              {/* Patient access button */}
+              <Link href="/reports/view">
+                <Button type="button" className="w-full cursor-pointer">
+                  I'm a Patient
+                </Button>
+              </Link>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Log in to continue
+                  or Log in as Doctor
                 </span>
               </div>
               <div className="grid gap-6">
