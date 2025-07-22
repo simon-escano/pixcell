@@ -28,7 +28,7 @@ const StatsCard = ({
   color: string
 }) => (
   <Card
-    className="backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
+    className="flex-1 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
     style={{ background: "var(--card)", border: "2px solid var(--border)" }}
   >
     <CardContent className="p-6">
@@ -151,7 +151,7 @@ const SamplesPage = async () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Section */}
           <div className="flex justify-center w-full mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 inline-flex">
+            <div className="flex gap-4">
               <StatsCard
                 title="Total Samples"
                 value={totalSamples}

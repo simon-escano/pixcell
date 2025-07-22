@@ -1,25 +1,16 @@
-import { Suspense } from "react"
-import { getReportById, getPatientById, getSampleById, getProfileByUserId, getRoleById } from "@/db/queries/select"
 import Base from "@/components/base"
 import ImprovedReportPreview from "@/components/reports/report-preview"
-import ReportActions from "./report-actions-client"
 import type { ReportStatus } from "@/components/reports/status-update"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CustomAlertDialog } from "@/components/custom-alert-dialog"
-import {
-  ArrowLeft,
-  Shield,
-  Clock,
-  AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Eye,
-} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { getPatientById, getProfileByUserId, getReportById, getRoleById, getSampleById } from "@/db/queries/select"
 import { format } from "date-fns"
+import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Eye, Shield, XCircle, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { Suspense } from "react"
 import AiGeneratedNoticeClient from "./ai-generated-notice-client"
+import ReportActions from "./report-actions-client"
 
 // Loading component
 function ReportPageSkeleton() {
@@ -37,7 +28,6 @@ function ReportPageSkeleton() {
             <div className="h-8 w-64 bg-muted rounded animate-pulse mb-2" />
             <div className="h-4 w-96 bg-muted rounded animate-pulse" />
           </div>
-
           {/* Content Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-3">
@@ -67,7 +57,9 @@ function ReportNotFound() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Report Not Found</h3>
-                <p className="text-muted-foreground mt-1">The report you're looking for doesn't exist or has been removed.</p>
+                <p className="text-muted-foreground mt-1">
+                  The report you're looking for doesn't exist or has been removed.
+                </p>
               </div>
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" asChild>
@@ -92,7 +84,11 @@ function StatusBadge({ status }: { status: string }) {
       case "Draft":
         return { color: "bg-muted text-muted-foreground border-border", icon: Clock }
       case "Finalized":
-        return { color: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800", icon: CheckCircle2 }
+        return {
+          color:
+            "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800",
+          icon: CheckCircle2,
+        }
       case "UNDER_REVIEW":
         return { color: "bg-accent text-accent-foreground border-accent", icon: Eye }
       case "REJECTED":
@@ -111,6 +107,19 @@ function StatusBadge({ status }: { status: string }) {
     <Badge variant="outline" className={`${config.color} border flex items-center gap-1`}>
       <Icon className="h-3 w-3" />
       {status.replace("_", " ")}
+    </Badge>
+  )
+}
+
+// AI Generated badge component
+function AiGeneratedBadge() {
+  return (
+    <Badge
+      variant="outline"
+      className="bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-purple-200 dark:from-purple-950 dark:to-blue-950 dark:text-purple-300 dark:border-purple-800 flex items-center gap-1.5 px-3 py-1 font-medium shadow-sm"
+    >
+      <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+      AI Generated
     </Badge>
   )
 }
@@ -165,8 +174,11 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
             {/* Title and Actions */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">{report.title || "Medical Report"}</h1>
-                <p className="text-muted-foreground mt-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-foreground">{report.title || "Medical Report"}</h1>
+                  {report.isAiGenerated && <AiGeneratedBadge />}
+                </div>
+                <p className="text-muted-foreground">
                   {report.testType} • Created{" "}
                   {report.createdAt ? format(new Date(report.createdAt), "MMM dd, yyyy") : "Unknown"}
                 </p>
@@ -192,7 +204,16 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
                   <ImprovedReportPreview
                     formData={formData}
                     reportContent={reportContent}
-                    selectedPatient={patient ?? undefined}
+                    selectedPatient={
+                      patient
+                        ? {
+                            ...patient,
+                            fullName: `${patient.firstName} ${patient.lastName}`,
+                            role: "Patient",
+                            createdBy: patient.id,
+                          }
+                        : undefined
+                    }
                     selectedSample={sample ? { ...sample, createdByName: doctorName } : undefined}
                     doctorName={doctorName}
                     doctorRole={doctorRole}
@@ -222,9 +243,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
               </Suspense>
 
               {/* AI Generated Notice */}
-              {report.isAiGenerated && (
-                <AiGeneratedNoticeClient />
-              )}
+              {report.isAiGenerated && <AiGeneratedNoticeClient />}
             </div>
           </div>
         </div>

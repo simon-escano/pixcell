@@ -180,7 +180,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
     return (
       <div className="min-h-screen bg-[var(--background)] relative">
         {/* Public Header */}
-        <PublicHeader reportData={reportData} code={code} />
+        <PublicHeader code={code} />
         <div className="container mx-auto p-8">
           {/* Report Header */}
           <ReportHeader reportData={reportData} code={code} />
