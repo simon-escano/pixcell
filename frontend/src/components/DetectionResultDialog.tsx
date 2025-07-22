@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -23,8 +22,12 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Download,
+  Archive,
+  Loader2,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import JSZip from 'jszip';
 
 interface DetectionResultDialogProps {
   open: boolean
@@ -48,6 +51,8 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   const router = useRouter()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid")
+  const [isExporting, setIsExporting] = useState(false)
+  const [isBatchExporting, setIsBatchExporting] = useState(false)
 
   // Consistent neutral styling for all detected objects
   const getDetectionStyle = () => {
@@ -57,6 +62,80 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   // Batch mode: detectionResults.per_image exists
   const isBatch = detectionResults && detectionResults.per_image
   const images = isBatch ? detectionResults.per_image : []
+
+  // Function to convert base64 to blob
+  const base64ToBlob = (base64: string, mimeType = "image/jpeg") => {
+    const byteCharacters = atob(base64)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    return new Blob([byteArray], { type: mimeType })
+  }
+
+  // Function to download single image
+  const downloadSingleImage = async (base64Image: string, filename: string) => {
+    setIsExporting(true)
+    try {
+      const blob = base64ToBlob(base64Image)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Error downloading image:", error)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Function to download all images as zip
+  const downloadAllImagesAsZip = async () => {
+    setIsBatchExporting(true)
+    try {
+      const zip = new JSZip()
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+
+      // Add each processed image to the zip
+      images.forEach((img: any, index: number) => {
+        if (img.processed_image_base64) {
+          const blob = base64ToBlob(img.processed_image_base64)
+          zip.file(`detected_image_${index + 1}.jpg`, blob)
+        }
+      })
+
+      // Add a summary file with detection results
+      const summaryData = {
+        timestamp: new Date().toISOString(),
+        totalImages: images.length,
+        totalDetections: detectionResults.total_detections,
+        detectionSummary: detectionResults.detections,
+        patientId,
+        sampleId,
+      }
+      zip.file("detection_summary.json", JSON.stringify(summaryData, null, 2))
+
+      // Generate and download the zip file
+      const content = await zip.generateAsync({ type: "blob" })
+      const url = URL.createObjectURL(content)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `detection_results_${timestamp}.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Error creating zip file:", error)
+    } finally {
+      setIsBatchExporting(false)
+    }
+  }
 
   // Handler for generating report in batch mode
   const handleGenerateReport = () => {
@@ -94,6 +173,22 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
         <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground px-3 py-1.5 rounded-full text-sm font-medium border border-border shadow-sm">
           <ImageIcon className="w-3 h-3 inline mr-1.5" />
           Image {index + 1}
+        </div>
+        {/* Export button for individual image */}
+        <div className="absolute top-3 right-3">
+          <Button
+            size="sm"
+            onClick={() => downloadSingleImage(imageData.processed_image_base64, `detected_image_${index + 1}.jpg`)}
+            disabled={isExporting}
+            className="bg-background/90 backdrop-blur-sm text-foreground hover:bg-background border border-border shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            {isExporting ? (
+              <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
+            ) : (
+              <Download className="w-3 h-3 mr-1.5" />
+            )}
+            Export
+          </Button>
         </div>
       </div>
       {imageData.detections && Object.keys(imageData.detections).length > 0 && (
@@ -240,7 +335,20 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                 </div>
                               </div>
                             )}
-                            <div className="flex justify-end mt-8">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-end mt-8">
+                              <Button
+                                onClick={downloadAllImagesAsZip}
+                                disabled={isBatchExporting}
+                                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                                size="lg"
+                              >
+                                {isBatchExporting ? (
+                                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                ) : (
+                                  <Archive className="w-5 h-5 mr-2" />
+                                )}
+                                {isBatchExporting ? "Creating ZIP..." : "Export All Images"}
+                              </Button>
                               <Button
                                 onClick={handleGenerateReport}
                                 className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
@@ -262,25 +370,40 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                         <ImageIcon className="w-5 h-5 text-primary" />
                         Image Gallery
                       </h3>
-                      <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
+                      <div className="flex items-center gap-4">
                         <Button
-                          variant={viewMode === "grid" ? "default" : "ghost"}
+                          onClick={downloadAllImagesAsZip}
+                          disabled={isBatchExporting}
                           size="sm"
-                          onClick={() => setViewMode("grid")}
-                          className="flex items-center gap-2 rounded-md"
+                          className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                         >
-                          <Grid3X3 className="w-4 h-4" />
-                          Grid
+                          {isBatchExporting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Archive className="w-4 h-4 mr-2" />
+                          )}
+                          {isBatchExporting ? "Creating..." : "Export All"}
                         </Button>
-                        <Button
-                          variant={viewMode === "carousel" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setViewMode("carousel")}
-                          className="flex items-center gap-2 rounded-md"
-                        >
-                          <ImageIcon className="w-4 h-4" />
-                          Carousel
-                        </Button>
+                        <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
+                          <Button
+                            variant={viewMode === "grid" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setViewMode("grid")}
+                            className="flex items-center gap-2 rounded-md"
+                          >
+                            <Grid3X3 className="w-4 h-4" />
+                            Grid
+                          </Button>
+                          <Button
+                            variant={viewMode === "carousel" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setViewMode("carousel")}
+                            className="flex items-center gap-2 rounded-md"
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                            Carousel
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex-1 min-h-0">
@@ -405,13 +528,29 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                   {/* Single Processed Image */}
                   {processedImageUrl && (
                     <Card className="border-2 border-dashed border-primary/30 bg-card/30 backdrop-blur-sm shadow-lg">
-                      <CardHeader className="pb-4">
+                      <CardHeader className="pb-4 flex flex-row items-center justify-between">
                         <CardTitle className="text-lg flex items-center gap-3 text-foreground">
                           <div className="p-2 bg-primary/10 rounded-lg">
                             <ImageIcon className="w-5 h-5 text-primary" />
                           </div>
                           Processed Medical Image
                         </CardTitle>
+                        <Button
+                          onClick={() => {
+                            // Extract base64 from data URL
+                            const base64 = processedImageUrl.split(",")[1]
+                            downloadSingleImage(base64, "detected_image.jpg")
+                          }}
+                          disabled={isExporting}
+                          className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                        >
+                          {isExporting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4 mr-2" />
+                          )}
+                          Export Image
+                        </Button>
                       </CardHeader>
                       <CardContent>
                         <div className="relative overflow-hidden rounded-xl border border-border shadow-lg group">
