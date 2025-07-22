@@ -1,16 +1,10 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { Worm, Shield, Sun, Moon } from "lucide-react"
-import { useTheme } from "next-themes"
-import { useState, useEffect } from "react"
 import ThemeToggle from "@/components/theme-toggle"
+import { Badge } from "@/components/ui/badge"
+import { Shield, Worm } from "lucide-react"
 
-export default function PublicHeader({ reportData, code }: { reportData: any; code: string }) {
-  const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
-
+export default function PublicHeader({ code }: { code: string }) {
   return (
     <div className="bg-[var(--card)] border-b border-[var(--border)] shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
