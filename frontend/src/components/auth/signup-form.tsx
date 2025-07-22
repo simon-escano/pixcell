@@ -109,6 +109,14 @@ export function SignupForm({
                   </SelectContent>
                 </Select>
                 <Input
+                  name="licenseNo"
+                  id="licenseNo"
+                  type="licenseNo"
+                  placeholder="License Number"
+                  required
+                  disabled={isPending}
+                />
+                <Input
                   name="email"
                   id="email"
                   type="email"

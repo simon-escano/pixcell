@@ -32,6 +32,7 @@ export const signupAction = async (formData: FormData) => {
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const roleId = formData.get("roleId") as string;
+    const licenseNo = formData.get("licenseNo") as string;
 
     // Check if email already exists
     const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
@@ -88,6 +89,7 @@ export const signupAction = async (formData: FormData) => {
       userId,
       roleId,
       imageId,
+      licenseNo,
     });
 
     console.log("Profile insert values:", {
