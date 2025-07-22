@@ -1,5 +1,5 @@
 import { doctorPatient, feedback, image, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from "..";
 
 import { createClient } from '@supabase/supabase-js';
@@ -152,26 +152,50 @@ export async function getSamplesByPatientId(id: string) {
 }
 
 export async function getSamplesByUserId(userId: string) {
-  return await db
+  const directSamples = db
     .select({
       id: sample.id,
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
-      // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
       imageId: sampleImage.imageId,
-      imageUrl: sampleImg.imageUrl
+      imageUrl: sampleImg.imageUrl,
     })
     .from(sample)
     .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
     .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
     .where(eq(sample.createdBy, userId));
+
+  const patientSamples = db
+    .select({
+      id: sample.id,
+      patientId: sample.patientId,
+      sampleName: sample.sampleName,
+      createdBy: sample.createdBy,
+      uploadedBy: sampleImage.uploadedBy,
+      metadata: sampleImage.metadata,
+      capturedAt: sampleImage.capturedAt,
+      imageId: sampleImage.imageId,
+      imageUrl: sampleImg.imageUrl,
+    })
+    .from(doctorPatient)
+    .innerJoin(sample, eq(doctorPatient.patientId, sample.patientId))
+    .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
+    .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
+    .where(eq(doctorPatient.doctorId, userId));
+
+  const [direct, patients] = await Promise.all([directSamples, patientSamples]);
+
+  const seen = new Set<string>();
+  return [...direct, ...patients].filter((s) => {
+    if (seen.has(s.id)) return false;
+    seen.add(s.id);
+    return true;
+  });
 }
-
-
 
 export async function getSampleById(id: string) {
   const result = await db
@@ -579,6 +603,16 @@ export async function getDoctorForPatient(patientId: string) {
     .from(doctorPatient)
     .where(eq(doctorPatient.patientId, patientId));
   return result[0]?.doctorId || null;
+}
+
+export async function isDoctorAssociatedWithPatient(doctorId: string, patientId: string): Promise<boolean> {
+  const result = await db
+    .select({ id: doctorPatient.id })
+    .from(doctorPatient)
+    .where(and(eq(doctorPatient.doctorId, doctorId), eq(doctorPatient.patientId, patientId)))
+    .limit(1);
+
+  return result.length > 0;
 }
 
 export async function getReportsByPatientId(patientId: string) {
