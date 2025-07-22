@@ -2,7 +2,8 @@
 
 import ThemeToggle from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Worm } from "lucide-react"
+import { Shield } from "lucide-react"
+import PixCellLogo from "../pixcell-logo"
 
 export default function PublicHeader({ code }: { code: string }) {
   return (
@@ -10,9 +11,7 @@ export default function PublicHeader({ code }: { code: string }) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[var(--primary)] rounded-lg flex items-center justify-center">
-              <Worm className="h-6 w-6 text-[var(--primary-foreground)]" />
-            </div>
+            <PixCellLogo className="size-10" />
             <div>
               <h1 className="text-xl font-bold text-[var(--foreground)]">PixCell Medical</h1>
               <p className="text-sm text-[var(--muted-foreground)]">Secure Medical Report Access</p>

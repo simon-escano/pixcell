@@ -1,26 +1,25 @@
-import { Suspense } from "react"
-import ImprovedReportPreview from "@/components/reports/report-preview"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  AlertCircle,
-  Shield,
-  Clock,
-  User,
-  TestTube,
-  Building,
-  ArrowLeft,
-  Eye,
-  CheckCircle2,
-  XCircle,
-  Worm, // Add Worm icon
-} from "lucide-react"
-import Link from "next/link"
-import { format } from "date-fns"
+import PixCellLogo from "@/components/pixcell-logo"
+import PublicHeader from "@/components/reports/public-header"
 import ReportMetadata from "@/components/reports/report-metadata"
 import ReportNotFound from "@/components/reports/report-not-found"
-import PublicHeader from "@/components/reports/public-header"
+import ImprovedReportPreview from "@/components/reports/report-preview"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { format } from "date-fns"
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Eye,
+  Shield,
+  TestTube,
+  User,
+  XCircle
+} from "lucide-react"
+import Link from "next/link"
+import { Suspense } from "react"
 
 // Loading component
 function ReportViewSkeleton() {
@@ -216,11 +215,9 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
             <div className="bg-[var(--card)] rounded-lg border border-[var(--border)] p-6 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[var(--primary)/10] rounded-lg flex items-center justify-center">
-                    <Worm className="h-5 w-5 text-[var(--primary)] dark:text-[var(--primary-foreground)]" />
-                  </div>
+                  <PixCellLogo className="size-8" />
                   <div>
-                    <h3 className="font-semibold text-[var(--foreground)]">PixCell</h3>
+                    <h3 className="font-medium text-[var(--foreground)]">PixCell</h3>
                     <p className="text-sm text-[var(--muted-foreground)]">123 Medical Center Dr. • +1 (555) 123-4567</p>
                   </div>
                 </div>
