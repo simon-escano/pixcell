@@ -98,7 +98,7 @@ export default function CameraModal({ open, onClose, onCapture }: CameraModalPro
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] p-0 overflow-hidden bg-background border-border">
+      <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] p-0 overflow-hidden bg-background border-border">
         <DialogHeader className="px-6 py-4 border-b border-border bg-muted/30">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <div className="p-2 rounded-full bg-primary/10">
@@ -108,9 +108,9 @@ export default function CameraModal({ open, onClose, onCapture }: CameraModalPro
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col p-6">
-          <div className="flex items-center justify-center">
-            <div className="relative w-full aspect-video bg-muted/50 flex items-center justify-center rounded-2xl overflow-hidden border-2 border-border shadow-xl">
+        <div className="flex flex-col p-6 overflow-hidden h-full">
+          <div className="flex items-center flex-1 h-full justify-center overflow-hidden">
+            <div className="relative w-full h-full aspect-video bg-muted/50 flex items-center justify-center rounded-2xl overflow-hidden border-2 border-border shadow-xl">
               {error ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center max-w-md">
                   <div className="p-4 rounded-full bg-destructive/10 mb-4">
