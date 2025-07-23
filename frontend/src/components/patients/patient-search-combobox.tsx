@@ -1,6 +1,6 @@
 "use client"
 
-import { MetaPatient } from "@/app/samples/types"
+import type { MetaPatient } from "@/app/samples/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
@@ -34,24 +34,17 @@ export function PatientSearchCombobox({
   const filteredPatients = patients.filter((p) => {
     const term = searchTerm.toLowerCase().trim()
     if (term === "") return true
-    const individualMatch =
-      p.fullName.toLowerCase().includes(term) ||
-      p.email.toLowerCase().includes(term)
-
+    const individualMatch = p.fullName.toLowerCase().includes(term) || p.email.toLowerCase().includes(term)
     const fullNameMatch = p.fullName.includes(term)
-
     const searchTerms = term.split(/\s+/)
     const multiTermMatch = searchTerms.every(
-      (term) =>
-        p.fullName.toLowerCase().includes(term) ||
-        p.email.toLowerCase().includes(term),
+      (term) => p.fullName.toLowerCase().includes(term) || p.email.toLowerCase().includes(term),
     )
-
     return individualMatch || fullNameMatch || multiTermMatch
   })
 
   const selected = patients.find((p) => p.id === value)
-  let selectedName = selected?.fullName
+  const selectedName = selected?.fullName
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -60,18 +53,20 @@ export function PatientSearchCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-transparent"
+          className="w-full justify-between bg-transparent min-w-0"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             {selected && (
-              <Avatar className="h-6 w-6">
+              <Avatar className="h-6 w-6 flex-shrink-0">
                 <AvatarImage src={patientImages[selected.id] || undefined} alt={selectedName} />
                 <AvatarFallback className="text-xs">{getPatientInitials(selected)}</AvatarFallback>
               </Avatar>
             )}
-            <span className="truncate">{selected ? `${selectedName} (${selected.email})` : "Select a patient..."}</span>
+            <span className="truncate flex-1 text-left">
+              {selected ? `${selectedName} (${selected.email})` : "Select a patient..."}
+            </span>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="h-4 w-4 flex-shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
@@ -92,7 +87,7 @@ export function PatientSearchCombobox({
                     }}
                     className="flex items-center gap-3 p-3"
                   >
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarImage src={patientImages[patient.id] || undefined} alt={patient.fullName} />
                       <AvatarFallback className="text-sm">{getPatientInitials(patient)}</AvatarFallback>
                     </Avatar>
@@ -100,7 +95,9 @@ export function PatientSearchCombobox({
                       <span className="font-medium truncate">{patient.fullName}</span>
                       <span className="text-sm text-muted-foreground truncate">{patient.email}</span>
                     </div>
-                    <Check className={cn("h-4 w-4 shrink-0", value === patient.id ? "opacity-100" : "opacity-0")} />
+                    <Check
+                      className={cn("h-4 w-4 flex-shrink-0", value === patient.id ? "opacity-100" : "opacity-0")}
+                    />
                   </CommandItem>
                 )
               })}
