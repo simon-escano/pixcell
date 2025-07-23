@@ -92,17 +92,6 @@ export default function SampleBrowserClient({ samples, currentUser, patients }: 
               />
             </div>
             <div className="flex items-center gap-3">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40 bg-card">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="blood">Blood Smear</SelectItem>
-                  <SelectItem value="tissue">Tissue</SelectItem>
-                  <SelectItem value="fluid">Body Fluid</SelectItem>
-                </SelectContent>
-              </Select>
 
               <Select value={sort} onValueChange={setSort}>
                 <SelectTrigger className="w-40 bg-card">

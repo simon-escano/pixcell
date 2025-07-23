@@ -266,11 +266,11 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       <div className="flex h-full flex-col w-[350px] space-y-4 min-h-0">
         {/* Sample Info Card */}
         <Card className="bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg p-2">
-          <CardHeader className="pb-1 px-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-1">
+          <CardHeader className="pb-1 px-2 overflow-hidden">
+            <div className="flex items-center justify-between w-full overflow-hidden">
+              <CardTitle className="text-lg font-semibold justify-start text-foreground flex flex-1 overflow-hidden items-center gap-1">
                 <FileImage className="w-5 h-5 text-primary" />
-                {sample.sampleName}
+                <p className="truncate flex-1">{sample.sampleName}</p>
               </CardTitle>
               <div className="flex items-center gap-1">
                 {/* Share Button */}

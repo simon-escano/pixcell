@@ -156,7 +156,7 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
       >
         <div className="p-2 pb-0">{renderImageGrid()}</div>
         <div className="flex flex-col gap-2 p-3">
-          <h1 className="font-display px-1 text-lg lg:text-xl">
+          <h1 className="font-display truncate px-1 text-lg lg:text-xl">
             {sample.sampleName}
           </h1>
           <div className="grid grid-cols-2 gap-2">
