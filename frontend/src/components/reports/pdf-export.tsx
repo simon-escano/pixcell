@@ -278,6 +278,10 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
           <View style={styles.header} fixed>
             <View style={styles.headerContent}>
               <View style={styles.logoSection}>
+
+                <View style={{ width: 50, height: 50, padding:5 }} >
+                  <Image src={'/pixcell-logo.png'}  ></Image>
+                </View>
                 
                 <View style={styles.companyInfo}>
                   <Text style={styles.companyName}>PixCell</Text>
