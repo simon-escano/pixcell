@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import {
   AlertCircle,
+  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Clock,
@@ -76,7 +77,16 @@ export default function ImprovedReportViewPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       {/* Light/Dark Mode Toggle in upper right */}
-      <div className="absolute top-6 right-6 z-10">
+      <div className="flex absolute top-6 right-6 z-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/login")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Login</span>
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Toggle theme">
@@ -120,9 +130,6 @@ export default function ImprovedReportViewPage() {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="code" className="text-sm font-medium text-foreground">
-                  Report Code *
-                </Label>
                 <div className="relative">
                   <Input
                     id="code"
