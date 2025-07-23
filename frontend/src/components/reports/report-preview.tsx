@@ -10,6 +10,7 @@ import { Calendar, FileText, TestTube } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getPatientInitials } from "../patients/patient-search-combobox";
 import { PDFExport, ReportPDF } from "./pdf-export";
+import PixCellLogo from "../pixcell-logo";
 
 interface TableData {
   id: string;
@@ -123,7 +124,7 @@ export default function ReportPreview({
     <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-gray-300">
       <div className="flex items-center">
         <div className="flex items-center gap-3 self-center font-medium">
-          
+          <PixCellLogo className="size-14"/>
         </div>
         <div className="text-sm text-gray-700 ml-4">
           <p className="font-semibold text-lg text-gray-800">PixCell</p>
