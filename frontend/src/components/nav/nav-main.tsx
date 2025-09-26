@@ -1,4 +1,4 @@
-import { ContactRound, FileText, House, Images } from "lucide-react";
+import { ContactRound, FileText, House, Images, LayoutDashboard } from "lucide-react";
 
 import { Collapsible } from "@/components/ui/collapsible";
 import {
@@ -14,9 +14,9 @@ import Link from "next/link";
 export function NavMain() {
   const items = [
     {
-      title: "Home",
+      title: "Dashboard",
       url: "/",
-      icon: House,
+      icon: LayoutDashboard,
     },
     {
       title: "Patients",

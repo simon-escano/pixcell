@@ -11,7 +11,7 @@ export default async function OtherUsersPage() {
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
 
-  // Redirect non-administrators to home page
+  // Redirect non-administrators to dashboard page
   if (role.name !== "Administrator") {
     redirect("/");
   }
