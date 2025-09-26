@@ -197,7 +197,7 @@ export function UserDialog({
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Name</Label>
+            <Label className="text-right">Name<span className="text-destructive">*</span></Label>
             <div className="col-span-3 flex gap-2">
               <div className="flex-1">
                 <Input
@@ -226,7 +226,7 @@ export function UserDialog({
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
-              Email
+              Email<span className="text-destructive">*</span>
             </Label>
             <div className="col-span-3">
               <Input
@@ -244,7 +244,7 @@ export function UserDialog({
           {isAddMode && (
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="password" className="text-right">
-                Password
+                Password<span className="text-destructive">*</span>
               </Label>
               <div className="col-span-3">
                 <Input
@@ -274,7 +274,7 @@ export function UserDialog({
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="role" className="text-right">
-              Role
+              Role<span className="text-destructive">*</span>
             </Label>
             <div className="col-span-3">
               <Select
