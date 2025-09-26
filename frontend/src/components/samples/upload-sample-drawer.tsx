@@ -170,14 +170,21 @@ export default function SampleDrawer({
                   onChange={setSelectedPatient}
                 />
                 <div className="flex flex-col">
-                  <Input
-                    id="sampleName"
-                    className="rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
-                    placeholder="Enter sample name"
-                    value={sampleName}
-                    onChange={(e) => setSampleName(e.target.value)}
-                    disabled={isUploading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="sampleName"
+                      className="pr-4 rounded-t-lg rounded-b-none border-2 border-dashed shadow-none"
+                      placeholder="Enter sample name"
+                      value={sampleName}
+                      onChange={(e) => setSampleName(e.target.value)}
+                      disabled={isUploading}
+                      required
+                    />
+                    {!sampleName && (
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive mr-2">*</span>
+                    )}
+                  </div>
+
                   <UploadSampleFile onFilesChange={setFiles} files={files} />
                 </div>
               </div>

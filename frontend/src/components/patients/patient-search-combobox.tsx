@@ -63,7 +63,7 @@ export function PatientSearchCombobox({
               </Avatar>
             )}
             <span className="truncate flex-1 text-left">
-              {selected ? `${selectedName} (${selected.email})` : "Select a patient..."}
+              {selected ? `${selectedName} (${selected.email})` : <span>Select a patient...<span className="text-destructive"> *</span></span>}
             </span>
           </div>
           <ChevronsUpDown className="h-4 w-4 flex-shrink-0 opacity-50" />
