@@ -110,43 +110,26 @@ export function LoginForm({
           {step === 'email' && (
             <form onSubmit={handleCheckAccount}>
               <div className="grid gap-6">
-                {/* Patient access button */}
-                <Link href="/reports/view">
-                  <Button type="button" className="w-full cursor-pointer">
-                    I'm a Patient
-                  </Button>
-                </Link>
-                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                  <span className="bg-card text-muted-foreground relative z-10 px-2">
-                    or Log in as Doctor
-                  </span>
-                </div>
-                <div className="grid gap-6">
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
+                <div className="grid gap-4">
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                   <div className="flex flex-col items-center gap-2">
                     <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
                       {isPending ? "Checking..." : "Check Account"}
                     </Button>
-                    <ForgotPasswordDialog />
                   </div>
                 </div>
                 <div className="text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/signup" className="underline underline-offset-4">
-                    Sign up
+                  Are you a patient?{" "}
+                  <Link href="/reports/view" className="underline underline-offset-4 text-primary">
+                    View reports
                   </Link>
                 </div>
               </div>
@@ -170,23 +153,20 @@ export function LoginForm({
                     ← Use different email
                   </Button>
                 </div>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      required
-                    />
+                <div className="flex flex-col gap-4">
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
+                      {isPending ? "Signing in..." : "Sign In"}
+                    </Button>
+                    <ForgotPasswordDialog />
                   </div>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-                    {isPending ? "Signing in..." : "Sign In"}
-                  </Button>
-                  <ForgotPasswordDialog />
                 </div>
               </div>
             </form>
