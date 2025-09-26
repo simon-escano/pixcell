@@ -1,5 +1,5 @@
 import { not } from "drizzle-orm";
-import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema, integer, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, json, jsonb, timestamp, boolean, varchar, date, pgSchema, integer, pgEnum, bigint } from "drizzle-orm/pg-core";
 
 const authSchema = pgSchema('auth');
 
@@ -13,7 +13,7 @@ export const reportStatusEnum = pgEnum("report_status", [
 
 
 export const user = authSchema.table('users', {
-	id: uuid('id').primaryKey(),
+	id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull(),
   phone: varchar("phone"),
 });
@@ -24,7 +24,7 @@ export const role = pgTable("role", {
 });
 
 export const profile = pgTable("profile", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   userId: uuid('user_id').references(() => user.id).notNull(),
@@ -34,23 +34,23 @@ export const profile = pgTable("profile", {
 });
 
 export const image = pgTable("image", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   imageUrl: text("image_url")
 });
 
 export const patient = pgTable("patient", {
   id: uuid("id").primaryKey().defaultRandom(),
-  birthDate: date("birth_date").notNull(),
+  birthDate: date("birth_date"),
   sex: text("sex").notNull(),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  contactNumber: varchar("contact_number").notNull(),
-  email: varchar("email").notNull(),
-  address: text("address").notNull(),
-  height: integer("height").notNull(),
-  weight: integer("weight").notNull(),
-  bloodType: varchar("blood_type", { length: 3 }).notNull(),
+  contactNumber: varchar("contact_number"),
+  email: varchar("email"),
+  address: text("address"),
+  height: integer("height"),
+  weight: integer("weight"),
+  bloodType: varchar("blood_type", { length: 3 }),
   imageId: uuid("image_id").references(() => image.id).unique(),
   createdBy: uuid("created_by").references(() => profile.id),
 });
@@ -63,7 +63,7 @@ export const sampleImage = pgTable("sample_image",{
   metadata: json("metadata").notNull(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-
+  isAiGenerated: boolean("is_ai_generated").default(false),
 });
 
 export const sample = pgTable("sample", {
@@ -134,11 +134,11 @@ export const feedback = pgTable("feedback", {
 });
 
 export const doctorPatient = pgTable("doctor_patient", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  doctorId: uuid("doctor_id").notNull().references(() => profile.id),
-  patientId: uuid("patient_id").notNull().references(() => patient.id),
-  orderNo: integer("order_no"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  doctorId: uuid("doctor_id"),
+  patientId: uuid("patient_id"),
+  orderNo: bigint("order_no", { mode: "number" }),
 });
 
 export type Role = typeof role.$inferSelect;
