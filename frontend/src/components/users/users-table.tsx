@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUser, updateUser, signupAction } from "@/actions/users";
+import { deleteUser, updateUser, createUserWithAutoPasswordAction } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -60,7 +60,6 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     lastName: string;
     email: string;
     roleId: string;
-    phone?: string;
     file?: File;
   }) => {
     if (!selectedUser) return;
@@ -70,7 +69,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       data.lastName,
       data.email,
       data.roleId,
-      data.phone,
+      undefined,
       data.file
     );
     toast.success("User updated successfully.");
@@ -83,27 +82,19 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     lastName: string;
     email: string;
     roleId: string;
-    phone?: string;
     file?: File;
-    password?: string;
   }) => {
-    if (!data.password) {
-      toast.error("Password is required");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("firstName", data.firstName);
     formData.append("lastName", data.lastName);
     formData.append("email", data.email);
-    formData.append("password", data.password);
     formData.append("roleId", data.roleId);
-    if (data.phone) formData.append("phone", data.phone);
+    formData.append("licenseNo", ""); // Add empty license number for now
     if (data.file) formData.append("file", data.file);
 
-    const res = await signupAction(formData);
+    const res = await createUserWithAutoPasswordAction(formData);
     if (!res.errorMessage) {
-      toast.success("User added successfully.");
+      toast.success("User added successfully. Password has been auto-generated and will be required to be changed on first login.");
       setAddOpen(false);
       router.refresh();
     } else {

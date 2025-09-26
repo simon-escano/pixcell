@@ -30,7 +30,8 @@ export const profile = pgTable("profile", {
   userId: uuid('user_id').references(() => user.id).notNull(),
   roleId: uuid("role_id").notNull().references(() => role.id),
   imageId: uuid("image_id").references(() => image.id),
-  licenseNo: text("license_no")
+  licenseNo: text("license_no"),
+  mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
 export const image = pgTable("image", {

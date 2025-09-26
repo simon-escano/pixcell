@@ -48,7 +48,6 @@ interface UserDialogProps {
     email: string;
     roleId: string;
     file?: File;
-    password?: string;
   }) => Promise<void>;
   title: string;
   description: string;
@@ -75,7 +74,6 @@ export function UserDialog({
     firstName?: string;
     lastName?: string;
     email?: string;
-    password?: string;
     role?: string;
   }>({});
 
@@ -107,7 +105,6 @@ export function UserDialog({
     const firstName = (document.getElementById("firstName") as HTMLInputElement)?.value;
     const lastName = (document.getElementById("lastName") as HTMLInputElement)?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = isAddMode ? (document.getElementById("password") as HTMLInputElement)?.value : undefined;
 
     if (!firstName?.trim()) {
       errors.firstName = "First name is required";
@@ -119,9 +116,6 @@ export function UserDialog({
       errors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errors.email = "Please enter a valid email address";
-    }
-    if (isAddMode && !password?.trim()) {
-      errors.password = "Password is required";
     }
     if (!roleValue) {
       errors.role = "Role is required";
@@ -139,7 +133,6 @@ export function UserDialog({
     const firstName = (document.getElementById("firstName") as HTMLInputElement)?.value;
     const lastName = (document.getElementById("lastName") as HTMLInputElement)?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const password = isAddMode ? (document.getElementById("password") as HTMLInputElement)?.value : undefined;
 
     setIsPending(true);
     try {
@@ -149,7 +142,6 @@ export function UserDialog({
         email,
         roleId: roleValue,
         file: file || undefined,
-        password,
       });
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -237,24 +229,6 @@ export function UserDialog({
             </div>
           </div>
 
-          {isAddMode && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right">
-                Password<span className="text-destructive">*</span>
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter password"
-                  className={formErrors.password ? "border-red-500" : ""}
-                />
-                {formErrors.password && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.password}</p>
-                )}
-              </div>
-            </div>
-          )}
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="role" className="text-right">

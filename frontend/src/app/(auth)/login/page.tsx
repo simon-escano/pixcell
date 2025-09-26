@@ -1,5 +1,5 @@
 
-import { LoginForm } from "@/components/auth/login-form";
+import { EmailFirstLoginForm } from "@/components/auth/email-first-login-form";
 import PixCellLogo from "@/components/pixcell-logo";
 import Link from "next/link";
 
@@ -14,7 +14,7 @@ export default function LoginPage() {
           <PixCellLogo />
           PixCell
         </Link>
-        <LoginForm />
+        <EmailFirstLoginForm />
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
     lastName: string;
     email: string;
     roleId: string;
-    phone?: string;
     file?: File;
   }) => {
     await updateUser(
@@ -22,7 +21,7 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
       data.lastName,
       data.email,
       data.roleId,
-      data.phone,
+      undefined,
       data.file
     );
     setOpen(false);

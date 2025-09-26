@@ -232,7 +232,8 @@ export async function getProfileByUserId(userId: string) {
       roleId: profile.roleId,
       imageId: profile.imageId,
       imageUrl: image.imageUrl,
-      licenseNo: profile.licenseNo, // <-- Add this line
+      licenseNo: profile.licenseNo,
+      mustChangePassword: profile.mustChangePassword,
     })
     .from(profile)
     .leftJoin(image, eq(profile.imageId, image.id))
