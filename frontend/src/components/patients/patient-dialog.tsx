@@ -253,18 +253,31 @@ export function PatientDialog({
           <div className="flex flex-col gap-2">
             <Label>Basic Info</Label>
             <div className="flex gap-2">
-              <Input
-                placeholder="First name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-              <Input
-                placeholder="Last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
+              <div className="relative flex-1">
+                <Input
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+                {!firstName && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive mr-2">*</span>
+                )}
+              </div>
+
+              <div className="relative flex-1">
+                <Input
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+                {!lastName && (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive mr-2">*</span>
+                )}
+              </div>
             </div>
+
             <Input
               placeholder="Email"
               type="email"
@@ -306,7 +319,7 @@ export function PatientDialog({
             <div className="flex gap-2">
               <Select value={sex} onValueChange={setSex}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sex" />
+                  <SelectValue placeholder={<span>Sex<span className="text-destructive"> *</span></span>} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="M">Male</SelectItem>
