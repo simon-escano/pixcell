@@ -414,7 +414,7 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
 
 export { ReportPDF };
 
-export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps) => {
+export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps, content?: string) => {
   const handleExportPDF = async () => {
     try {
       const blob = await pdf(
@@ -448,10 +448,10 @@ export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSa
       onClick={handleExportPDF}
       variant="outline"
       size="sm"
-      className="flex items-center space-x-2"
+      className="flex items-center gap-2"
     >
       <Download className="h-4 w-4" />
-      <span>Export PDF</span>
+      {content ? <span>{content}</span> : ""}
     </Button>
   );
 }; 

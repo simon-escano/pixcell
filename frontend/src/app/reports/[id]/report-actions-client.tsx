@@ -1,43 +1,40 @@
-"use client"
+  "use client"
 
 import dynamic from "next/dynamic"
 const QRCode = dynamic(() => import("react-qr-code"), { ssr: false })
 
-import { useRouter } from "next/navigation"
-import { useTransition, useState } from "react"
-import { toast } from "react-hot-toast"
+import { deleteReport } from "@/actions/reports"
+import { CustomAlertDialog } from "@/components/custom-alert-dialog"
+import StatusUpdate from "@/components/reports/status-update"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { CustomAlertDialog } from "@/components/custom-alert-dialog"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog"
-import { deleteReport } from "@/actions/reports"
+import { Separator } from "@/components/ui/separator"
+import { type ReportStatus } from "@/lib/status-config"
 import {
-  FileText,
-  Edit,
-  Trash2,
-  QrCode,
+  AlertTriangle,
+  Clock,
   Copy,
   Download,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Eye,
-  Shield,
+  Edit,
   ExternalLink,
+  FileText,
   Loader2,
-  User,
+  QrCode,
   TestTube,
+  Trash2,
+  User
 } from "lucide-react"
-import StatusUpdate, { type ReportStatus } from "@/components/reports/status-update"
+import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
+import { toast } from "react-hot-toast"
 
 interface ReportActionsProps {
   reportId: string
@@ -49,47 +46,6 @@ interface ReportActionsProps {
   doctorName?: string // Add doctorName prop
 }
 
-// Status configuration
-const getStatusConfig = (status: ReportStatus) => {
-  switch (status) {
-    case "Draft":
-      return {
-        color: "bg-muted text-muted-foreground border-border",
-        icon: Clock,
-        description: "Report is in draft mode and can be edited",
-      }
-    case "Finalized":
-      return {
-        color: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800",
-        icon: CheckCircle2,
-        description: "Report has been finalized and is ready for sharing",
-      }
-    case "UNDER_REVIEW":
-      return {
-        color: "bg-accent text-accent-foreground border-accent",
-        icon: Eye,
-        description: "Report is currently under review",
-      }
-    case "REJECTED":
-      return {
-        color: "bg-destructive/10 text-destructive border-destructive",
-        icon: AlertTriangle,
-        description: "Report has been rejected and needs revision",
-      }
-    case "ARCHIVED":
-      return {
-        color: "bg-muted text-muted-foreground border-border",
-        icon: Shield,
-        description: "Report has been archived",
-      }
-    default:
-      return {
-        color: "bg-muted text-muted-foreground border-border",
-        icon: FileText,
-        description: "Unknown status",
-      }
-  }
-}
 
 export default function ImprovedReportActions({
   reportId,
@@ -101,43 +57,12 @@ export default function ImprovedReportActions({
   doctorName,
 }: ReportActionsProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDownloadingQR, setIsDownloadingQR] = useState(false)
   const [isCopyingLink, setIsCopyingLink] = useState(false)
 
   // The URL to view the report (for QR code)
   const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/view/${reportCode}`
   const qrContainerId = `qr-container-${reportId}`
-
-  const statusConfig = getStatusConfig(reportStatus)
-  const StatusIcon = statusConfig.icon
-
-  const handleEdit = () => {
-    router.push(`/reports/${reportId}/edit`)
-  }
-
-  const handleDelete = () => {
-    setShowDeleteDialog(true)
-  }
-
-  const confirmDelete = () => {
-    setShowDeleteDialog(false)
-    startTransition(async () => {
-      try {
-        const res = await deleteReport(reportId)
-        if (res.success) {
-          toast.success("Report deleted successfully")
-          router.push("/reports")
-          router.refresh()
-        } else {
-          toast.error(res.error || "Failed to delete report")
-        }
-      } catch (error) {
-        toast.error("An error occurred while deleting the report")
-      }
-    })
-  }
 
   const handleCopyQr = async () => {
     setIsCopyingLink(true)
@@ -230,12 +155,12 @@ export default function ImprovedReportActions({
                 <QRCode value={reportUrl} size={120} level="M" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-foreground">Report Code: {reportCode}</p>
-                <p className="text-xs text-muted-foreground mt-1">Scan QR code to view report</p>
+                <p className="text-xs text-muted-foreground">Report Code</p>
+                <p className="font-semibold text-xl text-foreground">{reportCode}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -246,80 +171,14 @@ export default function ImprovedReportActions({
                 {isCopyingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
                 Copy Link
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleDownloadQr}
-                disabled={isDownloadingQR}
-                className="flex items-center gap-2 bg-transparent"
-              >
-                {isDownloadingQR ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                Download
+              <Button size="sm" variant="secondary" onClick={handleViewReport} className="flex items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View Public Report
               </Button>
             </div>
-
-            <Button size="sm" variant="secondary" onClick={handleViewReport} className="w-full flex items-center gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View Public Report
-            </Button>
           </CardContent>
         </Card>
       )}
-
-      {/* Report Actions Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Report Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Status Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Status</span>
-              <Badge variant="outline" className={`${statusConfig.color} border flex items-center gap-1`}>
-                <StatusIcon className="h-3 w-3" />
-                {reportStatus.replace("_", " ")}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">{statusConfig.description}</p>
-            <StatusUpdate reportId={reportId} currentStatus={reportStatus} onUpdate={handleStatusUpdated} />
-          </div>
-
-          <Separator />
-
-          {/* Edit Action */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEdit}
-            className="w-full flex items-center gap-2 justify-start bg-transparent"
-            disabled={reportStatus === "ARCHIVED"}
-          >
-            <Edit className="h-4 w-4" />
-            Edit Report
-          </Button>
-
-          <Separator />
-
-          {/* Danger Zone */}
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Danger Zone</p>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              disabled={isPending}
-              className="w-full flex items-center gap-2 justify-start"
-            >
-              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-              Delete Report
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Report Information Card */}
       <Card>
@@ -452,6 +311,76 @@ export default function ImprovedReportActions({
         />
       )}
 
+    </div>
+  )
+}
+
+
+export function ReportActionButtons({
+  reportId,
+  reportStatus,
+}: ReportActionsProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const confirmDelete = () => {
+    setShowDeleteDialog(false)
+    startTransition(async () => {
+      try {
+        const res = await deleteReport(reportId)
+        if (res.success) {
+          toast.success("Report deleted successfully")
+          router.push("/reports")
+          router.refresh()
+        } else {
+          toast.error(res.error || "Failed to delete report")
+        }
+      } catch (error) {
+        toast.error("An error occurred while deleting the report")
+      }
+    })
+  }
+  
+  const handleStatusUpdated = async (newStatus: ReportStatus) => {
+    router.refresh()
+    toast.success("Report status updated successfully")
+  }
+
+  const handleEdit = () => {
+    router.push(`/reports/${reportId}/edit`)
+  }
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true)
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <StatusUpdate reportId={reportId} currentStatus={reportStatus} onUpdate={handleStatusUpdated} />
+
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleEdit}
+          className="h-full py-2"
+          disabled={reportStatus === "Archived"}
+        >
+          <Edit className="size-4" />
+        </Button>
+
+        <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isPending}
+            className="bg-rose-50 border border-rose-400 text-rose-400 dark:bg-rose-600 dark:border-none dark:text-rose-200 h-full py-2"
+          >
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </Button>
+      </div>
+      
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md">

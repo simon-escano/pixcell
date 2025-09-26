@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import type { Role } from "@/db/schema";
 import { pdf } from '@react-pdf/renderer';
 import { format } from "date-fns";
-import { Calendar, FileText, TestTube } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, FileText, TestTube } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getPatientInitials } from "../patients/patient-search-combobox";
 import { PDFExport, ReportPDF } from "./pdf-export";
@@ -170,10 +170,16 @@ export default function ReportPreview({
   // --- Render current page ---
   const pageContent = pages[pageIdx] || [];
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Report Preview</h3>
-        <div className="flex items-center space-x-4">
+    <div className="flex flex-col p-6 space-y-4 items-center justify-center">
+      <div className="w-full flex items-center justify-between gap-4">
+        {/* Navigation Controls */}
+        <div className="justify-center flex gap-2 items-center">
+          <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.max(0, p - 1))} disabled={pageIdx === 0}><ChevronLeft/></Button>
+          <span>{pageIdx + 1} of {totalPages}</span>
+          <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.min(totalPages - 1, p + 1))} disabled={pageIdx === totalPages - 1}><ChevronRight/></Button>
+        </div>
+
+        <div className="flex items-center gap-2">
           <PDFExport 
             formData={formData}
             reportContent={reportContent}
@@ -209,15 +215,14 @@ export default function ReportPreview({
           </Button>
         </div>
       </div>
-      {/* Navigation Controls */}
-      <div className="mb-2 justify-center flex gap-2 items-center">
-        <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.max(0, p - 1))} disabled={pageIdx === 0}>Prev</Button>
-        <span>Page {pageIdx + 1} of {totalPages}</span>
-        <Button size="sm" variant="outline" onClick={() => setPageIdx((p) => Math.min(totalPages - 1, p + 1))} disabled={pageIdx === totalPages - 1}>Next</Button>
-      </div>
       {/* A4 Preview */}
-      <Card style={{ width: PAGE_WIDTH, height: PAGE_HEIGHT, background: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)', borderRadius: 0, padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', transform: 'scale(0.8)', transformOrigin: 'top left' }}>
-        <div className="h-full flex flex-col p-12" style={{ fontFamily: "'Arial', sans-serif", fontSize: 16, color: '#222' }}>
+      <Card style={{ aspectRatio: `${PAGE_WIDTH}/${PAGE_HEIGHT}` }}
+        className="w-full bg-white shadow-2xl rounded-none p-0 overflow-hidden flex flex-col"
+      >
+        <div
+          className="h-full flex flex-col p-[2vw] text-[0.8vw]"
+          style={{ fontFamily: "'Arial', sans-serif" }}
+        >
           <Header />
           {/* Title/TestType/Date only on first page */}
           {pageIdx === 0 && (
@@ -324,3 +329,4 @@ export default function ReportPreview({
     </div>
   );
 } 
+

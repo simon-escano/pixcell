@@ -6,9 +6,9 @@ const authSchema = pgSchema('auth');
 export const reportStatusEnum = pgEnum("report_status", [
   "Draft",
   "Finalized",
-  "UNDER_REVIEW",
-  "REJECTED",
-  "ARCHIVED",
+  "Under Review",
+  "Rejected",
+  "Archived",
 ]);
 
 

@@ -1,16 +1,17 @@
 import Base from "@/components/base"
 import ImprovedReportPreview from "@/components/reports/report-preview"
+import StatusBadge from "@/components/reports/status-badge"
 import type { ReportStatus } from "@/components/reports/status-update"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { getPatientById, getProfileByUserId, getReportById, getRoleById, getSampleById } from "@/db/queries/select"
 import { format } from "date-fns"
-import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Eye, Shield, XCircle, Sparkles } from "lucide-react"
+import { ArrowLeft, Sparkles, XCircle } from "lucide-react"
 import Link from "next/link"
 import { Suspense } from "react"
 import AiGeneratedNoticeClient from "./ai-generated-notice-client"
-import ReportActions from "./report-actions-client"
+import ReportActions, { ReportActionButtons } from "./report-actions-client"
 
 // Loading component
 function ReportPageSkeleton() {
@@ -77,48 +78,14 @@ function ReportNotFound() {
   )
 }
 
-// Status badge component
-function StatusBadge({ status }: { status: string }) {
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "Draft":
-        return { color: "bg-muted text-muted-foreground border-border", icon: Clock }
-      case "Finalized":
-        return {
-          color:
-            "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800",
-          icon: CheckCircle2,
-        }
-      case "UNDER_REVIEW":
-        return { color: "bg-accent text-accent-foreground border-accent", icon: Eye }
-      case "REJECTED":
-        return { color: "bg-destructive/10 text-destructive border-destructive", icon: XCircle }
-      case "ARCHIVED":
-        return { color: "bg-muted text-muted-foreground border-border", icon: Shield }
-      default:
-        return { color: "bg-muted text-muted-foreground border-border", icon: AlertCircle }
-    }
-  }
-
-  const config = getStatusConfig(status)
-  const Icon = config.icon
-
-  return (
-    <Badge variant="outline" className={`${config.color} border flex items-center gap-1`}>
-      <Icon className="h-3 w-3" />
-      {status.replace("_", " ")}
-    </Badge>
-  )
-}
-
 // AI Generated badge component
 function AiGeneratedBadge() {
   return (
     <Badge
       variant="outline"
-      className="bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-purple-200 dark:from-purple-950 dark:to-blue-950 dark:text-purple-300 dark:border-purple-800 flex items-center gap-1.5 px-3 py-1 font-medium shadow-sm"
+      className="bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-purple-200 dark:from-purple-950 dark:to-blue-950 dark:text-purple-300 dark:border-purple-800 border flex items-center font-medium shadow-sm"
     >
-      <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+      <Sparkles className="size-4 text-purple-600 dark:text-purple-400" />
       AI Generated
     </Badge>
   )
@@ -172,33 +139,33 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
           {/* Header */}
           <div className="mb-8">
             {/* Title and Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-foreground">{report.title || "Medical Report"}</h1>
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+              <div className="flex flex-col gap-3">
+                <h1 className="text-3xl font-semibold text-foreground">{report.title || "Medical Report"}</h1>
+                <div className="flex flex-wrap items-center gap-4">
                   {report.isAiGenerated && <AiGeneratedBadge />}
+                  <p className="text-muted-foreground">
+                    {report.testType} • Created{" "}
+                    {report.createdAt ? format(new Date(report.createdAt), "MMM dd, yyyy") : "Unknown"}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ReportActionButtons reportId={reportId} formData={formData} reportStatus={report.status || "Draft"} reportCode={report.code ?? ""} />
+                  </div>
                 </div>
-                <p className="text-muted-foreground">
-                  {report.testType} • Created{" "}
-                  {report.createdAt ? format(new Date(report.createdAt), "MMM dd, yyyy") : "Unknown"}
-                </p>
               </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={report.status || "Draft"} />
-                <Button variant="outline" asChild>
-                  <Link href="/reports">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Reports
-                  </Link>
-                </Button>
-              </div>
+              <Button variant="ghost" asChild>
+                <Link href="/reports">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Reports
+                </Link>
+              </Button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="flex flex-wrap">
             {/* Main Preview */}
-            <div className="lg:col-span-3 flex justify-center">
+            <div className="flex-1 flex justify-center">
               <div className="w-full max-w-3xl">
                 <Suspense fallback={<div className="h-96 bg-muted rounded-lg animate-pulse" />}>
                   <ImprovedReportPreview
