@@ -124,7 +124,6 @@ export function EmailFirstLoginForm({
                 <div className="grid gap-6">
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         name="email"
