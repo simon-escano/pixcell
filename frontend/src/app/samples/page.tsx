@@ -31,7 +31,7 @@ const StatsCard = ({
     className="flex-1 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
     style={{ background: "var(--card)", border: "2px solid var(--border)" }}
   >
-    <CardContent className="p-6">
+    <CardContent>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -43,7 +43,7 @@ const StatsCard = ({
             </p>
           )}
         </div>
-        <div className={`p-3 rounded-full ${color}`}>{icon}</div>
+        <div className={`p-2 rounded-full ${color}`}>{icon}</div>
       </div>
     </CardContent>
   </Card>
@@ -146,44 +146,49 @@ const SamplesPage = async () => {
   return (
     <Base>
       <div className="min-h-screen" style={{ background: "var(--background)" }}>
-     
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Section */}
-          <div className="flex justify-center w-full mb-8">
-            <div className="flex gap-4">
+          <div className="w-full mb-8 overflow-x-auto">
+            <div className="overflow-visible">
+              <div className="flex min-w-[78rem] sm:min-w-[77rem] lg:min-w-[76rem] gap-4">
+                {/* cards */}
+              </div>
+            </div>
+          </div>
+          <div className="flex w-full pb-8 overflow-x-auto">
+            <div className="flex min-w-[78rem] sm:min-w-[77rem] lg:min-w-[76rem] gap-4">
               <StatsCard
                 title="Total Samples"
                 value={totalSamples}
-                icon={<FileImage className="w-6 h-6 text-white" />}
+                icon={<FileImage className="w-5 h-5 text-white" />}
                 color="bg-gradient-to-r from-blue-500 to-blue-600"
                 trend={trendString}
               />
               <StatsCard
                 title="Recent Samples"
                 value={recentSamples}
-                icon={<Clock className="w-6 h-6 text-white" />}
+                icon={<Clock className="w-5 h-5 text-white" />}
                 color="bg-gradient-to-r from-green-500 to-green-600"
                 trend="Last 7 days"
               />
               <StatsCard
                 title="Samples Pending Analysis"
                 value={samplesPendingAnalysis}
-                icon={<Activity className="w-6 h-6 text-white" />}
+                icon={<Activity className="w-5 h-5 text-white" />}
                 color="bg-gradient-to-r from-orange-500 to-orange-600"
                 trend="No report yet"
               />
               <StatsCard
                 title="Samples Analyzed This Month"
                 value={samplesAnalyzedThisMonth}
-                icon={<Activity className="w-6 h-6 text-white" />}
+                icon={<Activity className="w-5 h-5 text-white" />}
                 color="bg-gradient-to-r from-purple-500 to-purple-600"
                 trend="Analyzed this month"
               />
               <StatsCard
                 title="Flagged/Abnormal Results"
                 value={abnormalResults}
-                icon={<AlertCircle className="w-6 h-6 text-white" />}
+                icon={<AlertCircle className="w-5 h-5 text-white" />}
                 color="bg-gradient-to-r from-red-500 to-red-600"
                 trend="Contains 'abnormal'"
               />

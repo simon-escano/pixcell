@@ -76,59 +76,49 @@ export default function SampleBrowserClient({ samples, currentUser, patients }: 
   return (
     <>
       {/* Search and Filter Bar */}
-      <Card
-        className="backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
-        style={{ background: "var(--card)", border: "2px solid var(--border)" }}
-      >
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search samples by name, patient, doctor, or ID..."
-                className="pl-10 bg-card border focus:border-blue-400"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-3">
+      <div className="group flex-col border rounded-lg overflow-x-hidden transition-all duration-50 focus-within:outline-primary focus-within:outline-2">
+        <div className="relative flex-1 overflow-hidden">
+          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5"/>
+          <Input
+            placeholder="Search samples by name, patient, doctor, or ID..."
+            className="px-10 py-6 pl-14 bg-card outline-none border-none text-base! rounded-lg rounded-b-none truncate"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 p-3 border-t bg-muted rounded-lg rounded-t-none overflow-hidden">
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger className="w-40 bg-card">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="name">Name A-Z</SelectItem>
+              <SelectItem value="patient">Patient Name</SelectItem>
+            </SelectContent>
+          </Select>
 
-              <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger className="w-40 bg-card">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="name">Name A-Z</SelectItem>
-                  <SelectItem value="patient">Patient Name</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Separator orientation="vertical" className="h-8" />
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant={view === "grid" ? "outline" : "ghost"}
-                  size="sm"
-                  className="p-2 bg-transparent"
-                  onClick={() => setView("grid")}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={view === "table" ? "outline" : "ghost"}
-                  size="sm"
-                  className="p-2"
-                  onClick={() => setView("table")}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+          <div className="flex items-center">
+            <Button
+              variant={view === "grid" ? "outline" : "ghost"}
+              size="sm"
+              className="p-2"
+              onClick={() => setView("grid")}
+            >
+              <Grid3X3 className="text-foreground w-4 h-4" />
+            </Button>
+            <Button
+              variant={view === "table" ? "outline" : "ghost"}
+              size="sm"
+              className="p-2"
+              onClick={() => setView("table")}
+            >
+              <List className="text-foreground w-4 h-4" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Samples View */}
       {view === "grid" ? (
