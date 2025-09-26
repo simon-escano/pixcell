@@ -25,7 +25,6 @@ import {
 } from "../ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Camera } from "lucide-react";
-import { PhoneInput } from "../ui/phone-input";
 
 type CombinedUser = {
   id: User["id"];
@@ -48,7 +47,6 @@ interface UserDialogProps {
     lastName: string;
     email: string;
     roleId: string;
-    phone?: string;
     file?: File;
     password?: string;
   }) => Promise<void>;
@@ -141,7 +139,6 @@ export function UserDialog({
     const firstName = (document.getElementById("firstName") as HTMLInputElement)?.value;
     const lastName = (document.getElementById("lastName") as HTMLInputElement)?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
-    const phone = (document.getElementById("phone") as HTMLInputElement)?.value;
     const password = isAddMode ? (document.getElementById("password") as HTMLInputElement)?.value : undefined;
 
     setIsPending(true);
@@ -151,7 +148,6 @@ export function UserDialog({
         lastName,
         email,
         roleId: roleValue,
-        phone,
         file: file || undefined,
         password,
       });
@@ -259,18 +255,6 @@ export function UserDialog({
               </div>
             </div>
           )}
-
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Phone
-            </Label>
-            <PhoneInput
-              id="phone"
-              defaultCountry="PH"
-              className="col-span-3"
-              value={user?.phone?.replace(/\s+/g, "")}
-            />
-          </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="role" className="text-right">
