@@ -22,6 +22,10 @@ export const role = pgTable("role", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name").notNull(),
 });
+export const image = pgTable("image", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  imageUrl: text("image_url")
+});
 
 export const profile = pgTable("profile", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -34,10 +38,7 @@ export const profile = pgTable("profile", {
   mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
-export const image = pgTable("image", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  imageUrl: text("image_url")
-});
+
 
 export const patient = pgTable("patient", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -56,6 +57,14 @@ export const patient = pgTable("patient", {
   createdBy: uuid("created_by").references(() => profile.id),
 });
 
+export const sample = pgTable("sample", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  patientId: uuid("patient_id").notNull().references(() => patient.id),
+  sampleName: text("sample_name"),
+  createdBy: uuid("created_by").notNull().references(()=>user.id),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
 
 export const sampleImage = pgTable("sample_image",{
   id: uuid("id").primaryKey().defaultRandom(),
@@ -67,13 +76,7 @@ export const sampleImage = pgTable("sample_image",{
   isAiGenerated: boolean("is_ai_generated").default(false),
 });
 
-export const sample = pgTable("sample", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  patientId: uuid("patient_id").notNull().references(() => patient.id),
-  sampleName: text("sample_name"),
-  createdBy: uuid("created_by").notNull().references(()=>user.id),
-  createdAt: timestamp("created_at").defaultNow()
-});
+
 
 
 export const aiAnalysis = pgTable("ai_analysis", {
@@ -102,7 +105,7 @@ export const report = pgTable("report", {
 
 export const session = pgTable("session", {
   sessionId: uuid("id").primaryKey().defaultRandom(),
-  profileId: uuid("user_id").notNull().references(() => profile.id),
+  profileId: uuid("profile_id").notNull().references(() => profile.id),
   loginTime: timestamp("login_time", { withTimezone: true }),
   logoutTime: timestamp("logout_time", { withTimezone: true }),
   isActive: boolean("is_active").notNull().default(true),
@@ -142,6 +145,23 @@ export const doctorPatient = pgTable("doctor_patient", {
   orderNo: bigint("order_no", { mode: "number" }),
 });
 
+export const organization = pgTable("organization", {
+  id: uuid("id").primaryKey().defaultRandom(), 
+  name: varchar('name',{ length: 255 }),
+  address: varchar('address',{ length: 512 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const organization_staff = pgTable("organization_staff", {
+   id: uuid("id").primaryKey().defaultRandom(), 
+   organizationId: uuid("organization_id").references(() => organization.id),
+   staffId: uuid("staff_id").references(() => profile.id),
+   role: text('role'),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type Role = typeof role.$inferSelect;
 export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
@@ -152,6 +172,8 @@ export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
+export type Organization = typeof organization.$inferSelect;
+export type OrganizationStaff = typeof organization_staff.$inferSelect;
 
 // Combined type for sample with image data
 export type SampleWithImage = Sample & {
