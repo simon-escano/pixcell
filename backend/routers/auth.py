@@ -8,6 +8,7 @@ import logging
 from datetime import datetime, timedelta
 import asyncio
 from supabase import create_client, Client
+from db import get_supabase_client, get_supabase_admin_client
 import json
 import httpx
 from urllib.parse import quote
@@ -42,25 +43,8 @@ class UserInfo(BaseModel):
     firstName: Optional[str] = None
     lastName: Optional[str] = None
 
-# Initialize Supabase client with anon key for client operations
-def get_supabase_client() -> Client:
-    url = os.getenv("SUPABASE_URL")
-    anon_key = os.getenv("SUPABASE_ANON_KEY")  # Use anon key for client operations
-    
-    if not url or not anon_key:
-        raise HTTPException(status_code=500, detail="Supabase configuration missing")
-    
-    return create_client(url, anon_key)
 
-# Admin client for server-side operations (like creating profiles)
-def get_supabase_admin_client() -> Client:
-    url = os.getenv("SUPABASE_URL")
-    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    
-    if not url or not service_key:
-        raise HTTPException(status_code=500, detail="Supabase admin configuration missing")
-    
-    return create_client(url, service_key)
+
 
 # Get authenticated user from session
 async def get_current_user(request: Request) -> Optional[dict]:
