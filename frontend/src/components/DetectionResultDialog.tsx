@@ -53,6 +53,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid")
   const [isExporting, setIsExporting] = useState(false)
   const [isBatchExporting, setIsBatchExporting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Consistent neutral styling for all detected objects
   const getDetectionStyle = () => {
@@ -137,6 +138,38 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
     }
   }
 
+  const saveProcessedImage = async (base64Image: string) => {
+    if (!sampleId) return
+    setIsSaving(true)
+    try {
+      const blob = base64ToBlob(base64Image)
+      const form = new FormData()
+      form.append('file', new File([blob], 'detected_image.jpg', { type: 'image/jpeg' }))
+      // Create a placeholder sample_image for this sample, then attach new processed image
+      // We reuse the existing API which updates a specific sample_image id: requires creating a temp record.
+      // Instead, post to a new route or extend existing one: we will call processed-image after creating a record.
+      const createRes = await fetch('/api/samples/create-sample-image', {
+        method: 'POST',
+        body: JSON.stringify({ sampleId }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const createJson = await createRes.json()
+      if (!createRes.ok || !createJson?.sampleImageId) throw new Error(createJson.error || 'Failed to create sample image record')
+
+      const uploadForm = new FormData()
+      uploadForm.append('sampleImageId', createJson.sampleImageId)
+      uploadForm.append('file', new File([blob], 'detected_image.jpg', { type: 'image/jpeg' }))
+      const res = await fetch('/api/samples/processed-image', { method: 'POST', body: uploadForm })
+      const json = await res.json()
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to save processed image')
+      onOpenChange(false)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   // Handler for generating report in batch mode
   const handleGenerateReport = () => {
     if (isBatch) {
@@ -174,7 +207,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           <ImageIcon className="w-3 h-3 inline mr-1.5" />
           Image {index + 1}
         </div>
-        {/* Export button for individual image */}
+        {/* Export/Save buttons for individual image */}
         <div className="absolute top-3 right-3">
           <Button
             size="sm"
@@ -190,6 +223,17 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
             )}
             Export
           </Button>
+          {sampleId && (
+            <Button
+              size="sm"
+              onClick={() => saveProcessedImage(imageData.processed_image_base64)}
+              disabled={isSaving}
+              className="ml-2"
+            >
+              {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Sparkles className="w-3 h-3 mr-1.5" />}
+              Save
+            </Button>
+          )}
         </div>
       </div>
       {imageData.detections && Object.keys(imageData.detections).length > 0 && (
@@ -541,6 +585,19 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                           )}
                           Export Image
                         </Button>
+                        {sampleId && (
+                          <Button
+                            onClick={() => {
+                              const base64 = processedImageUrl.split(",")[1]
+                              saveProcessedImage(base64)
+                            }}
+                            disabled={isSaving}
+                            className="ml-2"
+                          >
+                            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                            Save to Sample
+                          </Button>
+                        )}
                       </CardHeader>
                       <CardContent>
                         <div className="relative overflow-hidden rounded-lg border">

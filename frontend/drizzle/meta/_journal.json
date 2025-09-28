@@ -43,6 +43,13 @@
       "when": 1749906744644,
       "tag": "0005_thin_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1758899510980,
+      "tag": "0006_violet_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

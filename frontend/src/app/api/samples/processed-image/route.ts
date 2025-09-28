@@ -3,10 +3,12 @@ import { db } from '@/db';
 import { sampleImage, image } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'node:crypto'
+import sizeOf from 'image-size'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl!, supabaseKey!);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,14 +43,26 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    // Update sampleImage to point to new image
+    // Extract image dimensions for metadata
+    const dims = sizeOf(buffer)
+    const metadata = {
+      type: file.type || dims.type || 'image/jpeg',
+      width: dims.width || 0,
+      height: dims.height || 0,
+    }
+
+    // Update sampleImage to point to new image and mark as AI-generated, with dimensions metadata
     await db
       .update(sampleImage)
-      .set({ imageId: imageRecord.id })
+      .set({ imageId: imageRecord.id, isAiGenerated: true, metadata })
       .where(eq(sampleImage.id, sampleImageId));
 
-    return NextResponse.json({ success: true, imageUrl });
+    return NextResponse.json({ success: true, imageUrl, metadata });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 } 
+
+export async function GET() {
+  return NextResponse.json({ ok: true });
+}

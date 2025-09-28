@@ -1,6 +1,6 @@
 {
-  "id": "3e14e6a2-a780-4379-8e3d-e1b06d2b1139",
-  "prevId": "1e2f544d-1f36-4765-97fc-425041123d37",
+  "id": "3c88b404-57a4-4a99-a188-80b49c0403eb",
+  "prevId": "3e14e6a2-a780-4379-8e3d-e1b06d2b1139",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -76,8 +76,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.annotation": {
-      "name": "annotation",
+    "public.doctor_patient": {
+      "name": "doctor_patient",
       "schema": "",
       "columns": {
         "id": {
@@ -87,45 +87,26 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "sample_image_id": {
-          "name": "sample_image_id",
+        "doctor_id": {
+          "name": "doctor_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "profile_id": {
-          "name": "profile_id",
+        "patient_id": {
+          "name": "patient_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "content": {
-          "name": "content",
-          "type": "jsonb",
+        "order_no": {
+          "name": "order_no",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
-        },
-        "drawing_data": {
-          "name": "drawing_data",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "coordinates": {
-          "name": "coordinates",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
@@ -134,25 +115,25 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "annotation_sample_image_id_sample_image_id_fk": {
-          "name": "annotation_sample_image_id_sample_image_id_fk",
-          "tableFrom": "annotation",
-          "tableTo": "sample_image",
+        "doctor_patient_doctor_id_profile_id_fk": {
+          "name": "doctor_patient_doctor_id_profile_id_fk",
+          "tableFrom": "doctor_patient",
+          "tableTo": "profile",
           "columnsFrom": [
-            "sample_image_id"
+            "doctor_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "annotation_profile_id_profile_id_fk": {
-          "name": "annotation_profile_id_profile_id_fk",
-          "tableFrom": "annotation",
-          "tableTo": "profile",
+        "doctor_patient_patient_id_patient_id_fk": {
+          "name": "doctor_patient_patient_id_patient_id_fk",
+          "tableFrom": "doctor_patient",
+          "tableTo": "patient",
           "columnsFrom": [
-            "profile_id"
+            "patient_id"
           ],
           "columnsTo": [
             "id"
@@ -307,31 +288,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.note": {
-      "name": "note",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "note_content": {
-          "name": "note_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.patient": {
       "name": "patient",
       "schema": "",
@@ -416,8 +372,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "note_id": {
-          "name": "note_id",
+        "created_by": {
+          "name": "created_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -438,12 +394,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "patient_note_id_note_id_fk": {
-          "name": "patient_note_id_note_id_fk",
+        "patient_created_by_profile_id_fk": {
+          "name": "patient_created_by_profile_id_fk",
           "tableFrom": "patient",
-          "tableTo": "note",
+          "tableTo": "profile",
           "columnsFrom": [
-            "note_id"
+            "created_by"
           ],
           "columnsTo": [
             "id"
@@ -459,13 +415,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "image_id"
-          ]
-        },
-        "patient_note_id_unique": {
-          "name": "patient_note_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "note_id"
           ]
         }
       },
@@ -510,6 +459,12 @@
         "image_id": {
           "name": "image_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "license_no": {
+          "name": "license_no",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -594,13 +549,13 @@
         },
         "content": {
           "name": "content",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
         "export_format": {
           "name": "export_format",
-          "type": "varchar",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
@@ -615,6 +570,37 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "test_type": {
+          "name": "test_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "report_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -645,6 +631,19 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "report_patient_id_patient_id_fk": {
+          "name": "report_patient_id_patient_id_fk",
+          "tableFrom": "report",
+          "tableTo": "patient",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -707,6 +706,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -786,6 +792,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_ai_generated": {
+          "name": "is_ai_generated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -915,39 +928,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.test_sample": {
-      "name": "test_sample",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "auth.users": {
       "name": "users",
       "schema": "auth",
@@ -980,7 +960,19 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.report_status": {
+      "name": "report_status",
+      "schema": "public",
+      "values": [
+        "Draft",
+        "Finalized",
+        "UNDER_REVIEW",
+        "REJECTED",
+        "ARCHIVED"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

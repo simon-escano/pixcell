@@ -64,6 +64,7 @@ async function uploadFileAndInsertRecords(
       uploadedBy: profileId,
       metadata: dimensions,
       imageId: imageRecord.id,
+      isAiGenerated: false,
     });
 
 

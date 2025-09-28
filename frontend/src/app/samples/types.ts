@@ -23,6 +23,7 @@ export type MetaSampleImage = {
     width: number;
     height: number;
   };
+  isAiGenerated?: boolean;
 };
 
 export type MetaProfile = {

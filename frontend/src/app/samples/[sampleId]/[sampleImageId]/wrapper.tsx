@@ -352,76 +352,78 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
           </CardContent>
         </Card>
 
-        {/* Images Table Card */}
-        <Card className="flex flex-col flex-1 min-h-0 bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+        {/* Originals Table Card */}
+        <Card className="flex flex-col bg-card/80 backdrop-blur-sm border border-border shadow-sm">
+          <CardHeader className="py-1.5 px-3">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-primary" />
-              Sample Images
-              <Badge variant="secondary">{sampleImages.length}</Badge>
+              Original Images
+              <Badge variant="secondary" className="ml-1 h-5 px-2 text-[10px]">
+                {sampleImages.filter(i => !i.isAiGenerated).length}
+              </Badge>
               {canEdit && (
                 <div className="ml-auto">
                   <SampleDrawer patients={[sample.patient!]} sample={sample} patient={sample.patient}>
-                    <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
-                      <PlusIcon className="w-4 h-4" />
+                    <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-6 h-6 cursor-pointer items-center justify-center rounded-md transition-all">
+                      <PlusIcon className="w-3 h-3" />
                     </div>
                   </SampleDrawer>
                 </div>
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col min-h-0 p-0">
-            <ScrollArea className="flex-1 min-h-0">
-              <Table>
+          <CardContent className="p-0">
+            <div className="max-h-64 overflow-auto">
+              <Table className="text-xs">
                 <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableHead className="w-16"></TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">Preview</TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">
+                    <TableHead className="w-12 p-1"></TableHead>
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">Preview</TableHead>
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">
                       <Ruler className="w-3 h-3 inline mr-1" />
                       Size
                     </TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">
                       <Calendar className="w-3 h-3 inline mr-1" />
                       Date
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sampleImages.map((sampleImage) => (
+                  {sampleImages.filter(i => !i.isAiGenerated).map((sampleImage) => (
                     <ContextMenu key={sampleImage.id}>
                       <ContextMenuTrigger asChild>
                         <TableRow
-                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${
+                          className={`cursor-pointer hover:bg-muted/50 transition-colors h-10 ${
                             sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
                           }`}
                           onClick={() => {
                             router.push(`/samples/${sampleId}/${sampleImage.id}`)
                           }}
                         >
-                          <TableCell className="p-2">
+                          <TableCell className="p-1">
                             <div className="relative">
                               <img
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-border shadow-sm"
+                                className="w-8 h-8 rounded-md object-cover border border-border"
                                 src={sampleImage.imageUrl! || "/placeholder.svg"}
                                 alt="Sample"
                               />
                               {sampleImage.id == selectedSampleImage.id && (
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full flex items-center justify-center">
                                   <Eye className="w-2 h-2 text-primary-foreground" />
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
+                          <TableCell className="text-[11px] text-muted-foreground p-1">
+                            <Badge variant="outline" className="text-[10px] h-5">
                               {sampleImage.metadata.type}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                          <TableCell className="text-[11px] text-muted-foreground p-1">
                             {sampleImage.metadata.width} × {sampleImage.metadata.height}
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                          <TableCell className="text-[11px] text-muted-foreground p-1">
                             {new Date(sampleImage.capturedAt).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
@@ -451,7 +453,70 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                   ))}
                 </TableBody>
               </Table>
-            </ScrollArea>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* AI Generated Table Card */}
+        <Card className="flex flex-col bg-card/80 backdrop-blur-sm border border-border shadow-sm">
+          <CardHeader className="py-1.5 px-3">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              AI Generated
+              <Badge variant="secondary" className="ml-1 h-5 px-2 text-[10px]">
+                {sampleImages.filter(i => i.isAiGenerated).length}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="max-h-64 overflow-auto">
+              <Table className="text-xs">
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="w-12 p-1"></TableHead>
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">Preview</TableHead>
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">
+                      <Ruler className="w-3 h-3 inline mr-1" />
+                      Size
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-muted-foreground p-1">
+                      <Calendar className="w-3 h-3 inline mr-1" />
+                      Date
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sampleImages.filter(i => i.isAiGenerated).map((sampleImage) => (
+                    <TableRow
+                      key={sampleImage.id}
+                      className={`cursor-pointer hover:bg-muted/50 transition-colors h-10 ${
+                        sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
+                      }`}
+                      onClick={() => router.push(`/samples/${sampleId}/${sampleImage.id}`)}
+                    >
+                      <TableCell className="p-1">
+                        <img
+                          className="w-8 h-8 rounded-md object-cover border border-purple-200"
+                          src={sampleImage.imageUrl! || "/placeholder.svg"}
+                          alt="AI"
+                        />
+                      </TableCell>
+                      <TableCell className="text-[11px] text-muted-foreground p-1">
+                        <Badge variant="outline" className="text-[10px] h-5">
+                          {sampleImage.metadata.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[11px] text-muted-foreground p-1">
+                        {sampleImage.metadata.width} × {sampleImage.metadata.height}
+                      </TableCell>
+                      <TableCell className="text-[11px] text-muted-foreground p-1">
+                        {new Date(sampleImage.capturedAt).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
@@ -564,6 +629,8 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
           detectionResults={detectionResults}
           aiAnalysis={aiAnalysis}
           processedImageUrl={processedImageUrl}
+          patientId={sample.patient?.id}
+          sampleId={sample.id}
         />
 
         <DetectionResultDialog

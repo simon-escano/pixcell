@@ -138,6 +138,7 @@ export async function getMetaSampleImagesBySampleId(sampleId: string): Promise<M
       metadata: sampleImage.metadata,
       capturedAt: sampleImage.capturedAt,
       imageUrl: image.imageUrl,
+      isAiGenerated: sampleImage.isAiGenerated,
     })
     .from(sampleImage)
     .leftJoin(image, eq(sampleImage.imageId, image.id))
@@ -164,6 +165,7 @@ export async function getMetaSampleImagesBySampleId(sampleId: string): Promise<M
           width: meta.width ?? 0,
           height: meta.height ?? 0,
         },
+        isAiGenerated: row.isAiGenerated ?? false,
       };
     })
   );
