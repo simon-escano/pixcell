@@ -26,7 +26,7 @@ class OrganizationUpdate(BaseModel):
 
 @router.get('/', dependencies=[Depends(require_auth)])
 def all_organizations():
-  client = get_supabase_admin_client()
+  client = get_supabase_client()
   return client.table('organization').select("*").execute()
 
 @router.get("/current-organization", dependencies=[Depends(require_auth)])
@@ -129,3 +129,4 @@ async def delete_organization(org_id: str):
         return {"message": "Organization deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting organization: {e}")
+    
