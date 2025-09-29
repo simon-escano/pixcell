@@ -5,6 +5,8 @@ import { db } from "..";
 import { alias } from 'drizzle-orm/pg-core';
 import { createClient } from '@supabase/supabase-js';
 
+const backend_url = process.env.BACKEND_URL;
+
 const patientImage = alias(image, 'patientImage');
 const generatedByImage = alias(image, 'generatedByImage');
 const profileImage = alias(image, 'profileImage');
@@ -54,53 +56,25 @@ export async function getAllProfiles() {
  * @param profileId - The current user's profile id
  * @param roleName - The current user's role name (e.g., 'Administrator')
  */
+
+
 export async function getAllPatientsForUser(profileId: string, roleName: string) {
-  if (roleName === "Administrator") {
-    // Return all patients
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl,
-        createdBy: patient.createdBy
-      })
-      .from(patient)
-      .leftJoin(image, eq(patient.imageId, image.id));
-  } else {
-    // Return only patients assigned to this doctor
-    return await db
-      .select({
-        id: patient.id,
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        email: patient.email,
-        contactNumber: patient.contactNumber,
-        address: patient.address,
-        height: patient.height,
-        weight: patient.weight,
-        sex: patient.sex,
-        bloodType: patient.bloodType,
-        birthDate: patient.birthDate,
-        createdAt: patient.createdAt,
-        imageId: patient.imageId,
-        imageUrl: image.imageUrl
-      })
-      .from(patient)
-      .innerJoin(doctorPatient, eq(doctorPatient.patientId, patient.id))
-      .leftJoin(image, eq(patient.imageId, image.id))
-      .where(eq(doctorPatient.doctorId, profileId));
+  const res = await fetch(`${backend_url}/patients/my-patients`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch patients: ${res.statusText}`);
   }
+
+  const data = await res.json();
+
+  return data;
+
+
 }
 
 export async function getPatientById(id: string) {

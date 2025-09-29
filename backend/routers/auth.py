@@ -92,6 +92,46 @@ async def get_current_user(request: Request) -> Optional[dict]:
         logger.error(f"Error getting current user: {e}")
         return None
 
+async def get_current_user_role(request: Request):
+    """Fetch the current user's role from profile.role_id → role table"""
+    try:
+        # Get the current user first
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
+        user_id = user.get("id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user session")
+
+        client = get_supabase_admin_client()
+
+        # Step 1: Get profile for this user
+        profile_resp = client.table("profile").select("role_id").eq("user_id", user_id).single().execute()
+        if not profile_resp.data:
+            raise HTTPException(status_code=404, detail="Profile not found for user")
+
+        role_id = profile_resp.data.get("role_id")
+        if not role_id:
+            raise HTTPException(status_code=404, detail="Role not assigned")
+
+        # Step 2: Get role details
+        role_resp = client.table("role").select("id, name").eq("id", role_id).single().execute()
+        if not role_resp.data:
+            raise HTTPException(status_code=404, detail="Role not found")
+
+        return {
+            "user_id": user_id,
+            "role": role_resp.data
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user role: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user role")
+
+
 def get_error_message(error: Exception) -> str:
     """Convert exception to user-friendly error message"""
     error_str = str(error)
