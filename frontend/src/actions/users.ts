@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { profile, user, role, image } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
-import { getErrorMessage } from "@/utils"
+import { getErrorMessage } from "@/utils";
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm";
 
@@ -13,6 +13,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("Missing Supabase URL or Key");
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
+const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
 // Helper function for server-side logging
 function logServer(message: string, data?: any) {
@@ -32,77 +33,21 @@ export const signupAction = async (formData: FormData) => {
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const roleId = formData.get("roleId") as string;
-    const licenseNo = formData.get("licenseNo") as string;
+    const licenseNo = (formData.get("licenseNo") as string) || undefined;
 
-    // Check if email already exists
-    const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
-    if (existing.length > 0) {
-      return { errorMessage: "Email already exists." };
+    // Call backend to handle account creation and profile insert
+    const res = await fetch(`${backendBaseUrl}/auth/signup-json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, firstName, lastName, roleId, licenseNo }),
+      // Include credentials so backend can set auth cookies if it chooses to
+      credentials: "include",
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.errorMessage) {
+      return { errorMessage: data.errorMessage || `Signup failed (${res.status})` };
     }
-
-    const auth = await getSupabaseAuth();
-
-    const { data, error } = await auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`
-      }
-    });
-    if (error) throw error;
-
-    // Get the userId from the signUp response
-    const userId = data.user?.id;
-    if (!userId) throw new Error("User ID not returned from sign up");
-
-    // const { data, error: loginError } = await auth.signInWithPassword({ email, password });
-    // if (loginError) throw loginError;
-    // if (!data.session) throw new Error("No session");
-
-    //const userId = data.session.user.id;
-
-    const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
-
-    const [imageInsert] = await db
-      .insert(image)
-      .values({
-        id: crypto.randomUUID(), // or use drizzle's uuid() if available
-        imageUrl,
-      })
-      .returning({ id: image.id });
-
-    const imageId = imageInsert.id;
-
-    const [result] = await db
-      .select()
-      .from(role)
-      .where(eq(role.id, roleId));
-
-      if (!result) {
-        throw new Error(`Role with id "${roleId}" not found in the database`);
-      }
-
-    await db.insert(profile).values({
-      id: userId,
-      firstName,
-      lastName,
-      userId,
-      roleId,
-      imageId,
-      licenseNo,
-    });
-
-    console.log("Profile insert values:", {
-      id: userId,
-      firstName,
-      lastName,
-      userId,
-      roleId,
-      imageId,
-    });
-
-    console.log("Role query result:", result);
-
     return { errorMessage: null };
   } catch (error) {
     return { errorMessage: getErrorMessage(error) };
@@ -114,12 +59,16 @@ export const loginAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const auth = await getSupabaseAuth();
-
-    const { data, error: loginError } = await auth.signInWithPassword({ email, password });
-    if (loginError) throw loginError;
-    if (!data.session) throw new Error("No session");
-
+    const res = await fetch(`${backendBaseUrl}/auth/login-json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.errorMessage) {
+      return { errorMessage: data.errorMessage || `Login failed (${res.status})` };
+    }
     return { errorMessage: null };
   } catch (error) {
     return { errorMessage: getErrorMessage(error) };
@@ -402,73 +351,18 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const roleId = formData.get("roleId") as string;
-    const licenseNo = formData.get("licenseNo") as string;
+    const licenseNo = (formData.get("licenseNo") as string) || undefined;
 
-    // Generate a secure random password
-    const generatePassword = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-      let password = '';
-      for (let i = 0; i < 12; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return password;
-    };
-
-    const autoGeneratedPassword = generatePassword();
-
-    // Check if email already exists
-    const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
-    if (existing.length > 0) {
-      return { errorMessage: "Email already exists." };
-    }
-
-    const auth = await getSupabaseAuth();
-
-    const { data, error } = await auth.signUp({
-      email,
-      password: autoGeneratedPassword,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`
-      }
+    const res = await fetch(`${backendBaseUrl}/auth/create-user-auto-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, firstName, lastName, roleId, licenseNo }),
+      credentials: "include",
     });
-    if (error) throw error;
-
-    // Get the userId from the signUp response
-    const userId = data.user?.id;
-    if (!userId) throw new Error("User ID not returned from sign up");
-
-    const imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}%${encodeURIComponent(lastName)}`;
-
-    const [imageInsert] = await db
-      .insert(image)
-      .values({
-        id: crypto.randomUUID(),
-        imageUrl,
-      })
-      .returning({ id: image.id });
-
-    const imageId = imageInsert.id;
-
-    const [result] = await db
-      .select()
-      .from(role)
-      .where(eq(role.id, roleId));
-
-    if (!result) {
-      throw new Error(`Role with id "${roleId}" not found in the database`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.errorMessage === "string") {
+      return { errorMessage: data.errorMessage || `Create user failed (${res.status})` };
     }
-
-    await db.insert(profile).values({
-      id: userId,
-      firstName,
-      lastName,
-      userId,
-      roleId,
-      imageId,
-      licenseNo,
-      mustChangePassword: true,
-    });
-
     return { errorMessage: null };
   } catch (error) {
     return { errorMessage: getErrorMessage(error) };
@@ -477,102 +371,93 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
 
 export const checkAccountExistsAction = async (email: string) => {
   try {
-    // Check if email exists in our database
-    const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
-    
-    if (existing.length === 0) {
-      return { 
-        exists: false, 
+    // Validate email
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return {
+        exists: false,
         mustChangePassword: false,
-        errorMessage: "Account not found. Please check your email or contact your administrator." 
+        errorMessage: "Please provide a valid email address"
       };
     }
 
-    // Get profile to check if password change is required
-    const profileData = await db.select().from(profile).where(eq(profile.userId, existing[0].id)).limit(1);
+    // Call backend endpoint
+    const res = await fetch(`${backendBaseUrl}/auth/email-exists/${encodeURIComponent(email)}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies if needed for authentication
+    });
+
+    const data = await res.json().catch(() => ({}));
     
-    if (profileData.length === 0) {
-      return { 
-        exists: false, 
+    if (!res.ok || data.errorMessage) {
+      return {
+        exists: false,
         mustChangePassword: false,
-        errorMessage: "Profile not found. Please contact your administrator." 
+        errorMessage: data.errorMessage || `Failed to check email (${res.status})`
       };
     }
 
-    return { 
-      exists: true, 
-      mustChangePassword: profileData[0].mustChangePassword,
-      errorMessage: null 
+    return {
+      exists: data.exists,
+      mustChangePassword: data.mustChangePassword,
+      errorMessage: data.errorMessage
     };
   } catch (error) {
-    return { 
-      exists: false, 
+    return {
+      exists: false,
       mustChangePassword: false,
-      errorMessage: getErrorMessage(error) 
+      errorMessage: getErrorMessage(error)
     };
   }
 };
 
 export const setupInitialPasswordAction = async (email: string, newPassword: string) => {
   try {
-    // First, get the user from our database
-    const userData = await db.select().from(user).where(eq(user.email, email)).limit(1);
-    if (userData.length === 0) {
-      return { errorMessage: "User not found" };
-    }
-
-    const userId = userData[0].id;
-
-    // Try to update the password using the service role client
-    try {
-      const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword
-      });
-      
-      if (updateError) {
-        // If direct update fails, fall back to password reset flow
-        const { error: resetError } = await supabase.auth.admin.generateLink({
-          type: 'recovery',
-          email: email,
-          options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery&email=${encodeURIComponent(email)}`
-          }
-        });
-        
-        if (resetError) throw resetError;
-        
-        return { 
-          errorMessage: null, 
-          requiresEmailVerification: true,
-          message: "A password reset link has been sent to your email. Please check your inbox and follow the link to set your password."
-        };
-      }
-
-      // Update the profile to mark that password has been set
-      await db.update(profile)
-        .set({ mustChangePassword: false })
-        .where(eq(profile.userId, userId));
-
-      return { errorMessage: null };
-    } catch (adminError) {
-      // If admin operations fail, use password reset flow
-      const { error: resetError } = await supabase.auth.admin.generateLink({
-        type: 'recovery',
-        email: email,
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?type=recovery&email=${encodeURIComponent(email)}`
-        }
-      });
-      
-      if (resetError) throw resetError;
-      
-      return { 
-        errorMessage: null, 
-        requiresEmailVerification: true,
-        message: "A password reset link has been sent to your email. Please check your inbox and follow the link to set your password."
+    // Validate inputs
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return {
+        errorMessage: "Please provide a valid email address",
+        requiresEmailVerification: false,
+        message: null
       };
     }
+    if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
+      return {
+        errorMessage: "Password must be at least 6 characters",
+        requiresEmailVerification: false,
+        message: null
+      };
+    }
+
+    // Call backend endpoint
+    const res = await fetch(`${backendBaseUrl}/auth/setup-initial-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies if needed
+      body: JSON.stringify({ email, newPassword })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    
+    if (!res.ok || data.errorMessage) {
+      return {
+        errorMessage: data.errorMessage || `Failed to set password (${res.status})`,
+        requiresEmailVerification: false,
+        message: null
+      };
+    }
+
+    return {
+      errorMessage: data.errorMessage,
+      requiresEmailVerification: data.requiresEmailVerification || false,
+      message: data.message
+    };
   } catch (error) {
-    return { errorMessage: getErrorMessage(error) };
+    logServer("Setup initial password failed", { error });
+    return {
+      errorMessage: getErrorMessage(error),
+      requiresEmailVerification: false,
+      message: null
+    };
   }
 };

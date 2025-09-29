@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { checkAccountExistsAction } from "@/actions/users";
+import { checkAccountExistsAction, loginAction } from "@/actions/users";
 import toast from "react-hot-toast";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ForgotPasswordDialog } from "./forgot-password-dialog";
@@ -61,22 +61,21 @@ export function LoginForm({
     });
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const password = formData.get("password") as string;
-    const supabase = createClientComponentClient();
+ const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget as HTMLFormElement);
+  formData.append("email", email); // Append email from state
 
-    startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error) {
-        toast.success("Successfully logged in");
-        router.replace("/");
-      } else {
-        toast.error(error.message);
-      }
-    });
-  };
+  startTransition(async () => {
+    const result = await loginAction(formData);
+    if (!result.errorMessage) {
+      toast.success("Successfully logged in");
+      router.replace("/");
+    } else {
+      toast.error(result.errorMessage);
+    }
+  });
+};
 
   const handlePasswordChangeSuccess = () => {
     setShowChangePasswordDialog(false);

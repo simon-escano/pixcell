@@ -47,6 +47,7 @@ interface UserDialogProps {
     lastName: string;
     email: string;
     roleId: string;
+    licenseNo: string;
     file?: File;
   }) => Promise<void>;
   title: string;
@@ -75,6 +76,7 @@ export function UserDialog({
     lastName?: string;
     email?: string;
     role?: string;
+    licenseNo?: string;
   }>({});
 
   useEffect(() => {
@@ -105,6 +107,7 @@ export function UserDialog({
     const firstName = (document.getElementById("firstName") as HTMLInputElement)?.value;
     const lastName = (document.getElementById("lastName") as HTMLInputElement)?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
+    const licenseNo = (document.getElementById("licenseNo") as HTMLInputElement)?.value;
 
     if (!firstName?.trim()) {
       errors.firstName = "First name is required";
@@ -120,6 +123,9 @@ export function UserDialog({
     if (!roleValue) {
       errors.role = "Role is required";
     }
+    if (!licenseNo?.trim()) {
+      errors.licenseNo = "License number is required";
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -133,6 +139,7 @@ export function UserDialog({
     const firstName = (document.getElementById("firstName") as HTMLInputElement)?.value;
     const lastName = (document.getElementById("lastName") as HTMLInputElement)?.value;
     const email = (document.getElementById("email") as HTMLInputElement)?.value;
+    const licenseNo = (document.getElementById("licenseNo") as HTMLInputElement)?.value;
 
     setIsPending(true);
     try {
@@ -141,6 +148,7 @@ export function UserDialog({
         lastName,
         email,
         roleId: roleValue,
+        licenseNo,
         file: file || undefined,
       });
     } catch (error) {
@@ -228,6 +236,23 @@ export function UserDialog({
               )}
             </div>
           </div>
+
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="licenseNo" className="text-right">
+            License No<span className="text-destructive">*</span>
+          </Label>
+          <div className="col-span-3">
+            <Input
+              id="licenseNo"
+              placeholder="e.g. PRC-123456"
+              className={formErrors.licenseNo ? "border-red-500" : ""}
+            />
+            {formErrors.licenseNo && (
+              <p className="mt-1 text-sm text-red-500">{formErrors.licenseNo}</p>
+            )}
+          </div>
+        </div>
 
 
           <div className="grid grid-cols-4 items-center gap-4">

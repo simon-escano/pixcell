@@ -26,6 +26,7 @@ class SignupRequest(BaseModel):
     firstName: str
     lastName: str
     roleId: str
+    licenseNo: str
 
 class LoginRequest(BaseModel):
     email: str
@@ -43,6 +44,9 @@ class UserInfo(BaseModel):
     firstName: Optional[str] = None
     lastName: Optional[str] = None
 
+class SetupInitialPasswordRequest(BaseModel):
+    email: str
+    newPassword: str
 
 
 
@@ -145,7 +149,8 @@ async def signup_endpoint(
     password: str = Form(...),
     firstName: str = Form(...),
     lastName: str = Form(...),
-    roleId: str = Form(...)
+    roleId: str = Form(...),
+    licenseNo: str = Form(...)
 ):
     """
     User signup endpoint
@@ -207,6 +212,7 @@ async def signup_endpoint(
             "role_id": roleId,
             "image_id": image_id,
         }
+        profile_data["license_no"] = licenseNo
         
         profile_response = admin_supabase.table("profile").insert(profile_data).execute()
         
@@ -453,6 +459,7 @@ async def signup_json_endpoint(request: SignupRequest, response: Response):
             "role_id": request.roleId,
             "image_id": image_id,
         }
+        profile_data["license_no"] = request.licenseNo
         
         profile_response = admin_supabase.table("profile").insert(profile_data).execute()
         
@@ -473,6 +480,229 @@ async def signup_json_endpoint(request: SignupRequest, response: Response):
     except Exception as error:
         logger.error(f"Signup error: {error}")
         return AuthResponse(errorMessage=get_error_message(error))
+
+
+class CreateUserAutoPasswordRequest(BaseModel):
+    email: str
+    firstName: str
+    lastName: str
+    roleId: str
+    licenseNo: str
+
+
+@router.post("/create-user-auto-password")
+async def create_user_auto_password_endpoint(request: CreateUserAutoPasswordRequest):
+    """Admin/Server-initiated user creation with auto-generated password.
+
+    - Generates a secure password
+    - Creates auth user
+    - Creates image and profile rows
+    - Sets profile.must_change_password = True
+    - Does NOT log in the user or set cookies
+    """
+    try:
+        supabase = get_supabase_client()
+        admin_supabase = get_supabase_admin_client()
+
+        # Generate a secure random password
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        auto_password = "".join(secrets.choice(alphabet) for _ in range(12))
+
+        app_url = os.getenv("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
+
+        auth_response = supabase.auth.sign_up({
+            "email": request.email,
+            "password": auto_password,
+            "options": {
+                "email_redirect_to": f"{app_url}/login"
+            }
+        })
+
+        if auth_response.user is None:
+            raise HTTPException(status_code=400, detail="Failed to create user")
+
+        user_id = auth_response.user.id
+
+        # Generate avatar image URL
+        encoded_first = quote(request.firstName)
+        encoded_last = quote(request.lastName)
+        image_url = f"https://api.dicebear.com/7.x/initials/svg?seed={encoded_first}%{encoded_last}"
+
+        # Insert image record
+        image_id = str(uuid.uuid4())
+        image_insert_response = admin_supabase.table("image").insert({
+            "id": image_id,
+            "image_url": image_url
+        }).execute()
+
+        if not image_insert_response.data:
+            raise HTTPException(status_code=500, detail="Failed to create image record")
+
+        # Verify role exists
+        role_response = admin_supabase.table("role").select("*").eq("id", request.roleId).execute()
+        if not role_response.data:
+            raise HTTPException(status_code=400, detail=f"Role with id '{request.roleId}' not found in the database")
+
+        # Insert profile record with must_change_password = True
+        profile_data = {
+            "id": user_id,
+            "first_name": request.firstName,
+            "last_name": request.lastName,
+            "user_id": user_id,
+            "role_id": request.roleId,
+            "image_id": image_id,
+            "must_change_password": True,
+        }
+        profile_data["license_no"] = request.licenseNo
+
+        profile_response = admin_supabase.table("profile").insert(profile_data).execute()
+        if not profile_response.data:
+            raise HTTPException(status_code=500, detail="Failed to create profile record")
+
+        return {
+            "success": True,
+            "message": "User created. They must set a new password on first login.",
+            "userId": user_id,
+        }
+    except HTTPException:
+        raise
+    except Exception as error:
+        logger.error(f"Create user (auto password) error: {error}")
+        raise HTTPException(status_code=500, detail=get_error_message(error))
+
+
+@router.get("/email-exists/{email}", response_model=dict)
+async def check_if_email_exists(email: str):
+    try:
+        client = get_supabase_admin_client()
+
+        # Check if email exists in Supabase Auth
+        users = client.auth.admin.list_users()  # List of User objects
+        exists = any(user.email == email for user in users)
+        
+        if not exists:
+            return {
+                "exists": False,
+                "mustChangePassword": False,
+                "errorMessage": "Account not found. Please check your email or contact your administrator."
+            }
+
+        # Find the user ID for the email
+        user_id = next((user.id for user in users if user.email == email), None)
+        if not user_id:
+            return {
+                "exists": False,
+                "mustChangePassword": False,
+                "errorMessage": "Account not found. Please check your email or contact your administrator."
+            }
+
+        # Query the profile table for must_change_password
+        profile_response = client.table("profile").select("must_change_password").eq("user_id", user_id).limit(1).execute()
+        
+        if not profile_response.data:
+            return {
+                "exists": False,
+                "mustChangePassword": False,
+                "errorMessage": "Profile not found. Please contact your administrator."
+            }
+
+        return {
+            "exists": True,
+            "mustChangePassword": profile_response.data[0]["must_change_password"],
+            "errorMessage": None
+        }
+    except Exception as error:
+        logger.error(f"Check email exists error: {error}")
+        return {
+            "exists": False,
+            "mustChangePassword": False,
+            "errorMessage": get_error_message(error)
+        }
+
+@router.post("/setup-initial-password")
+async def setup_initial_password_endpoint(request: SetupInitialPasswordRequest):
+    """
+    Set initial password for newly created accounts
+    Used when must_change_password is true
+    """
+    try:
+        admin_supabase = get_supabase_admin_client()
+        app_url = os.getenv("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
+
+        # Validate input
+        if not request.email or not request.newPassword or len(request.newPassword) < 6:
+            return {
+                "errorMessage": "Valid email and password (minimum 6 characters) are required",
+                "requiresEmailVerification": False,
+                "message": None
+            }
+
+        # Check if user exists
+        users = admin_supabase.auth.admin.list_users()
+        user = next((user for user in users if user.email == request.email), None)
+        if not user:
+            return {
+                "errorMessage": "User not found",
+                "requiresEmailVerification": False,
+                "message": None
+            }
+
+        user_id = user.id
+
+        # Check if must_change_password is true
+        profile_response = admin_supabase.table("profile").select("must_change_password").eq("user_id", user_id).limit(1).execute()
+        if not profile_response.data or not profile_response.data[0]["must_change_password"]:
+            return {
+                "errorMessage": "Password change not required or profile not found",
+                "requiresEmailVerification": False,
+                "message": None
+            }
+
+        # Try to update password directly
+        try:
+            admin_supabase.auth.admin.update_user_by_id(user_id, {
+                "password": request.newPassword
+            })
+
+            # Update profile to set must_change_password to false
+            profile_update_response = admin_supabase.table("profile").update({
+                "must_change_password": False
+            }).eq("user_id", user_id).execute()
+            
+            if not profile_update_response.data:
+                raise HTTPException(status_code=500, detail="Failed to update profile")
+
+            return {
+                "errorMessage": None,
+                "requiresEmailVerification": False,
+                "message": "Password set successfully"
+            }
+        except Exception as update_error:
+            logger.error(f"Direct password update failed: {update_error}")
+            # Fall back to password reset flow
+            reset_response = admin_supabase.auth.admin.generate_link({
+                "type": "recovery",
+                "email": request.email,
+                "options": {
+                    "redirect_to": f"{app_url}/reset-password?type=recovery&email={quote(request.email)}"
+                }
+            })
+            
+            return {
+                "errorMessage": None,
+                "requiresEmailVerification": True,
+                "message": "A password reset link has been sent to your email. Please check your inbox and follow the link to set your password."
+            }
+    except Exception as error:
+        logger.error(f"Setup initial password error: {error}")
+        return {
+            "errorMessage": get_error_message(error),
+            "requiresEmailVerification": False,
+            "message": None
+        }
+
 
 @router.post("/login-json", response_model=AuthResponse)
 async def login_json_endpoint(request: LoginRequest, response: Response):

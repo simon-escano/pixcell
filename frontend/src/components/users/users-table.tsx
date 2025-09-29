@@ -60,6 +60,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     lastName: string;
     email: string;
     roleId: string;
+    licenseNo: string;
     file?: File;
   }) => {
     if (!selectedUser) return;
@@ -82,6 +83,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     lastName: string;
     email: string;
     roleId: string;
+    licenseNo: string;
     file?: File;
   }) => {
     const formData = new FormData();
@@ -89,7 +91,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     formData.append("lastName", data.lastName);
     formData.append("email", data.email);
     formData.append("roleId", data.roleId);
-    formData.append("licenseNo", ""); // Add empty license number for now
+    formData.append("licenseNo", data.licenseNo);
     if (data.file) formData.append("file", data.file);
 
     const res = await createUserWithAutoPasswordAction(formData);
