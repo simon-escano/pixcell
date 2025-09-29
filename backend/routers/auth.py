@@ -406,6 +406,19 @@ async def get_me_endpoint(request: Request):
         logger.error(f"Error type: {type(error)}")
         raise HTTPException(status_code=500, detail=f"Failed to get user information: {str(error)}")
 
+@router.get("/email-exists/{email}")
+async def check_if_email_exists(email: str):
+    client = get_supabase_admin_client()
+    
+    # Fetch all users (returns a list of User objects)
+    users = client.auth.admin.list_users()  # list of User objects
+    
+    # Check if email exists
+    exists = any(user.email == email for user in users)
+
+    return {"exists": exists}
+    
+
 @router.post("/refresh")
 async def refresh_token_endpoint(request: Request, response: Response):
     """
