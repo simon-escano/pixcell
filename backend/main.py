@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from db import get_supabase_client 
-from routers import auth, organization
+from routers import auth, organization, patient, profile
 app = FastAPI()
 
 supabase = get_supabase_client()
@@ -16,3 +16,5 @@ def test_connection():
     
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(organization.router, prefix="/organization", tags=["Organization"])
+app.include_router(patient.router, prefix="/patient", tags=["Patient"])
+app.include_router(profile.router, prefix="/profile", tags=["Profile"])

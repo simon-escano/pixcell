@@ -3,7 +3,8 @@ import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from "..";
 
 import { createClient } from '@supabase/supabase-js';
-import { alias } from 'drizzle-orm/pg-core';
+
+const backend_url = process.env.BACKEND_URL;
 
 const patientImage = alias(image, 'patientImage');
 const generatedByImage = alias(image, 'generatedByImage');
