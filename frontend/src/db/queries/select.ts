@@ -1,6 +1,8 @@
 import { doctorPatient, feedback, image, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
-import { db } from "..";
+import { db } from '..';
+import { alias } from "drizzle-orm/pg-core";
+
 
 import { createClient } from '@supabase/supabase-js';
 
