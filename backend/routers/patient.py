@@ -20,7 +20,8 @@ def all_patients():
     }
 
 
-# get current user's patients
+# get current user's patients 
+# getAllPatientsForUser
 @router.get("/my-patients", dependencies=[Depends(require_auth)])
 async def all_doctors_patients(request: Request):
     client = get_supabase_jwt_client(request)   # <-- now bound to user’s token
@@ -102,6 +103,7 @@ async def all_doctors_patients_samples(request: Request):
 
 
 # get patient by id
+# getPatientById
 @router.get("/{patient_id}")
 async def patient_by_id(patient_id: str, request: Request):
     client = get_supabase_jwt_client(request)  # JWT client
@@ -130,6 +132,7 @@ async def patient_by_id(patient_id: str, request: Request):
 
 
 # get all patient samples by patient id
+# getSamplesByPatientId
 @router.get("/{patient_id}/samples", dependencies=[Depends(require_auth)])
 async def patient_samples(patient_id: str, request: Request):
     try:
