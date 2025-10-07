@@ -54,6 +54,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   const [isExporting, setIsExporting] = useState(false)
   const [isBatchExporting, setIsBatchExporting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSavingAll, setIsSavingAll] = useState(false)
 
   // Consistent neutral styling for all detected objects
   const getDetectionStyle = () => {
@@ -167,6 +168,48 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
       console.error(e)
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const saveAllProcessedImages = async () => {
+    if (!sampleId || !isBatch) return
+    setIsSavingAll(true)
+    try {
+      const savePromises = images.map(async (imageData: any, index: number) => {
+        if (!imageData.processed_image_base64) return null
+        
+        const blob = base64ToBlob(imageData.processed_image_base64)
+        
+        // Create sample image record
+        const createRes = await fetch('/api/samples/create-sample-image', {
+          method: 'POST',
+          body: JSON.stringify({ sampleId }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        const createJson = await createRes.json()
+        if (!createRes.ok || !createJson?.sampleImageId) {
+          throw new Error(createJson.error || 'Failed to create sample image record')
+        }
+
+        // Upload processed image
+        const uploadForm = new FormData()
+        uploadForm.append('sampleImageId', createJson.sampleImageId)
+        uploadForm.append('file', new File([blob], `detected_image_${index + 1}.jpg`, { type: 'image/jpeg' }))
+        const res = await fetch('/api/samples/processed-image', { method: 'POST', body: uploadForm })
+        const json = await res.json()
+        if (!res.ok || !json.success) {
+          throw new Error(json.error || 'Failed to save processed image')
+        }
+        
+        return json
+      })
+
+      await Promise.all(savePromises.filter(Boolean))
+      onOpenChange(false)
+    } catch (e) {
+      console.error('Error saving all images:', e)
+    } finally {
+      setIsSavingAll(false)
     }
   }
 
@@ -376,7 +419,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                             <div className="flex flex-col sm:flex-row gap-4 justify-end mt-8">
                               <Button
                                 onClick={downloadAllImagesAsZip}
-                                disabled={isBatchExporting}
+                                disabled={isBatchExporting || isSavingAll}
                                 variant="outline"
                                 size="lg"
                               >
@@ -387,6 +430,21 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                 )}
                                 {isBatchExporting ? "Creating ZIP..." : "Export All Images"}
                               </Button>
+                              {sampleId && (
+                                <Button
+                                  onClick={saveAllProcessedImages}
+                                  disabled={isSavingAll || isBatchExporting}
+                                  variant="secondary"
+                                  size="lg"
+                                >
+                                  {isSavingAll ? (
+                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                  ) : (
+                                    <Sparkles className="w-5 h-5 mr-2" />
+                                  )}
+                                  {isSavingAll ? "Saving All..." : "Save All Images"}
+                                </Button>
+                              )}
                               <Button onClick={handleGenerateReport} size="lg">
                                 <FileText className="w-5 h-5 mr-2" />
                                 Generate Medical Report
@@ -408,7 +466,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       <div className="flex items-center gap-4">
                         <Button
                           onClick={downloadAllImagesAsZip}
-                          disabled={isBatchExporting}
+                          disabled={isBatchExporting || isSavingAll}
                           size="sm"
                           variant="outline"
                         >
@@ -419,6 +477,21 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                           )}
                           {isBatchExporting ? "Creating..." : "Export All"}
                         </Button>
+                        {sampleId && (
+                          <Button
+                            onClick={saveAllProcessedImages}
+                            disabled={isSavingAll || isBatchExporting}
+                            size="sm"
+                            variant="secondary"
+                          >
+                            {isSavingAll ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Sparkles className="w-4 h-4 mr-2" />
+                            )}
+                            {isSavingAll ? "Saving..." : "Save All"}
+                          </Button>
+                        )}
                         <div className="flex items-center gap-2 bg-muted p-1 rounded-md">
                           <Button
                             variant={viewMode === "grid" ? "default" : "ghost"}
