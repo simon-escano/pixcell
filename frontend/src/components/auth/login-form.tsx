@@ -61,21 +61,22 @@ export function LoginForm({
     });
   };
 
- const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const formData = new FormData(e.currentTarget as HTMLFormElement);
-  formData.append("email", email); // Append email from state
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const password = formData.get("password") as string;
+    const supabase = createClientComponentClient();
 
-  startTransition(async () => {
-    const result = await loginAction(formData);
-    if (!result.errorMessage) {
-      toast.success("Successfully logged in");
-      router.replace("/");
-    } else {
-      toast.error(result.errorMessage);
-    }
-  });
-};
+    startTransition(async () => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        toast.success("Successfully logged in");
+        router.replace("/");
+      } else {
+        toast.error(error.message);
+      }
+    });
+  };
 
   const handlePasswordChangeSuccess = () => {
     setShowChangePasswordDialog(false);

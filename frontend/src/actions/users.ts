@@ -54,26 +54,26 @@ export const signupAction = async (formData: FormData) => {
   }
 };
 
-export const loginAction = async (formData: FormData) => {
-  try {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+// export const loginAction = async (formData: FormData) => {
+//   try {
+//     const email = formData.get("email") as string;
+//     const password = formData.get("password") as string;
 
-    const res = await fetch(`${backendBaseUrl}/auth/login-json`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.errorMessage) {
-      return { errorMessage: data.errorMessage || `Login failed (${res.status})` };
-    }
-    return { errorMessage: null };
-  } catch (error) {
-    return { errorMessage: getErrorMessage(error) };
-  }
-};
+//     const res = await fetch(`${backendBaseUrl}/auth/login-json`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       credentials: "include",
+//       body: JSON.stringify({ email, password }),
+//     });
+//     const data = await res.json().catch(() => ({}));
+//     if (!res.ok || data.errorMessage) {
+//       return { errorMessage: data.errorMessage || `Login failed (${res.status})` };
+//     }
+//     return { errorMessage: null };
+//   } catch (error) {
+//     return { errorMessage: getErrorMessage(error) };
+//   }
+// };
 
 export const logoutAction = async () => {
   try {

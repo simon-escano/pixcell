@@ -17,7 +17,10 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createMiddlewareClient({ req: request, res: response });
   const { data: { user } } = await supabase.auth.getUser();
-  const unprotectedPaths = ["/login", "/signup", "/reset-password","/reports/view"];
+  console.log("[DEBUG] Middleware cookies:", request.cookies);
+  console.log("[DEBUG] Middleware user:", user);
+  const unprotectedPaths = ["/login", "/signup", "/reset-password", "/reports/view"];
+  //const unprotectedPaths = [""];
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
   if (user && isUnprotectedPath) {
