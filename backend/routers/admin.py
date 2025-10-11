@@ -1,21 +1,12 @@
-# getProfileByUserId
 # getRoleById
 # getAllRoles
 # getUserById
 # getAllUsers
 # getAllUsersWithProfiles
-# getAllProfiles
-# getSamplesByUserId
-# getSampleById
-# getAllSamples
+
 # getRecentUploads
 # getRecentUploadsByUser
-# getPatientGenderStats
-# getPatientGenderStatsByUser
 # getMonthlyStats
 # getImageURLFromImageId
 # getSupabaseUserCount
 # getFeedbackByUser
-# getAllDoctors
-# getDoctorForPatient
-# isDoctorAssociatedWithPatient

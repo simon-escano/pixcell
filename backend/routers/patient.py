@@ -102,6 +102,97 @@ async def all_doctors_patients_samples(request: Request):
         return {"error": str(e)}
 
 
+# getPatientGenderStats
+@router.get("/gender-stats", dependencies=[Depends(require_auth)])
+async def get_patient_gender_stats(request: Request):
+    """
+    Returns patient gender counts grouped by month (YYYY-MM).
+    """
+    try:
+        client = get_supabase_jwt_client(request)
+
+        # Fetch patient data
+        response = client.table("patient").select("sex, created_at").execute()
+        patients = response.data or []
+
+        # Group by gender and month
+        stats = {}
+        for p in patients:
+            gender = p.get("sex")
+            created_at = p.get("created_at")
+            if not (gender and created_at):
+                continue
+
+            # Format to YYYY-MM
+            month = created_at[:7]
+            key = (gender, month)
+            stats[key] = stats.get(key, 0) + 1
+
+        # Format response
+        data = [
+            {"gender": g, "month": m, "count": c}
+            for (g, m), c in stats.items()
+        ]
+        data.sort(key=lambda x: x["month"])
+
+        return {"count": len(data), "data": data}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+# getPatientGenderStatsByUser
+@router.get("/gender-stats/{profile_id}", dependencies=[Depends(require_auth)])
+async def get_patient_gender_stats_by_user(profile_id: str, request: Request):
+    """
+    Returns patient gender counts grouped by month (YYYY-MM) for a specific doctor.
+    """
+    try:
+        client = get_supabase_jwt_client(request)
+
+        # Step 1: Get all patient IDs linked to the doctor
+        patients_link = client.table("doctor_patient").select("patient_id").eq("doctor_id", profile_id).execute()
+        patient_ids = [p["patient_id"] for p in (patients_link.data or [])]
+
+        if not patient_ids:
+            return {"count": 0, "data": []}
+
+        # Step 2: Get all matching patients' sex and created_at
+        patients = (
+            client.table("patient")
+            .select("sex, created_at")
+            .in_("id", patient_ids)
+            .execute()
+        ).data or []
+
+        # Step 3: Group results by gender and month
+        stats = {}
+        for p in patients:
+            gender = p.get("sex")
+            created_at = p.get("created_at")
+            if not (gender and created_at):
+                continue
+
+            month = created_at[:7]  # e.g., "2025-10"
+            key = (gender, month)
+            stats[key] = stats.get(key, 0) + 1
+
+        # Step 4: Format data
+        data = [
+            {"gender": g, "month": m, "count": c}
+            for (g, m), c in stats.items()
+        ]
+        data.sort(key=lambda x: x["month"])
+
+        return {
+            "count": len(data),
+            "data": data
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+
 # get patient by id
 # getPatientById
 @router.get("/{patient_id}")
@@ -129,6 +220,8 @@ async def patient_by_id(patient_id: str, request: Request):
         "count": len(data),
         "data": data
     }
+
+
 
 
 # get all patient samples by patient id

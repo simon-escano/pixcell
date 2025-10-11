@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from db import get_supabase_client 
-from routers import auth, organization, patient, profile, report
+from routers import auth, organization, patient, profile, report, sample
 app = FastAPI()
 
 supabase = get_supabase_client()
@@ -19,3 +19,4 @@ app.include_router(organization.router, prefix="/organization", tags=["Organizat
 app.include_router(patient.router, prefix="/patient", tags=["Patient"])
 app.include_router(profile.router, prefix="/profile", tags=["Profile"])
 app.include_router(report.router, prefix="/report", tags=["Report"])
+app.include_router(sample.router, prefix="/sample", tags=["Sample"])
