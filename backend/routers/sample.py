@@ -5,7 +5,7 @@ import logging
 from pydantic import BaseModel
 from typing import Optional
 from .auth import require_auth
-from .auth import get_current_user
+
 
 router = APIRouter()
 

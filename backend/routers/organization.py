@@ -1,10 +1,9 @@
 from db import get_supabase_client, get_supabase_admin_client
 from fastapi import APIRouter, Request, HTTPException, Depends
-from .auth import get_current_user
+from .auth import get_current_user, require_auth
 import logging
 from pydantic import BaseModel
 from typing import Optional
-from .auth import require_auth
 
 router = APIRouter()
 
