@@ -92,6 +92,46 @@ async def get_current_user(request: Request) -> Optional[dict]:
         logger.error(f"Error getting current user: {e}")
         return None
 
+async def get_current_user_role(request: Request):
+    """Fetch the current user's role from profile.role_id → role table"""
+    try:
+        # Get the current user first
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
+        user_id = user.get("id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid user session")
+
+        client = get_supabase_admin_client()
+
+        # Step 1: Get profile for this user
+        profile_resp = client.table("profile").select("role_id").eq("user_id", user_id).single().execute()
+        if not profile_resp.data:
+            raise HTTPException(status_code=404, detail="Profile not found for user")
+
+        role_id = profile_resp.data.get("role_id")
+        if not role_id:
+            raise HTTPException(status_code=404, detail="Role not assigned")
+
+        # Step 2: Get role details
+        role_resp = client.table("role").select("id, name").eq("id", role_id).single().execute()
+        if not role_resp.data:
+            raise HTTPException(status_code=404, detail="Role not found")
+
+        return {
+            "user_id": user_id,
+            "role": role_resp.data
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user role: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user role")
+
+
 def get_error_message(error: Exception) -> str:
     """Convert exception to user-friendly error message"""
     error_str = str(error)
@@ -365,6 +405,19 @@ async def get_me_endpoint(request: Request):
         logger.error(f"Get me error: {error}")
         logger.error(f"Error type: {type(error)}")
         raise HTTPException(status_code=500, detail=f"Failed to get user information: {str(error)}")
+
+@router.get("/email-exists/{email}")
+async def check_if_email_exists(email: str):
+    client = get_supabase_admin_client()
+    
+    # Fetch all users (returns a list of User objects)
+    users = client.auth.admin.list_users()  # list of User objects
+    
+    # Check if email exists
+    exists = any(user.email == email for user in users)
+
+    return {"exists": exists}
+    
 
 @router.post("/refresh")
 async def refresh_token_endpoint(request: Request, response: Response):

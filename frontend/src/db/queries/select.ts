@@ -1,9 +1,12 @@
 import { doctorPatient, feedback, image, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
-import { db } from "..";
+import { db } from '..';
+import { alias } from "drizzle-orm/pg-core";
+
 
 import { createClient } from '@supabase/supabase-js';
-import { alias } from 'drizzle-orm/pg-core';
+
+const backend_url = process.env.BACKEND_URL;
 
 const patientImage = alias(image, 'patientImage');
 const generatedByImage = alias(image, 'generatedByImage');

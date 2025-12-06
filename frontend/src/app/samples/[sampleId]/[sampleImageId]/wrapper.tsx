@@ -146,16 +146,31 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       const formData = new FormData()
       formData.append("file", imageBlob, "image.jpg")
 
-      // Call backend detection endpoint
-      const response = await fetch(
-        `http://127.0.0.1:8000/detect-and-analyze?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      )
+      // Call detection endpoint through Next.js API proxy (avoids CORS issues)
+      const endpoint = new URL('/api/detection/detect-and-analyze', window.location.origin)
+      endpoint.searchParams.append('model_name', selectedModel)
+      endpoint.searchParams.append('sample_type', 'Blood smear')
+      endpoint.searchParams.append('stain', 'Giemsa')
+      endpoint.searchParams.append('magnification', '1000x')
+      
+      console.log('Calling detection endpoint:', endpoint.toString())
+      
+      const response = await fetch(endpoint.toString(), {
+        method: "POST",
+        body: formData,
+        // Don't set Content-Type header - browser will set it with boundary for FormData
+      })
 
-      if (!response.ok) throw new Error("Detection failed")
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Detection failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: endpoint,
+          errorText: errorText.substring(0, 500)
+        })
+        throw new Error(`Detection failed: ${response.status} ${response.statusText}. ${errorText.substring(0, 200)}`)
+      }
 
       const resultData = await response.json()
 
@@ -218,16 +233,31 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       const formData = new FormData()
       files.forEach((file) => formData.append("files", file))
 
-      // Call backend batch detection endpoint
-      const response = await fetch(
-        `http://127.0.0.1:8000/detect-and-analyze-batch?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      )
+      // Call batch detection endpoint through Next.js API proxy (avoids CORS issues)
+      const endpoint = new URL('/api/detection/detect-and-analyze-batch', window.location.origin)
+      endpoint.searchParams.append('model_name', selectedModel)
+      endpoint.searchParams.append('sample_type', 'Blood smear')
+      endpoint.searchParams.append('stain', 'Giemsa')
+      endpoint.searchParams.append('magnification', '1000x')
+      
+      console.log('Calling batch detection endpoint:', endpoint.toString())
+      
+      const response = await fetch(endpoint.toString(), {
+        method: "POST",
+        body: formData,
+        // Don't set Content-Type header - browser will set it with boundary for FormData
+      })
 
-      if (!response.ok) throw new Error("Batch detection failed")
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Batch detection failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: endpoint,
+          errorText: errorText.substring(0, 500)
+        })
+        throw new Error(`Batch detection failed: ${response.status} ${response.statusText}. ${errorText.substring(0, 200)}`)
+      }
 
       const resultData = await response.json()
       console.log("Batch detection response:", resultData)
