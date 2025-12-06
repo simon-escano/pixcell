@@ -104,8 +104,13 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
       // Add each processed image to the zip
       images.forEach((img: any, index: number) => {
         if (img.processed_image_base64) {
-          const blob = base64ToBlob(img.processed_image_base64)
-          zip.file(`detected_image_${index + 1}.jpg`, blob)
+          try {
+            const blob = base64ToBlob(img.processed_image_base64)
+            const filename = img.filename || `detected_image_${index + 1}.jpg`
+            zip.file(filename, blob)
+          } catch (error) {
+            console.error(`Error adding image ${index + 1} to zip:`, error)
+          }
         }
       })
 
@@ -165,32 +170,44 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   const SingleImageView = ({ imageData, index }: { imageData: any; index: number }) => (
     <div className="space-y-6">
       <div className="relative group">
-        <img
-          src={`data:image/jpeg;base64,${imageData.processed_image_base64}`}
-          alt={`Processed ${index + 1}`}
-          className="w-full max-h-96 object-contain rounded-lg border bg-muted/30"
-        />
+        {imageData.processed_image_base64 ? (
+          <img
+            src={`data:image/jpeg;base64,${imageData.processed_image_base64}`}
+            alt={`Processed ${index + 1}`}
+            className="w-full max-h-96 object-contain rounded-lg border bg-muted/30"
+          />
+        ) : (
+          <div className="w-full h-96 flex items-center justify-center rounded-lg border bg-muted/30 text-muted-foreground">
+            <div className="text-center">
+              <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>Image not available</p>
+              {imageData.error && <p className="text-sm text-destructive mt-1">{imageData.error}</p>}
+            </div>
+          </div>
+        )}
         <div className="absolute top-3 left-3 bg-background/95 text-foreground px-3 py-1.5 rounded-md text-sm font-medium border shadow-sm">
           <ImageIcon className="w-3 h-3 inline mr-1.5" />
           Image {index + 1}
         </div>
         {/* Export button for individual image */}
-        <div className="absolute top-3 right-3">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => downloadSingleImage(imageData.processed_image_base64, `detected_image_${index + 1}.jpg`)}
-            disabled={isExporting}
-            className="bg-background/95 hover:bg-background border shadow-sm"
-          >
-            {isExporting ? (
-              <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
-            ) : (
-              <Download className="w-3 h-3 mr-1.5" />
-            )}
-            Export
-          </Button>
-        </div>
+        {imageData.processed_image_base64 && (
+          <div className="absolute top-3 right-3">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => downloadSingleImage(imageData.processed_image_base64, `detected_image_${index + 1}.jpg`)}
+              disabled={isExporting}
+              className="bg-background/95 hover:bg-background border shadow-sm"
+            >
+              {isExporting ? (
+                <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
+              ) : (
+                <Download className="w-3 h-3 mr-1.5" />
+              )}
+              Export
+            </Button>
+          </div>
+        )}
       </div>
       {imageData.detections && Object.keys(imageData.detections).length > 0 && (
         <Card>
@@ -448,7 +465,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                               {/* Thumbnail Navigation */}
                               <div className="flex justify-center">
                                 <div className="flex gap-3 overflow-x-auto pb-2 px-2">
-                                  {images.map((_: any, idx: number) => (
+                                  {images.map((img: any, idx: number) => (
                                     <button
                                       key={idx}
                                       onClick={() => setSelectedImageIndex(idx)}
@@ -458,11 +475,17 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                           : "border-border hover:border-primary/50"
                                       }`}
                                     >
-                                      <img
-                                        src={`data:image/jpeg;base64,${images[idx].processed_image_base64}`}
-                                        alt={`Thumb ${idx + 1}`}
-                                        className="w-full h-full object-cover"
-                                      />
+                                      {img.processed_image_base64 ? (
+                                        <img
+                                          src={`data:image/jpeg;base64,${img.processed_image_base64}`}
+                                          alt={`Thumb ${idx + 1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                                          <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                                        </div>
+                                      )}
                                     </button>
                                   ))}
                                 </div>
@@ -476,7 +499,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
 
                   <TabsContent value="analysis" className="h-full m-0">
                     <ScrollArea className="h-full p-6">
-                      {aiAnalysis && (
+                      {aiAnalysis ? (
                         <Card>
                           <CardHeader className="border-b">
                             <CardTitle className="text-xl flex items-center gap-3">
@@ -500,10 +523,30 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                 <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
                                 <div>
                                   <p className="font-semibold text-destructive">Analysis Error</p>
-                                  <p className="text-destructive/80">{aiAnalysis.error}</p>
+                                  <p className="text-destructive/80">{aiAnalysis.error || "Unknown error occurred"}</p>
                                 </div>
                               </div>
                             )}
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <Card>
+                          <CardHeader className="border-b">
+                            <CardTitle className="text-xl flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded-md">
+                                <Brain className="w-5 h-5 text-primary" />
+                              </div>
+                              AI Medical Analysis
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-6">
+                            <div className="flex items-center gap-3 p-6 bg-muted/30 border rounded-lg">
+                              <AlertCircle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+                              <div>
+                                <p className="font-semibold text-muted-foreground">Analysis Not Available</p>
+                                <p className="text-muted-foreground/80">AI analysis was not generated for this batch.</p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       )}

@@ -166,8 +166,11 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
           detection_details: resultData.detection_details,
         })
 
-        if (resultData.ai_analysis && resultData.ai_analysis.success) {
+        // Always set AI analysis if it exists (including error cases)
+        if (resultData.ai_analysis) {
           setAiAnalysis(resultData.ai_analysis)
+        } else {
+          setAiAnalysis(null)
         }
 
         // Set processed image from base64 if available
@@ -227,6 +230,8 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       if (!response.ok) throw new Error("Batch detection failed")
 
       const resultData = await response.json()
+      console.log("Batch detection response:", resultData)
+      console.log("AI Analysis in response:", resultData.ai_analysis)
 
       if (resultData.success) {
         setBatchDetectionResults({
@@ -235,8 +240,13 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
           per_image: resultData.results,
         })
 
-        if (resultData.ai_analysis && resultData.ai_analysis.success) {
+        // Always set AI analysis if it exists (including error cases)
+        if (resultData.ai_analysis) {
+          console.log("Setting batch AI analysis:", resultData.ai_analysis)
           setBatchAiAnalysis(resultData.ai_analysis)
+        } else {
+          console.log("No AI analysis in response, setting to null")
+          setBatchAiAnalysis(null)
         }
 
         toast.dismiss()
