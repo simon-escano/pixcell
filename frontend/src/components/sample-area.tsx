@@ -62,16 +62,22 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
       const formData = new FormData();
       formData.append("file", imageBlob, "image.jpg");
 
-      // Use the combined endpoint that runs detection once
-      const response = await fetch(
-        `http://127.0.0.1:8000/detect-and-analyze?model_name=${selectedModel}&sample_type=Blood%20smear&stain=Giemsa&magnification=1000x`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      // Use the combined endpoint that runs detection once (through Next.js proxy)
+      const endpoint = new URL('/api/detection/detect-and-analyze', window.location.origin);
+      endpoint.searchParams.append('model_name', selectedModel);
+      endpoint.searchParams.append('sample_type', 'Blood smear');
+      endpoint.searchParams.append('stain', 'Giemsa');
+      endpoint.searchParams.append('magnification', '1000x');
 
-      if (!response.ok) throw new Error("Prediction failed");
+      const response = await fetch(endpoint.toString(), {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || "Prediction failed");
+      }
 
       const resultData = await response.json();
       
@@ -87,22 +93,28 @@ export default function SampleArea({ sample, disabled }: SampleAreaProps) {
           setAiAnalysis(resultData.ai_analysis);
         }
         
-        // Get the processed image from the original predict endpoint for display
-        const imageFormData = new FormData();
-        imageFormData.append("file", imageBlob, "image.jpg");
-        
-        const imageResponse = await fetch(
-          `http://127.0.0.1:8000/predict?model_name=${selectedModel}`,
-          {
+        // Use processed image from base64 if available, otherwise fetch from predict endpoint
+        if (resultData.processed_image_base64) {
+          const resultUrl = `data:image/jpeg;base64,${resultData.processed_image_base64}`;
+          setProcessedImageUrl(resultUrl);
+        } else {
+          // Fallback: Get the processed image from the predict endpoint
+          const imageFormData = new FormData();
+          imageFormData.append("file", imageBlob, "image.jpg");
+          
+          const predictEndpoint = new URL('/api/detection/predict', window.location.origin);
+          predictEndpoint.searchParams.append('model_name', selectedModel);
+          
+          const imageResponse = await fetch(predictEndpoint.toString(), {
             method: "POST",
             body: imageFormData,
-          },
-        );
+          });
 
-        if (imageResponse.ok) {
-          const blob = await imageResponse.blob();
-          const resultUrl = URL.createObjectURL(blob);
-          setProcessedImageUrl(resultUrl);
+          if (imageResponse.ok) {
+            const blob = await imageResponse.blob();
+            const resultUrl = URL.createObjectURL(blob);
+            setProcessedImageUrl(resultUrl);
+          }
         }
 
         toast.dismiss();
