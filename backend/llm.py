@@ -10,7 +10,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY environment variable is not set. Please set it in your environment or .env file.")
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCLeD1ROTLbVb8GUYCjEuF-yQe2HegW1mE')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Get API key from environment variable
 # Check GC LOL -molt
