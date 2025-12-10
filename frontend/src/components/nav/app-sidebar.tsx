@@ -21,6 +21,7 @@ import { getUser } from "@/lib/auth";
 import Link from "next/link";
 import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
 import PixCellLogo from "../pixcell-logo";
+import OrganizationDropdown from "../organization-dropdown";
 
 export async function AppSidebar({
   ...props
@@ -54,16 +55,7 @@ export async function AppSidebar({
       <NavSecondaryWrapper />
       <NavTertiary />
       <SidebarFooter>
-        <div className="mb-4">
-          <p className="text-xs font-semibold text-muted-foreground px-2 py-2">Organizations</p>
-          <ul className="space-y-1 px-2">
-            {organizations.map((org) => (
-              <li key={org.id} className="text-sm text-foreground truncate">
-                {org.address}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <OrganizationDropdown organizations={organizations} />
         <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
       </SidebarFooter>
     </Sidebar>

@@ -1,4 +1,4 @@
-import { doctorPatient, feedback, image, organization, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
+import { doctorPatient, feedback, image, organization, organizationStaff, organizationPatient, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
@@ -642,8 +642,16 @@ export async function getReportsByPatientId(patientId: string) {
     .orderBy(report.createdAt);
 }
 
-export async function getOrganizationsByProfileId(profileId: string) {
-  return await db
+export const getOrganizationById = async (organizationId: string) => {
+  const organizations = await db
+    .select()
+    .from(organization)
+    .where(eq(organization.id, organizationId));
+  return organizations[0];
+}
+
+export const getOrganizationsByProfileId = async (profileId: string) => {
+  const organizations = await db
     .select({
       id: organization.id,
       name: organization.name,
@@ -652,6 +660,79 @@ export async function getOrganizationsByProfileId(profileId: string) {
       updatedAt: organization.updatedAt,
     })
     .from(organization)
-    .innerJoin(doctorPatient, eq(organization.id, doctorPatient.doctorId))
-    .where(eq(doctorPatient.doctorId, profileId));
+    .innerJoin(
+      organizationStaff,
+      eq(organization.id, organizationStaff.organizationId)
+    )
+    .where(eq(organizationStaff.staffId, profileId));
+  return organizations;
+};
+
+export async function getPatientsFromOrganizationForUser(
+  profileId: string,
+  roleName: string,
+  organizationId: string,
+  withSamplesOnly = false
+) {
+  const baseSelection = {
+    id: patient.id,
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    email: patient.email,
+    contactNumber: patient.contactNumber,
+    address: patient.address,
+    height: patient.height,
+    weight: patient.weight,
+    sex: patient.sex,
+    bloodType: patient.bloodType,
+    birthDate: patient.birthDate,
+    createdAt: patient.createdAt,
+    imageId: patient.imageId,
+    imageUrl: image.imageUrl,
+    createdBy: patient.createdBy
+  }
+
+  let query
+
+  if (roleName === "Administrator") {
+    query = db
+      .select(baseSelection)
+      .from(organizationPatient)
+      .innerJoin(patient, eq(organizationPatient.patientId, patient.id))
+      .leftJoin(image, eq(patient.imageId, image.id))
+      .where(eq(organizationPatient.organizationId, organizationId))
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId))
+    }
+  } else {
+    query = db
+      .select(baseSelection)
+      .from(organizationPatient)
+      .innerJoin(patient, eq(organizationPatient.patientId, patient.id))
+      .innerJoin(
+        doctorPatient,
+        eq(doctorPatient.patientId, patient.id)
+      )
+      .leftJoin(image, eq(patient.imageId, image.id))
+      .where(
+        and(
+          eq(organizationPatient.organizationId, organizationId),
+          eq(doctorPatient.doctorId, profileId)
+        )
+      )
+
+    if (withSamplesOnly) {
+      query = query.innerJoin(sample, eq(patient.id, sample.patientId))
+    }
+  }
+
+  const results = await query
+
+  const seen = new Set<string>()
+  return results.filter(p => {
+    if (seen.has(p.id)) return false
+    seen.add(p.id)
+    return true
+  })
 }

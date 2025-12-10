@@ -153,13 +153,22 @@ export const organization = pgTable("organization", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const organization_staff = pgTable("organization_staff", {
-   id: uuid("id").primaryKey().defaultRandom(), 
-   organizationId: uuid("organization_id").references(() => organization.id),
-   staffId: uuid("staff_id").references(() => profile.id),
-   role: text('role'),
+export const organizationStaff = pgTable("organization_staff", {
+  id: uuid("id").primaryKey().defaultRandom(), 
+  organizationId: uuid("organization_id").references(() => organization.id),
+  staffId: uuid("staff_id").references(() => profile.id),
+  role: text('role'),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const organizationPatient = pgTable("organization_patient", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
+  patientId: uuid("patient_id").defaultRandom(),
+  organizationId: uuid("organization_id").defaultRandom(),
+  status: varchar("status"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
 })
 
 export type Role = typeof role.$inferSelect;
@@ -173,7 +182,8 @@ export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 export type Organization = typeof organization.$inferSelect;
-export type OrganizationStaff = typeof organization_staff.$inferSelect;
+export type OrganizationStaff = typeof organizationStaff.$inferSelect;
+export type OrganizationPatient = typeof organizationPatient.$inferSelect;
 
 // Combined type for sample with image data
 export type SampleWithImage = Sample & {
