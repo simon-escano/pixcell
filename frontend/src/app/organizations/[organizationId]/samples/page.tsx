@@ -10,8 +10,8 @@ import {
   TrendingUp
 } from "lucide-react"
 import type React from "react"
-import SampleBrowserClient from "../../components/samples/sample-browser-client"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./queries"
+import SampleBrowserClient from "@/components/samples/sample-browser-client"
 
 // Stats card component
 const StatsCard = ({

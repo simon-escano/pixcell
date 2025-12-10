@@ -10,10 +10,10 @@ import {
 import { CircleOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { MetaProfile, MetaSample, MetaSampleImage } from "../../app/samples/types";
 import ProfileCard from "./profile-card";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useEffect } from "react";
+import { MetaProfile, MetaSample, MetaSampleImage } from "@/app/organizations/[organizationId]/samples/types";
 
 export const handleCopySampleId = (sample: MetaSample) => {
     navigator.clipboard.writeText(sample.id);

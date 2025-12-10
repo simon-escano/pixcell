@@ -5,9 +5,9 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Suspense } from "react";
-import { Providers } from "./samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import ClientServiceWorkerRegister from "@/components/ClientServiceWorkerRegister";
+import { Providers } from "./organizations/[organizationId]/samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

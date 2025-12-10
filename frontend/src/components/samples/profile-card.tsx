@@ -1,9 +1,9 @@
 "use client";
 
+import { MetaPatient, MetaProfile } from "@/app/organizations/[organizationId]/samples/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImageOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { MetaPatient, MetaProfile } from "../../app/samples/types";
 
 interface ProfileCardProps {
   profile: MetaProfile | MetaPatient;

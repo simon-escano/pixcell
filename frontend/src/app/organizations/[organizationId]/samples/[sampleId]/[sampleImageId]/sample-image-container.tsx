@@ -1,4 +1,3 @@
-import { User } from "@supabase/supabase-js";
 import { MetaSampleImage } from "../../types";
 import { Room } from "./liveblocks/Room";
 import { StorageTldraw } from "./liveblocks/components/StorageTldraw";

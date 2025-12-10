@@ -1,45 +1,43 @@
 "use client"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import {
-  Ellipsis,
-  PlusIcon,
-  Search,
-  Bot,
-  ImageIcon,
-  Calendar,
-  Ruler,
-  Eye,
-  Sparkles,
-  Zap,
-  Users,
-  FileImage,
-  Activity,
-  Share2,
-  Copy,
-  Link,
-} from "lucide-react"
-import { useParams, useRouter } from "next/navigation"
-import ProfileCard from "../../../../components/samples/profile-card"
-import type { MetaSample, MetaSampleImage } from "../../types"
-import SampleImageContainer from "./sample-image-container"
-import type { User } from "@supabase/supabase-js"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import DetectionResultDialog from "@/components/DetectionResultDialog"
+import ProfileCard from "@/components/samples/profile-card"
+import SampleDrawer from "@/components/samples/upload-sample-drawer"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
-import { handleCopySampleId, handleDeleteSample } from "../../../../components/samples/sample-card"
-import SampleDrawer from "@/components/samples/upload-sample-drawer"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Activity,
+  Bot,
+  Calendar,
+  Copy,
+  Ellipsis,
+  Eye,
+  FileImage,
+  ImageIcon,
+  Link,
+  PlusIcon,
+  Ruler,
+  Search,
+  Share2,
+  Sparkles,
+  Users,
+  Zap,
+} from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
-import { useState, useEffect } from "react"
-import DetectionResultDialog from "@/components/DetectionResultDialog"
-import { patient } from "@/db/schema"
+import SampleImageContainer from "./sample-image-container"
+import { handleCopySampleId, handleDeleteSample } from "@/components/samples/sample-card"
+import { MetaSample, MetaSampleImage } from "../../types"
 
 interface SamplePageWrapperProps {
   sample: MetaSample | undefined

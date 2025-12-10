@@ -22,17 +22,28 @@ import Link from "next/link";
 import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
 import PixCellLogo from "../pixcell-logo";
 import OrganizationDropdown from "../organization-dropdown";
+import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 
+// 1. Update the props type definition to include params
 export async function AppSidebar({
+  params, 
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: React.ComponentProps<typeof Sidebar> & {
+  params?: Promise<{ organizationId?: string }>;
+}) {
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
 
+  // 2. Logic Fix: await the params safely, then apply the fallbacks
+  // Logic: URL Param -> First Org ID -> Empty String
+  const resolvedParams = params ? await params : null;
+  const selectedOrganizationId = resolvedParams?.organizationId || undefined;
+
   const profileRole = profileRoleData?.name || null;
   const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -50,12 +61,15 @@ export async function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        {/* Pass the calculated ID */}
+        <OrganizationDropdown organizations={organizations} />
+        <NavMain organizationId={selectedOrganizationId}>
+           <UploadSampleWrapper />
+        </NavMain>
       </SidebarContent>
       <NavSecondaryWrapper />
       <NavTertiary />
       <SidebarFooter>
-        <OrganizationDropdown organizations={organizations} />
         <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
       </SidebarFooter>
     </Sidebar>

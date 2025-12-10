@@ -3,7 +3,7 @@ import { getUser } from "@/lib/auth";
 import { ImageUp } from "lucide-react";
 import { Button } from "../ui/button";
 import SampleDrawer from "./upload-sample-drawer";
-import { getMetaProfileByUserId } from "@/app/samples/queries";
+import { getMetaProfileByUserId } from "@/app/organizations/[organizationId]/samples/queries";
 
 export default async function UploadSampleWrapper() {
   const user = await getUser();

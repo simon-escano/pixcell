@@ -1,10 +1,10 @@
 import Base from "@/components/base";
 import { isDoctorAssociatedWithPatient } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
-import { getMetaSampleById, getMetaSampleImagesBySampleId, getMetaProfileByUserId } from "../../queries";
 import SamplePageWrapper from "./wrapper";
 import { redirect } from "next/navigation";
 import AccessDeniedToast from "./access-denied-toast";
+import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
 
 const SampleImagePage = async ({
   params,

@@ -11,9 +11,9 @@ import {
   createShapeId,
 } from "tldraw";
 import "tldraw/tldraw.css";
-import { MetaSampleImage } from "../../../../types";
 import { Avatars } from "./Avatars";
 import { useStorageStore } from "./useStorageStore";
+import { MetaSampleImage } from "../../../../types";
 
 interface StorageTldrawProps {
   sampleImage: MetaSampleImage;

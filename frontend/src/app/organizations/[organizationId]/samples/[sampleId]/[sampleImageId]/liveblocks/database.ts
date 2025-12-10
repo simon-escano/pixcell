@@ -1,5 +1,5 @@
-import { getUserMetaByUserId } from "@/app/samples/queries";
 import { getUser } from "@/lib/auth";
+import { getUserMetaByUserId } from "../../../queries";
 
 export async function getCurrentUser() {
   const user = await getUser();

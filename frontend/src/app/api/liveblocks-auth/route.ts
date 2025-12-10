@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/samples/[sampleId]/[sampleImageId]/liveblocks/database";
+import { getCurrentUser } from "@/app/organizations/[organizationId]/samples/[sampleId]/[sampleImageId]/liveblocks/database";
 import { Liveblocks } from "@liveblocks/node";
 import { NextRequest } from "next/server";
 
