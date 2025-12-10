@@ -199,7 +199,7 @@ export default function ProfileClient(props: ProfileClientProps) {
     
     let actions = (
       <div className="space-y-2">
-        <UploadSampleDrawerForPatient patientId={patient.id} />
+        <UploadSampleDrawerForPatient patientId={patient.id} organizationId={orgId} />
         <form action={orgId ? `/organizations/${orgId}/reports` : `/reports`} method="get">
           <input type="hidden" name="search" value={`${patient.firstName} ${patient.lastName}`} />
           <Button

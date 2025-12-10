@@ -112,7 +112,8 @@ async function ensureSampleImagesBucket() {
 export async function uploadSampleAction(
   patientId: string,
   files: File[],
-  sampleName: string
+  sampleName: string,
+  organizationId?: string
 ) {
   // Validate inputs
   if (!files?.length || !patientId || !sampleName.trim()) {
@@ -142,6 +143,7 @@ export async function uploadSampleAction(
         patientId,
         sampleName: sampleName.trim(),
         createdBy: currentUser.id,
+        organizationId: organizationId || crypto.randomUUID(),
       })
       .returning();
 

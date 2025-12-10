@@ -82,7 +82,7 @@ export default function SampleDrawer({
         setFiles([]);
         router.refresh();
       } else {
-        const result = await uploadSampleAction(selectedPatient, files, sampleName.trim());
+        const result = await uploadSampleAction(selectedPatient, files, sampleName.trim(), orgId);
         if (result && result.success && result.sampleId) {
           toast.success(`${files.length} sample(s) uploaded successfully.`, {
             id: uploadingToast,
@@ -221,7 +221,7 @@ export default function SampleDrawer({
 }
 
 // New drawer for uploading samples for a specific patient
-export function UploadSampleDrawerForPatient({ patientId, className }: { patientId: string, className?: string }) {
+export function UploadSampleDrawerForPatient({ patientId, className, organizationId }: { patientId: string, className?: string, organizationId?: string }) {
   const router = useRouter();
   const [files, setFiles] = React.useState<File[]>([]);
   const [sampleName, setSampleName] = React.useState<string>("");
@@ -233,7 +233,7 @@ export function UploadSampleDrawerForPatient({ patientId, className }: { patient
       return;
     }
     try {
-      await uploadSampleAction(patientId, files, sampleName.trim());
+      await uploadSampleAction(patientId, files, sampleName.trim(), organizationId);
       toast.success(`${files.length} sample(s) uploaded successfully.`);
       setDrawerOpen(false);
       setFiles([]);
