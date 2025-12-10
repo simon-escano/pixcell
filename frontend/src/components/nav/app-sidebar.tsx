@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
+  getOrganizationsByProfileId,
   getProfileByUserId,
   getRoleById
 } from "@/db/queries/select";
@@ -27,6 +28,7 @@ export async function AppSidebar({
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
+  const organizations = await getOrganizationsByProfileId(profileData?.id || "");
 
   const profileRole = profileRoleData?.name || null;
   const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };
@@ -52,6 +54,16 @@ export async function AppSidebar({
       <NavSecondaryWrapper />
       <NavTertiary />
       <SidebarFooter>
+        <div className="mb-4">
+          <p className="text-xs font-semibold text-muted-foreground px-2 py-2">Organizations</p>
+          <ul className="space-y-1 px-2">
+            {organizations.map((org) => (
+              <li key={org.id} className="text-sm text-foreground truncate">
+                {org.address}
+              </li>
+            ))}
+          </ul>
+        </div>
         <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
       </SidebarFooter>
     </Sidebar>

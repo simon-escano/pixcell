@@ -1,4 +1,4 @@
-import { doctorPatient, feedback, image, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
+import { doctorPatient, feedback, image, organization, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
@@ -640,4 +640,18 @@ export async function getReportsByPatientId(patientId: string) {
     .innerJoin(patient, eq(sample.patientId, patient.id))
     .where(eq(patient.id, patientId))
     .orderBy(report.createdAt);
+}
+
+export async function getOrganizationsByProfileId(profileId: string) {
+  return await db
+    .select({
+      id: organization.id,
+      name: organization.name,
+      address: organization.address,
+      createdAt: organization.createdAt,
+      updatedAt: organization.updatedAt,
+    })
+    .from(organization)
+    .innerJoin(doctorPatient, eq(organization.id, doctorPatient.doctorId))
+    .where(eq(doctorPatient.doctorId, profileId));
 }
