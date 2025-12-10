@@ -6,17 +6,18 @@ import { getUser } from "@/lib/auth";
 import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 import { redirect } from "next/navigation";
 
-export default async function OtherUsersPage() {
+export default async function OtherUsersPage({ params }: { params: Promise<{ organizationId: string }> }) {
+  const organizationId = (await params).organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
 
-  // Redirect non-administrators to dashboard page
+  // Redirect non-administrators to organization dashboard
   if (role.name !== "Administrator") {
-    redirect("/");
+    redirect(`/organizations/${organizationId}`);
   }
 
-  const usersData = await getAllUsersWithProfiles();
+  const usersData = await getAllUsersWithProfiles(organizationId);
   const rolesData = await getAllRoles();
 
   // Transform the data to match CombinedUser type by providing default values for nullable fields

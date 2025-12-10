@@ -13,11 +13,21 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
-export function NavSecondary({ isAdmin }: { isAdmin: boolean }) {
+interface NavSecondaryProps {
+  isAdmin: boolean;
+  organizationId?: string;
+}
+
+export function NavSecondary({ isAdmin, organizationId }: NavSecondaryProps) {
+  // If no valid organization ID, hide the menu
+  if (!organizationId || typeof organizationId !== "string" || organizationId.trim() === "") {
+    return null;
+  }
+
   const items = [
     ...(isAdmin ? [{
       title: "Manage users",
-      url: "/users",
+      url: `/organizations/${organizationId}/users`,
       icon: UsersRound,
     }] : []),
   ];

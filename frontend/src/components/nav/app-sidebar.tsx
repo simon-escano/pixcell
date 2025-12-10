@@ -75,7 +75,7 @@ export async function AppSidebar({
           }
         />
       </SidebarContent>
-      <NavSecondaryWrapper />
+      <NavSecondaryWrapper params={params} />
       <NavTertiary />
       <SidebarFooter>
         <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
