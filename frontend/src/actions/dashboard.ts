@@ -1,26 +1,21 @@
 "use server"
 import { getUser } from "@/lib/auth";
 
-import { 
-  getAllPatientsForUser, 
-  getAllSamples, 
-  getReportCountByPatientId,
-  getReportsLast30Days,
-  getPatientsWithLastReport,
-  getRecentUploads,
-  getPatientGenderStats,
+import { db } from "@/db";
+import {
+  getAllPatientsForUser,
   getMonthlyStats,
-  getProfileByUserId, 
-  getRoleById,
-  getSamplesByUserId,
-  getReportsLast30DaysByUser,
+  getPatientGenderStatsByUser,
   getPatientsWithLastReportByUser,
+  getProfileByUserId,
   getRecentUploadsByUser,
-  getPatientGenderStatsByUser
-} from "@/db/queries/select"
-import { db } from "@/db"
-import { patient, sample, report, sampleImage } from "@/db/schema"
-import { sql } from "drizzle-orm"
+  getReportCountByPatientId,
+  getReportsLast30DaysByUser,
+  getRoleById,
+  getSamplesByUserId
+} from "@/db/queries/select";
+import { patient, report, sample, sampleImage } from "@/db/schema";
+import { sql } from "drizzle-orm";
 
 // Helper function to calculate monthly changes
 async function getMonthlyChange(table: any, dateColumn: any) {
@@ -84,7 +79,7 @@ async function getSampleMonthlyChange() {
   return ((current - last) / last) * 100;
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(organizationId: string) {
   try {
     const user = await getUser();
     const profile = await getProfileByUserId(user.id);
@@ -101,8 +96,8 @@ export async function getDashboardStats() {
       genderStats,
       monthlyStats
     ] = await Promise.all([
-      getAllPatientsForUser(profile.id, role.name),
-      getSamplesByUserId(user.id),
+      getAllPatientsForUser(profile.id, role.name, organizationId),
+      getSamplesByUserId(user.id, organizationId),
       getReportsLast30DaysByUser(user.id),
       getPatientsWithLastReportByUser(user.id),
       getRecentUploadsByUser(user.id),

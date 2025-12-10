@@ -49,12 +49,17 @@ const StatsCard = ({
   </Card>
 )
 
-const SamplesPage = async () => {
+const SamplesPage = async ({
+  params,
+}: {
+  params: Promise<{ organizationId: string }>;
+}) => {
+  const organizationId = (await params).organizationId;
   const currentUser = await getUser()
   const metaUser = await getMetaProfileByUserId(currentUser.id)
-  const samples = (metaUser?.role == "Administrator") ? await getAllSamples() : await getSamplesByUserId(currentUser.id);
-  const reports = (metaUser?.role == "Administrator") ? await import("@/db/queries/select").then(m => m.getAllReports()) : await import("@/db/queries/select").then(m => m.getAllReportsByUserId(currentUser.id))
-  let patientsRaw = await getAllPatientsForUser(metaUser?.id!, metaUser?.role!);
+  const samples = (metaUser?.role == "Administrator") ? await getAllSamples(organizationId) : await getSamplesByUserId(currentUser.id, organizationId);
+  const reports = (metaUser?.role == "Administrator") ? await import("@/db/queries/select").then(m => m.getAllReports(organizationId)) : await import("@/db/queries/select").then(m => m.getAllReportsByUserId(currentUser.id))
+  let patientsRaw = await getAllPatientsForUser(metaUser?.id!, metaUser?.role!, organizationId);
   // Map to MetaPatient type
   let patients = patientsRaw.map((p: any) => ({
     ...p,

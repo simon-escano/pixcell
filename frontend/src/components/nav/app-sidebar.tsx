@@ -29,7 +29,7 @@ export async function AppSidebar({
   params, 
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
-  params?: Promise<{ organizationId?: string }>;
+  params?: Promise<{ organizationId: string }>;
 }) {
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
@@ -63,9 +63,7 @@ export async function AppSidebar({
       <SidebarContent>
         {/* Pass the calculated ID */}
         <OrganizationDropdown organizations={organizations} />
-        <NavMain organizationId={selectedOrganizationId}>
-           <UploadSampleWrapper />
-        </NavMain>
+        <NavMain organizationId={selectedOrganizationId}></NavMain>
       </SidebarContent>
       <NavSecondaryWrapper />
       <NavTertiary />

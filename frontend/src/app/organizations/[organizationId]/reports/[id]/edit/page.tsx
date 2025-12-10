@@ -6,15 +6,16 @@ import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 
 // We'll inline the edit form logic here for now, but ideally this would be a shared component
-export default async function EditReportPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditReportPage({ params }: { params: Promise<{ id: string, organizationId: string }> }) {
   const { id } = await params;
+  const organizationId = (await params).organizationId;
   const reportId = id;
   const report = await getReportById(reportId);
   if (!report) return notFound();
 
   const user = await getUser();
   const profile = await getMetaProfileByUserId(user.id);
-  const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role, true);
+  const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role, organizationId, true);
   let patients = patientsRaw.map((p: any) => ({
     ...p,
     fullName: `${p.firstName} ${p.lastName}`,

@@ -25,9 +25,9 @@ export async function getUserById(id: string) {
 
 export async function getAllUsers() {
   return await db.select().from(user);
-}
+} 
 
-export async function getAllUsersWithProfiles() {
+export async function getAllUsersWithProfiles(organizationId: string) {
   return await db
     .select({
       id: user.id,
@@ -43,7 +43,11 @@ export async function getAllUsersWithProfiles() {
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
     .innerJoin(role, eq(profile.roleId, role.id))
-    .leftJoin(image, eq(profile.imageId, image.id));
+    .leftJoin(image, eq(profile.imageId, image.id))
+    // 1. Join the profile table to the organizationStaff junction table
+    .innerJoin(organizationStaff, eq(profile.id, organizationStaff.staffId)) 
+    // 2. Filter using the organizationId column on the organizationStaff table
+    .where(eq(organizationStaff.organizationId, organizationId));
 }
 
 export async function getAllProfiles() {
@@ -53,6 +57,7 @@ export async function getAllProfiles() {
 export async function getAllPatientsForUser(
   profileId: string,
   roleName: string,
+  organizationId: string,
   withSamplesOnly = false
 ) {
   const baseSelection = {
@@ -70,7 +75,7 @@ export async function getAllPatientsForUser(
     createdAt: patient.createdAt,
     imageId: patient.imageId,
     imageUrl: image.imageUrl,
-    createdBy: patient.createdBy
+    createdBy: patient.createdBy,
   };
 
   let query;
@@ -79,7 +84,12 @@ export async function getAllPatientsForUser(
     query = db
       .select(baseSelection)
       .from(patient)
-      .leftJoin(image, eq(patient.imageId, image.id));
+      .innerJoin(
+        organizationPatient,
+        eq(organizationPatient.patientId, patient.id)
+      )
+      .leftJoin(image, eq(patient.imageId, image.id))
+      .where(eq(organizationPatient.organizationId, organizationId));
 
     if (withSamplesOnly) {
       query = query.innerJoin(sample, eq(patient.id, sample.patientId));
@@ -89,8 +99,17 @@ export async function getAllPatientsForUser(
       .select(baseSelection)
       .from(doctorPatient)
       .innerJoin(patient, eq(doctorPatient.patientId, patient.id))
+      .innerJoin(
+        organizationPatient,
+        eq(organizationPatient.patientId, patient.id)
+      )
       .leftJoin(image, eq(patient.imageId, image.id))
-      .where(eq(doctorPatient.doctorId, profileId));
+      .where(
+        and(
+          eq(doctorPatient.doctorId, profileId),
+          eq(organizationPatient.organizationId, organizationId)
+        )
+      );
 
     if (withSamplesOnly) {
       query = query.innerJoin(sample, eq(patient.id, sample.patientId));
@@ -99,8 +118,7 @@ export async function getAllPatientsForUser(
 
   const results = await query;
 
-  // Deduplicate by patient.id
-  const seen = new Set();
+  const seen = new Set<string>();
   const unique = results.filter((p) => {
     if (seen.has(p.id)) return false;
     seen.add(p.id);
@@ -109,6 +127,7 @@ export async function getAllPatientsForUser(
 
   return unique;
 }
+
 
 export async function getPatientById(id: string) {
   const result = await db
@@ -154,7 +173,8 @@ export async function getSamplesByPatientId(id: string) {
     .where(eq(sample.patientId, id));
 }
 
-export async function getSamplesByUserId(userId: string) {
+export async function getSamplesByUserId(userId: string, organizationId: string) {
+  // 1. Samples created directly by the user AND belonging to the specified organization
   const directSamples = db
     .select({
       id: sample.id,
@@ -170,8 +190,14 @@ export async function getSamplesByUserId(userId: string) {
     .from(sample)
     .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
     .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
-    .where(eq(sample.createdBy, userId));
+    .where(
+      and(
+        eq(sample.createdBy, userId),
+        eq(sample.organizationId, organizationId) // <-- Filter by organization ID
+      )
+    );
 
+  // 2. Samples linked to the user's patients (via doctorPatient table) AND belonging to the specified organization
   const patientSamples = db
     .select({
       id: sample.id,
@@ -188,10 +214,16 @@ export async function getSamplesByUserId(userId: string) {
     .innerJoin(sample, eq(doctorPatient.patientId, sample.patientId))
     .leftJoin(sampleImage, eq(sample.id, sampleImage.sampleId))
     .leftJoin(sampleImg, eq(sampleImage.imageId, sampleImg.id))
-    .where(eq(doctorPatient.doctorId, userId));
+    .where(
+      and(
+        eq(doctorPatient.doctorId, userId),
+        eq(sample.organizationId, organizationId) // <-- Filter by organization ID
+      )
+    );
 
   const [direct, patients] = await Promise.all([directSamples, patientSamples]);
 
+  // Combine results and deduplicate
   const seen = new Set<string>();
   return [...direct, ...patients].filter((s) => {
     if (seen.has(s.id)) return false;
@@ -221,8 +253,11 @@ export async function getSampleById(id: string) {
   return result[0];
 }
 
-export async function getAllSamples() {
-  return await db.select().from(sample);
+export async function getAllSamples(organizationId: string) {
+  return await db
+    .select()
+    .from(sample)
+    .where(eq(sample.organizationId, organizationId));
 }
 
 export async function getProfileByUserId(userId: string) {
@@ -435,7 +470,7 @@ export async function getRecentUploadsByUser(userId: string) {
     .limit(5);
 }
 
-export async function getPatientGenderStats() {
+export async function getPatientGenderStats(organizationId: string) {
   const result = await db
     .select({
       gender: patient.sex,
@@ -443,6 +478,13 @@ export async function getPatientGenderStats() {
       month: sql<string>`to_char(${patient.createdAt}, 'YYYY-MM')`,
     })
     .from(patient)
+    .innerJoin(
+      organizationPatient,
+      eq(patient.id, organizationPatient.patientId) // Join condition
+    )
+    .where(
+      eq(organizationPatient.organizationId, organizationId) // Filter by organizationId
+    )
     .groupBy(patient.sex, sql`to_char(${patient.createdAt}, 'YYYY-MM')`)
     .orderBy(sql`to_char(${patient.createdAt}, 'YYYY-MM')`);
 
@@ -496,28 +538,13 @@ export async function getMonthlyStats() {
   };
 }
 
-export async function getAllReports() {
+export async function getAllReports(organizationId: string) {
   return await db
-    .select({
-      id: report.id,
-      content: report.content,
-      isAiGenerated: report.isAiGenerated,
-      createdAt: report.createdAt,
-      exportedUrl: report.exportedUrl,
-      exportFormat: report.exportFormat,
-      sampleId: sample.id,
-      sampleName: sample.sampleName,
-      patientId: patient.id,
-      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
-      patientImage: patientImage.imageUrl,
-      generatedById: user.id,
-      generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
-      generatedByImage: generatedByImage.imageUrl,
-      generatedByRole: role.name,
-      title: report.title,
-      testType: report.testType, // <-- Add this line
-    })
+    .select()
     .from(report)
+    // 1. Add the filter here, based on the new report.organizationId column
+    .where(eq(report.organizationId, organizationId))
+    // Existing joins
     .leftJoin(sample, eq(report.sampleId, sample.id))
     .leftJoin(patient, eq(sample.patientId, patient.id))
     .leftJoin(patientImage, eq(patient.imageId, patientImage.id))

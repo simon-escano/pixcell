@@ -5,10 +5,14 @@ import { Button } from "../ui/button";
 import SampleDrawer from "./upload-sample-drawer";
 import { getMetaProfileByUserId } from "@/app/organizations/[organizationId]/samples/queries";
 
-export default async function UploadSampleWrapper() {
+interface UploadSampleWrapperProps {
+  organizationId: string;
+}
+
+export default async function UploadSampleWrapper({organizationId}: UploadSampleWrapperProps) {
   const user = await getUser();
   const profile = await getMetaProfileByUserId(user.id);
-  const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role);
+  const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role, organizationId);
   let patients = patientsRaw.map((p: any) => ({
     ...p,
     fullName: `${p.firstName} ${p.lastName}`,

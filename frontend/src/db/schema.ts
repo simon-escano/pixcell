@@ -35,6 +35,7 @@ export const profile = pgTable("profile", {
   roleId: uuid("role_id").notNull().references(() => role.id),
   imageId: uuid("image_id").references(() => image.id),
   licenseNo: text("license_no"),
+
   mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
@@ -60,8 +61,9 @@ export const patient = pgTable("patient", {
 export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
+  organizationId: uuid("organization_id").notNull().references(() => organization.id),
   sampleName: text("sample_name"),
-  createdBy: uuid("created_by").notNull().references(()=>user.id),
+  createdBy: uuid("created_by").notNull().references(()=> user.id),
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -101,6 +103,7 @@ export const report = pgTable("report", {
   testType: text("test_type"),
   status: reportStatusEnum("status"),
   code: text('code'),
+  organizationId: uuid("organization_id").notNull().references(() => organization.id),
 });
 
 export const session = pgTable("session", {

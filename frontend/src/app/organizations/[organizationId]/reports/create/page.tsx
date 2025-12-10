@@ -3,13 +3,18 @@ import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleById 
 import { getUser } from "@/lib/auth";
 import CreateReportForm from "@/components/reports/create-report-form";
 
-export default async function CreateReportPage() {
+export default async function CreateReportPage({
+  params,
+}: {
+  params: Promise<{ organizationId: string }>;
+}) {
+  const organizationId = (await params).organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
   
   // Get patients based on user role
-  const patientsRaw = await getAllPatientsForUser(profile.id, role.name, true);
+  const patientsRaw = await getAllPatientsForUser(profile.id, role.name, organizationId, true);
   let patients = patientsRaw.map((p: any) => ({
     ...p,
     fullName: `${p.firstName} ${p.lastName}`,

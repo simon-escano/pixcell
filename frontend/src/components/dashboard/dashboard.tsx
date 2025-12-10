@@ -63,9 +63,10 @@ interface DashboardProps {
     imageUrl: string | null
   }
   userRole: string
+  organizationId: string
 }
 
-export function Dashboard({ userProfile, userRole }: DashboardProps) {
+export function Dashboard({ userProfile, userRole, organizationId }: DashboardProps) {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [genderFilter, setGenderFilter] = useState<string>("all")
@@ -73,7 +74,7 @@ export function Dashboard({ userProfile, userRole }: DashboardProps) {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const data = await getDashboardStats()
+        const data = await getDashboardStats(organizationId)
         setStats(data)
       } catch (error) {
         console.error("Error fetching dashboard stats:", error)
