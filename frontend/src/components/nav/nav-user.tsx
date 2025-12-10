@@ -55,8 +55,7 @@ export function NavUser({
   };
 
   const handleProfile = async () => {
-    if (orgId) router.push(`/organizations/${orgId}/users/${user.id}`)
-    else router.push(`/users/${user.id}`)
+    router.push(`/organizations/${orgId}/users/${user.id}`)
   };
 
   // Default values if profile is null

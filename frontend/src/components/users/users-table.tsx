@@ -219,8 +219,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          if (orgId) router.push(`/organizations/${orgId}/users/${user.id}`)
-          else router.push(`/users/${user.id}`)
+          router.push(`/organizations/${orgId}/users/${user.id}`)
         }}
         customHeaderContent={
           <div className="flex items-center gap-2">

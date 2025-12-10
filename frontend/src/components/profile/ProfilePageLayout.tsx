@@ -732,8 +732,7 @@ export default function ProfilePageLayout({
                                 doctor={doctor}
                                 index={index}
                                 onClick={() => {
-                                  if (orgId) router.push(`/organizations/${orgId}/users/${doctor.id}`)
-                                  else router.push(`/users/${doctor.id}`)
+                                  router.push(`/organizations/${orgId}/users/${doctor.id}`)
                                 }}
                               />
                             ))}
