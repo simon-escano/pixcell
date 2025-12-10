@@ -1,6 +1,5 @@
 "use client";
 
-import { MetaPatient } from "@/app/samples/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Role } from "@/db/schema";
@@ -11,6 +10,7 @@ import { useEffect, useState } from "react";
 import { getPatientInitials } from "../patients/patient-search-combobox";
 import { PDFExport, ReportPDF } from "./pdf-export";
 import PixCellLogo from "../pixcell-logo";
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types";
 
 interface TableData {
   id: string;

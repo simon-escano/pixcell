@@ -46,7 +46,7 @@ const Header = () => {
           <Breadcrumb>
             <BreadcrumbList>
               {pathArray.map((segment, index) => {
-                const href = "/" + pathArray.slice(1, index + 1).join("/");
+                const href = "/" + pathArray.slice(0, index + 1).join("/");
                 const isLast = index === pathArray.length - 1;
 
                 return (

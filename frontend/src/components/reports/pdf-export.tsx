@@ -4,8 +4,8 @@ import { Document, Page, Text, View, StyleSheet, pdf, Image } from '@react-pdf/r
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import toast from "react-hot-toast";
-import { MetaPatient } from '@/app/samples/types';
 import { getPatientInitials } from '../patients/patient-search-combobox';
+import { MetaPatient } from '@/app/organizations/[organizationId]/samples/types';
 
 interface Sample {
   id: string;

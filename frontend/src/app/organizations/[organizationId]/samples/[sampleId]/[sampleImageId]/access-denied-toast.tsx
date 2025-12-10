@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,12 @@ export default function AccessDeniedToast({ message }: AccessDeniedToastProps) {
           </p>
           <div className="flex flex-col gap-2">
             <Button 
-              onClick={() => router.push('/samples')}
+              onClick={() => {
+                const params = useParams();
+                const orgId = (params as any)?.organizationId || "";
+                if (orgId) router.push(`/organizations/${orgId}/samples`)
+                else router.push('/samples')
+              }}
               className="w-full"
               variant="default"
             >

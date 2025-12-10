@@ -1,6 +1,5 @@
 "use client"
 
-import { ContactRound, FileText, Images, LayoutDashboard } from "lucide-react";
 import { Collapsible } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
@@ -9,10 +8,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ContactRound, FileText, Images, LayoutDashboard } from "lucide-react";
 // REMOVE THIS IMPORT: import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 
 interface NavMainProps {
   organizationId?: string;
@@ -60,8 +59,6 @@ export function NavMain({ organizationId: propOrgId, children }: NavMainProps) {
       <div className="flex flex-col gap-2 mb-2">
         {children}
       </div>
-      
-      <UploadSampleWrapper organizationId={organizationId} />
       
       <SidebarGroupLabel>Organization</SidebarGroupLabel>
       <SidebarMenu>

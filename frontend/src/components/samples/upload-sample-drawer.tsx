@@ -3,7 +3,6 @@ import { ImageUp, Loader2 } from "lucide-react";
 import * as React from "react";
 
 import { editSampleAction, uploadSampleAction } from "@/actions/samples";
-import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/samples/types";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -16,11 +15,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { getErrorMessage } from "@/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Input } from "../ui/input";
 import UploadSampleFile from "./upload-sample-file";
 import { PatientSearchCombobox } from "../patients/patient-search-combobox";
+import { MetaPatient, MetaSample } from "@/app/organizations/[organizationId]/samples/types";
 
 interface SampleDrawerProps {
   patients: MetaPatient[];
@@ -36,6 +36,8 @@ export default function SampleDrawer({
   children
 }: SampleDrawerProps) {
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const isEditMode = !!(sample);
   
   const [selectedPatient, setSelectedPatient] = React.useState<string>(
@@ -89,8 +91,9 @@ export default function SampleDrawer({
           setFiles([]);
           setSampleName("");
           setSelectedPatient("");
-          // Redirect to the new sample page
-          router.push(`/samples/${result.sampleId}`);
+          // Redirect to the new sample page (organization-scoped when available)
+          if (orgId) router.push(`/organizations/${orgId}/samples/${result.sampleId}`);
+          else router.push(`/samples/${result.sampleId}`);
           return;
         } else {
           toast.error("Failed to upload sample.", { id: uploadingToast });

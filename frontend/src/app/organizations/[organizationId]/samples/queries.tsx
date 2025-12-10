@@ -1,8 +1,8 @@
-import { MetaPatient, MetaProfile, MetaSample, MetaSampleImage } from "@/app/samples/types";
 import { generateColorFromId } from "@/utils";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { image, patient, profile, role, sample, sampleImage } from "@/db/schema";
+import { MetaPatient, MetaProfile, MetaSample, MetaSampleImage } from "./types";
 
 export async function getUserMetaByUserId(userId: string) {
   const result = await db
@@ -116,14 +116,14 @@ export async function getMetaPatientById(id: string): Promise<MetaPatient | unde
     fullName: `${row.firstName} ${row.lastName}`,
     role: "Patient",
     imageUrl: row.imageUrl,
-    birthDate: row.birthDate,
+    birthDate: row.birthDate ?? "",
     sex: row.sex,
-    contactNumber: row.contactNumber,
-    email: row.email,
-    address: row.address,
-    height: row.height,
-    weight: row.weight,
-    bloodType: row.bloodType,
+    contactNumber: row.contactNumber ?? "",
+    email: row.email ?? "",
+    address: row.address ?? "",
+    height: row.height ?? 0,
+    weight: row.weight ?? 0,
+    bloodType: row.bloodType ?? "",
     createdAt: row.createdAt,
     createdBy: row.createdBy,
   };

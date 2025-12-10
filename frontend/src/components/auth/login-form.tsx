@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { checkAccountExistsAction } from "@/actions/users";
 import toast from "react-hot-toast";
@@ -26,6 +26,8 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<'email' | 'password' | 'change-password'>('email');
   const [email, setEmail] = useState('');
@@ -128,7 +130,7 @@ export function LoginForm({
                 </div>
                 <div className="text-center text-sm">
                   Are you a patient?{" "}
-                  <Link href="/reports/view" className="underline underline-offset-4 text-primary">
+                  <Link href={orgId ? `/organizations/${orgId}/reports/view` : `/reports/view`} className="underline underline-offset-4 text-primary">
                     View reports
                   </Link>
                 </div>

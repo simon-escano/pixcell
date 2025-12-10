@@ -1,6 +1,6 @@
 "use client"
 
-import type { MetaPatient } from "@/app/samples/types"
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"

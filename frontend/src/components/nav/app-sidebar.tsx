@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
+  getAllPatientsForUser,
   getOrganizationsByProfileId,
   getProfileByUserId,
   getRoleById
@@ -20,8 +21,8 @@ import {
 import { getUser } from "@/lib/auth";
 import Link from "next/link";
 import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
-import PixCellLogo from "../pixcell-logo";
 import OrganizationDropdown from "../organization-dropdown";
+import PixCellLogo from "../pixcell-logo";
 import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 
 // 1. Update the props type definition to include params
@@ -35,6 +36,7 @@ export async function AppSidebar({
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
+  const role = (await getRoleById(profileData?.roleId || "")).name;
 
   // 2. Logic Fix: await the params safely, then apply the fallbacks
   // Logic: URL Param -> First Org ID -> Empty String
@@ -63,7 +65,11 @@ export async function AppSidebar({
       <SidebarContent>
         {/* Pass the calculated ID */}
         <OrganizationDropdown organizations={organizations} />
-        <NavMain organizationId={selectedOrganizationId}></NavMain>
+        {/* <UploadSampleWrapper organizationId={selectedOrganizationId} patientsRaw={patientsRaw} /> */}
+        <NavMain organizationId={selectedOrganizationId}>
+           
+        </NavMain>
+        {/* <UploadSampleWrapper organizationId={selectedOrganizationId} /> */}
       </SidebarContent>
       <NavSecondaryWrapper />
       <NavTertiary />

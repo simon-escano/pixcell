@@ -9,6 +9,7 @@ const UploadSampleDrawerForPatient = dynamic(() => import("@/components/samples/
 const AssignDoctorToPatient = dynamic(() => import("./AssignDoctorToPatient"), { ssr: false });
 const AssignPatientToDoctor = dynamic(() => import("./AssignPatientToDoctor"), { ssr: false });
 import { Button } from "@/components/ui/button";
+import { useRouter, useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 type ProfileClientProps =
@@ -36,6 +37,9 @@ type ProfileClientProps =
 export default function ProfileClient(props: ProfileClientProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<string>("");
+  const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
 
   useEffect(() => {
     async function fetchUserAndRole() {
@@ -85,7 +89,10 @@ export default function ProfileClient(props: ProfileClientProps) {
             <button
               key={patient.id}
               className="p-3 bg-muted rounded-lg w-full text-left hover:bg-muted/80 transition-all"
-              onClick={() => window.location.href = `/patients/${patient.id}`}
+              onClick={() => {
+                const path = orgId ? `/organizations/${orgId}/patients/${patient.id}` : `/patients/${patient.id}`;
+                router.push(path);
+              }}
               type="button"
             >
               <div className="font-medium text-card-foreground text-sm">
@@ -193,7 +200,7 @@ export default function ProfileClient(props: ProfileClientProps) {
     let actions = (
       <div className="space-y-2">
         <UploadSampleDrawerForPatient patientId={patient.id} />
-        <form action={`/reports`} method="get">
+        <form action={orgId ? `/organizations/${orgId}/reports` : `/reports`} method="get">
           <input type="hidden" name="search" value={`${patient.firstName} ${patient.lastName}`} />
           <Button
             type="submit"

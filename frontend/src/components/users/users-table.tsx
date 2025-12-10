@@ -3,7 +3,7 @@
 import { deleteUser, updateUser, createUserWithAutoPasswordAction } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { CustomAlertDialog } from "../custom-alert-dialog";
@@ -47,6 +47,8 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
 
 export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -217,7 +219,8 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/users/${user.id}`);
+          if (orgId) router.push(`/organizations/${orgId}/users/${user.id}`)
+          else router.push(`/users/${user.id}`)
         }}
         customHeaderContent={
           <div className="flex items-center gap-2">

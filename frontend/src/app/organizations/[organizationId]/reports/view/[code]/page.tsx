@@ -104,12 +104,13 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 // Report Header Component
-function ReportHeader({ reportData, code }: { reportData: any; code: string }) {
+function ReportHeader({ reportData, code, organizationId }: { reportData: any; code: string; organizationId?: string }) {
+  const orgHref = organizationId ? `/organizations/${organizationId}/reports/view` : `/reports/view`
   return (
     <div className="mb-8">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-        <Link href="/reports/view" className="hover:text-foreground transition-colors flex items-center gap-1">
+        <Link href={orgHref} className="hover:text-foreground transition-colors flex items-center gap-1">
           <ArrowLeft className="h-3 w-3" />
           Report Access
         </Link>
@@ -156,8 +157,8 @@ function ReportHeader({ reportData, code }: { reportData: any; code: string }) {
 }
 
 // Main component
-export default async function ImprovedReportViewByCodePage({ params }: { params: { code: string } }) {
-  const { code } = params
+export default async function ImprovedReportViewByCodePage({ params }: { params: { code: string; organizationId?: string } }) {
+  const { code, organizationId } = params
   const baseUrl = "http://localhost:3000"
 
   try {
@@ -182,7 +183,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
         <PublicHeader code={code} />
         <div className="container mx-auto p-8">
           {/* Report Header */}
-          <ReportHeader reportData={reportData} code={code} />
+          <ReportHeader reportData={reportData} code={code} organizationId={organizationId} />
           {/* Main Content */}
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
             {/* Main Report Preview - Takes up more space */}
@@ -227,7 +228,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
                     HIPAA Compliant
                   </Badge>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/reports/view">
+                    <Link href={organizationId ? `/organizations/${organizationId}/reports/view` : `/reports/view`}>
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Access Another Report
                     </Link>

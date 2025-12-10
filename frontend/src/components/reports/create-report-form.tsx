@@ -4,7 +4,7 @@ import { addReport } from "@/actions/reports"
 import type { Role } from "@/db/schema"
 import { useEffect, useState } from "react"
 import type { ReportContent, ReportFormData, TableData } from "./report-form"
-import type { MetaPatient } from "@/app/samples/types"
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types"
 
 interface Patient {
   id: string

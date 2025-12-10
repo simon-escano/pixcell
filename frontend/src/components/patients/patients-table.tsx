@@ -2,7 +2,7 @@
 
 import { deletePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
@@ -36,6 +36,8 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
 
 const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -199,12 +201,12 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
             customRender: (_: any, row?: any) => {
               // fallback: just render the first name if row is not available
               if (!row) return String(_);
-              return (
+                return (
                 <UserButton
                   imageUrl={row.imageUrl || ""}
                   firstName={row.firstName}
                   lastName={row.lastName}
-                  redirectUrl={`/patients/${row.id}`}
+                  redirectUrl={orgId ? `/organizations/${orgId}/patients/${row.id}` : `/patients/${row.id}`}
                   roleName={"Patient"}
                 />
               );
@@ -225,7 +227,8 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
           </div>
         }
         onRowClick={(patient: Patient) => {
-          router.push(`/patients/${patient.id}`);
+          if (orgId) router.push(`/organizations/${orgId}/patients/${patient.id}`)
+          else router.push(`/patients/${patient.id}`)
         }}
         selectedRowIds={selectedIds}
         onSelectedRowIdsChange={setSelectedIds}

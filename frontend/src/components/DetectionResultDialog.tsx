@@ -26,7 +26,7 @@ import {
   Archive,
   Loader2,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import JSZip from "jszip"
 
 interface DetectionResultDialogProps {
@@ -49,6 +49,8 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   sampleId,
 }) => {
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid")
   const [isExporting, setIsExporting] = useState(false)
@@ -155,7 +157,8 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           sampleId,
         }),
       )
-      router.push("/reports/ai-generate")
+      if (orgId) router.push(`/organizations/${orgId}/reports/ai-generate`)
+      else router.push(`/reports/ai-generate`)
     }
   }
 

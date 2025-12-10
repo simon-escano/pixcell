@@ -1,7 +1,7 @@
 import Base from "@/components/base";
 import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId } from "@/db/queries/select";
-import { getMetaPatientById, getMetaSampleImagesBySampleId } from "@/app/organiations/[organizationId]/samples/queries";
 import PatientProfileClient from "./PatientProfileClient";
+import { getMetaPatientById, getMetaSampleImagesBySampleId } from "../../samples/queries";
 
 export default async function PatientPage({
   params,

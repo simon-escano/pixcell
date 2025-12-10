@@ -1,8 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 
 export function PatientReportsList({ reports }: { reports: any[] }) {
+  const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
+
   return (
     <div className="space-y-2 h-full overflow-auto">
       {reports.map((report, index) => (
@@ -37,7 +42,10 @@ export function PatientReportsList({ reports }: { reports: any[] }) {
               variant="ghost"
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-              onClick={() => window.location.href = `/reports/${report.id}`}
+              onClick={() => {
+                if (orgId) router.push(`/organizations/${orgId}/reports/${report.id}`)
+                else router.push(`/reports/${report.id}`)
+              }}
             >
               <FileText className="h-3 w-3" />
             </Button>
@@ -46,4 +54,4 @@ export function PatientReportsList({ reports }: { reports: any[] }) {
       ))}
     </div>
   );
-} 
+}

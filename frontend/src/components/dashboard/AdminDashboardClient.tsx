@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
 function CompactStatCard({ title, value, icon }: { title: string; value: string | number; icon: React.ReactNode }) {
   return (
@@ -140,6 +141,8 @@ export default function AdminDashboardCompact({
   genderStats,
 }: any) {
   const [genderFilter, setGenderFilter] = useState<string>("all")
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
 
   const transformedData = genderStats
     ?.reduce((acc: any[], curr: any) => {
@@ -234,7 +237,7 @@ export default function AdminDashboardCompact({
               </SelectContent>
             </Select>
             <Button asChild size="sm" variant="outline" className="h-7 text-xs bg-transparent px-2">
-              <Link href="/patients">
+              <Link href={orgId ? `/organizations/${orgId}/patients` : `/patients`}>
                 <Settings className="h-2.5 w-2.5 mr-1 text-gray-500" />
                 Manage
               </Link>
@@ -310,7 +313,7 @@ export default function AdminDashboardCompact({
               User Distribution
             </CardTitle>
             <Button asChild size="sm" variant="outline" className="h-7 text-xs bg-transparent px-2">
-              <Link href="/users">
+              <Link href={orgId ? `/organizations/${orgId}/users` : `/users`}>
                 <Settings className="h-2.5 w-2.5 mr-1 text-gray-500" />
                 Manage
               </Link>

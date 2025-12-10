@@ -1,7 +1,6 @@
 import Base from "@/components/base"
 import ImprovedReportPreview from "@/components/reports/report-preview"
 import StatusBadge from "@/components/reports/status-badge"
-import type { ReportStatus } from "@/components/reports/status-update"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -12,6 +11,7 @@ import Link from "next/link"
 import { Suspense } from "react"
 import AiGeneratedNoticeClient from "./ai-generated-notice-client"
 import ReportActions, { ReportActionButtons } from "./report-actions-client"
+import { ReportStatus } from "@/lib/status-config"
 
 // Loading component
 function ReportPageSkeleton() {
@@ -46,7 +46,7 @@ function ReportPageSkeleton() {
 }
 
 // Error component
-function ReportNotFound() {
+function ReportNotFound({ organizationId }: { organizationId?: string }) {
   return (
     <Base>
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -64,7 +64,7 @@ function ReportNotFound() {
               </div>
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" asChild>
-                  <Link href="/reports">
+                  <Link href={organizationId ? `/organizations/${organizationId}/reports` : `/reports`}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Reports
                   </Link>
@@ -92,14 +92,15 @@ function AiGeneratedBadge() {
 }
 
 // Main component
-export default async function ImprovedReportPage({ params }: { params: Promise<{ id: string | string[] }> }) {
+export default async function ImprovedReportPage({ params }: { params: Promise<{ id: string | string[], organizationId: string }> }) {
   const { id } = await params
+  const organizationId = (await params).organizationId
   const reportId = Array.isArray(id) ? id[0] : (id ?? "")
 
   const report = await getReportById(reportId)
 
   if (!report) {
-    return <ReportNotFound />
+    return <ReportNotFound organizationId={organizationId} />
   }
 
   const patient = report.patientId ? await getPatientById(report.patientId) : null
@@ -149,12 +150,12 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
                     {report.createdAt ? format(new Date(report.createdAt), "MMM dd, yyyy") : "Unknown"}
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
-                    <ReportActionButtons reportId={reportId} formData={formData} reportStatus={report.status || "Draft"} reportCode={report.code ?? ""} />
+                    <ReportActionButtons reportId={reportId} formData={formData} organizationId={organizationId} reportStatus={report.status || "Draft"} reportCode={report.code ?? ""} />
                   </div>
                 </div>
               </div>
               <Button variant="ghost" asChild>
-                <Link href="/reports">
+                <Link href={`/organizations/${organizationId}/reports`}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Reports
                 </Link>
@@ -196,6 +197,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
               <Suspense fallback={<div className="h-32 bg-muted rounded-lg animate-pulse" />}>
                 <ReportActions
                   reportId={reportId}
+                  organizationId={organizationId}
                   reportStatus={
                     ["Draft", "Finalized", "UNDER_REVIEW", "REJECTED", "ARCHIVED"].includes(report.status ?? "")
                       ? (report.status as ReportStatus)
@@ -220,7 +222,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
 }
 
 // Export with Suspense wrapper for better loading experience
-export function ReportPageWithSuspense({ params }: { params: Promise<{ id: string | string[] }> }) {
+export function ReportPageWithSuspense({ params }: { params: Promise<{ id: string | string[]; organizationId: string }> }) {
   return (
     <Suspense fallback={<ReportPageSkeleton />}>
       <ImprovedReportPage params={params} />

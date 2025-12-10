@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -284,6 +284,8 @@ export default function ProfilePageLayout({
   doctorsCount,
 }: ProfilePageLayoutProps) {
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Search and filter states
@@ -575,7 +577,10 @@ export default function ProfilePageLayout({
                                 key={`${sample.id}-${index}`}
                                 sample={sample}
                                 index={samples.indexOf(sample)}
-                                onClick={() => router.push(`/samples/${sample.id}`)}
+                                onClick={() => {
+                                  if (orgId) router.push(`/organizations/${orgId}/samples/${sample.id}`)
+                                  else router.push(`/samples/${sample.id}`)
+                                }}
                               />
                             ))}
                           </div>
@@ -640,7 +645,10 @@ export default function ProfilePageLayout({
                               key={`${report.id}-${index}`}
                               report={report}
                               index={reports.indexOf(report)}
-                              onClick={() => router.push(`/reports/${report.id}`)}
+                              onClick={() => {
+                                if (orgId) router.push(`/organizations/${orgId}/reports/${report.id}`)
+                                else router.push(`/reports/${report.id}`)
+                              }}
                             />
                           ))}
                         </div>
@@ -680,7 +688,10 @@ export default function ProfilePageLayout({
                                 key={`${patient.id}-${index}`}
                                 patient={patient}
                                 index={index}
-                                onClick={() => router.push(`/patients/${patient.id}`)}
+                                onClick={() => {
+                                  if (orgId) router.push(`/organizations/${orgId}/patients/${patient.id}`)
+                                  else router.push(`/patients/${patient.id}`)
+                                }}
                               />
                             ))}
                           </div>
@@ -720,7 +731,10 @@ export default function ProfilePageLayout({
                                 key={`${doctor.id}-${index}`}
                                 doctor={doctor}
                                 index={index}
-                                onClick={() => router.push(`/users/${doctor.id}`)}
+                                onClick={() => {
+                                  if (orgId) router.push(`/organizations/${orgId}/users/${doctor.id}`)
+                                  else router.push(`/users/${doctor.id}`)
+                                }}
                               />
                             ))}
                           </div>

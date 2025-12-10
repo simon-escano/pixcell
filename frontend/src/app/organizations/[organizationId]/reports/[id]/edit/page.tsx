@@ -1,9 +1,9 @@
-import { getMetaProfileByUserId } from "@/app/samples/queries";
 import Base from "@/components/base";
 import EditReportForm from "@/components/reports/edit-report-form";
 import { getAllPatientsForUser, getAllProfiles, getReportById } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
+import { getMetaProfileByUserId } from "../../../samples/queries";
 
 // We'll inline the edit form logic here for now, but ideally this would be a shared component
 export default async function EditReportPage({ params }: { params: Promise<{ id: string, organizationId: string }> }) {

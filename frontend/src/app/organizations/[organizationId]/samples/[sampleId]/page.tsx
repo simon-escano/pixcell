@@ -11,9 +11,10 @@ import Base from "@/components/base";
 const SamplePage = async ({
   params,
 }: {
-  params: Promise<{ sampleId: string }>;
+  params: Promise<{ sampleId: string; organizationId: string }>;
 }) => {
   const sampleId = (await params).sampleId;
+  const organizationId = (await params).organizationId;
   const sample = await getSampleById(sampleId);
   
   // Check if sample exists
@@ -50,8 +51,12 @@ const SamplePage = async ({
     return <div>No images found for this sample.</div>;
   }
 
-  // Redirect to the first sample image
-  redirect(`/samples/${sampleId}/${sampleImages[0].id}`);
+  // Redirect to the first sample image (organization-scoped)
+  if (organizationId) {
+    redirect(`/organizations/${organizationId}/samples/${sampleId}/${sampleImages[0].id}`);
+  } else {
+    redirect(`/samples/${sampleId}/${sampleImages[0].id}`);
+  }
 };
 
 export default SamplePage;

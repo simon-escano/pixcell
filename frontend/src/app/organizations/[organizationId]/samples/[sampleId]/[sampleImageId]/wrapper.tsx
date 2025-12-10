@@ -51,9 +51,12 @@ async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, 
   try {
     const { deleteSampleImage } = await import("@/actions/samples")
     const res = await deleteSampleImage(sampleImageId)
-    if (res.success) {
-      toast.success("Sample image deleted", { id: toastId })
-      router.push(`/samples/${sampleId}`)
+      if (res.success) {
+        toast.success("Sample image deleted", { id: toastId })
+        const params = useParams()
+        const orgId = params?.organizationId
+        if (orgId) router.push(`/organizations/${orgId}/samples/${sampleId}`)
+        else router.push(`/samples/${sampleId}`)
     } else {
       toast.error(res.error || "Failed to delete sample image", { id: toastId })
     }
@@ -119,7 +122,9 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
     try {
       await navigator.clipboard.writeText(currentUrl)
       toast.success("Link copied to clipboard!")
-      setIsShareDialogOpen(false)
+        const params = useParams()
+        const sampleId = params?.sampleId
+        const orgId = params?.organizationId
     } catch (error) {
       toast.error("Failed to copy link")
     }
@@ -434,7 +439,8 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                             sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
                           }`}
                           onClick={() => {
-                            router.push(`/samples/${sampleId}/${sampleImage.id}`)
+                            if (orgId) router.push(`/organizations/${orgId}/samples/${sampleId}/${sampleImage.id}`)
+                            else router.push(`/samples/${sampleId}/${sampleImage.id}`)
                           }}
                         >
                           <TableCell className="p-2">

@@ -44,6 +44,7 @@ interface ReportActionsProps {
   patient?: any // Add patient prop
   sample?: any // Add sample prop
   doctorName?: string // Add doctorName prop
+  organizationId: string
 }
 
 
@@ -55,13 +56,14 @@ export default function ImprovedReportActions({
   patient,
   sample,
   doctorName,
+  organizationId,
 }: ReportActionsProps) {
   const router = useRouter()
   const [isDownloadingQR, setIsDownloadingQR] = useState(false)
   const [isCopyingLink, setIsCopyingLink] = useState(false)
 
   // The URL to view the report (for QR code)
-  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/reports/view/${reportCode}`
+  const reportUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/organizations/${organizationId}/reports/view/${reportCode}`
   const qrContainerId = `qr-container-${reportId}`
 
   const handleCopyQr = async () => {
@@ -319,6 +321,7 @@ export default function ImprovedReportActions({
 export function ReportActionButtons({
   reportId,
   reportStatus,
+  organizationId,
 }: ReportActionsProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -331,7 +334,7 @@ export function ReportActionButtons({
         const res = await deleteReport(reportId)
         if (res.success) {
           toast.success("Report deleted successfully")
-          router.push("/reports")
+          router.push(`/organizations/${organizationId}/reports`)
           router.refresh()
         } else {
           toast.error(res.error || "Failed to delete report")
@@ -348,7 +351,7 @@ export function ReportActionButtons({
   }
 
   const handleEdit = () => {
-    router.push(`/reports/${reportId}/edit`)
+    router.push(`/organizations/${organizationId}/reports/${reportId}/edit`)
   }
 
   const handleDelete = () => {

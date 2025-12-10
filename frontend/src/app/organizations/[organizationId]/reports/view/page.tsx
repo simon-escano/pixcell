@@ -25,7 +25,7 @@ import {
   Sun
 } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { useState } from "react"
 
 export default function ImprovedReportViewPage() {
@@ -33,6 +33,8 @@ export default function ImprovedReportViewPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const { setTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,8 +56,9 @@ export default function ImprovedReportViewPage() {
         return
       }
 
-      // Navigate to the report view
-      router.push(`/reports/view/${encodeURIComponent(cleanCode)}`)
+      // Navigate to the report view (organization-scoped when available)
+      if (orgId) router.push(`/organizations/${orgId}/reports/view/${encodeURIComponent(cleanCode)}`)
+      else router.push(`/organizations/${orgId}/reports/view/${encodeURIComponent(cleanCode)}`)
     } catch (error) {
       setError("An error occurred while accessing the report")
       setIsLoading(false)

@@ -1,24 +1,26 @@
 import Base from "@/components/base";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllReports, getReportsByGeneratedBy } from "@/db/queries/select";
-import { getUser } from "@/lib/auth";
-import { format } from "date-fns";
-import { FileText, User } from "lucide-react";
-import Link from "next/link";
-import { getProfileByUserId, getRoleById } from "@/db/queries/select";
 import ReportsTable from "@/components/reports/reports-table";
-import { cookies } from "next/headers";
+import { getAllReports, getProfileByUserId, getReportsByGeneratedBy, getRoleById } from "@/db/queries/select";
+import { getUser } from "@/lib/auth";
 
-export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
+interface ReportPageProps {
+  params: Promise<{ organizationId: string }>;
+  searchParams: Promise<{ search?: string }>;
+}
+
+export default async function ReportsPage({
+  params: _,
+  searchParams,
+}: ReportPageProps) {
   const params = await searchParams;
+  const organizationId = (await _).organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
   
   // If user is admin, show all reports, otherwise show only user's reports
   const reports = role.name === "Administrator"
-    ? await getAllReports()
+    ? await getAllReports(organizationId)
     : await getReportsByGeneratedBy(user.id);
 
   // Normalize reports to ensure consistent structure
@@ -45,7 +47,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     <Base>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
-        <ReportsTable reports={normalizedReports as any} initialSearch={params?.search || ""} />
+        <ReportsTable reports={normalizedReports as any} organizationId={organizationId} />
       </div>
     </Base>
   );

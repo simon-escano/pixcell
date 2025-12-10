@@ -540,7 +540,25 @@ export async function getMonthlyStats() {
 
 export async function getAllReports(organizationId: string) {
   return await db
-    .select()
+    .select({
+      id: report.id,
+      content: report.content,
+      isAiGenerated: report.isAiGenerated,
+      createdAt: report.createdAt,
+      exportedUrl: report.exportedUrl,
+      exportFormat: report.exportFormat,
+      sampleId: sample.id,
+      sampleName: sample.sampleName,
+      patientId: patient.id,
+      patientName: sql<string>`concat(${patient.firstName}, ' ', ${patient.lastName})`,
+      patientImage: patientImage.imageUrl,
+      generatedById: user.id,
+      generatedByName: sql<string>`concat(${profile.firstName}, ' ', ${profile.lastName})`,
+      generatedByImage: generatedByImage.imageUrl,
+      generatedByRole: role.name,
+      title: report.title,
+      testType: report.testType,
+    })
     .from(report)
     // 1. Add the filter here, based on the new report.organizationId column
     .where(eq(report.organizationId, organizationId))
