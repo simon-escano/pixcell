@@ -36,14 +36,16 @@ export async function AppSidebar({
   const profileData = await getProfileByUserId(user.id);
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
-  const role = (await getRoleById(profileData?.roleId || "")).name;
-
+  
   // 2. Logic Fix: await the params safely, then apply the fallbacks
   // Logic: URL Param -> First Org ID -> Empty String
   const resolvedParams = params ? await params : null;
-  const selectedOrganizationId = resolvedParams?.organizationId || undefined;
+  const selectedOrganizationId = resolvedParams?.organizationId || organizations[0]?.id || undefined;
 
-  const profileRole = profileRoleData?.name || null;
+  // Fetch patients for the selected organization
+  const patientsRaw = selectedOrganizationId && profileData?.id && profileRoleData?.name
+    ? await getAllPatientsForUser(profileData.id, profileRoleData.name, selectedOrganizationId)
+    : [];  const profileRole = profileRoleData?.name || null;
   const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };
 
   return (
@@ -63,13 +65,15 @@ export async function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {/* Pass the calculated ID */}
         <OrganizationDropdown organizations={organizations} />
-        {/* <UploadSampleWrapper organizationId={selectedOrganizationId} patientsRaw={patientsRaw} /> */}
-        <NavMain organizationId={selectedOrganizationId}>
-           
-        </NavMain>
-        {/* <UploadSampleWrapper organizationId={selectedOrganizationId} /> */}
+        <NavMain 
+          organizationId={selectedOrganizationId}
+          uploadSampleButton={
+            selectedOrganizationId ? (
+              <UploadSampleWrapper organizationId={selectedOrganizationId} patientsRaw={patientsRaw} />
+            ) : null
+          }
+        />
       </SidebarContent>
       <NavSecondaryWrapper />
       <NavTertiary />

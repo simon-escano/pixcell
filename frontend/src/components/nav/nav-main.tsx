@@ -1,5 +1,3 @@
-"use client"
-
 import { Collapsible } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
@@ -9,23 +7,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { ContactRound, FileText, Images, LayoutDashboard } from "lucide-react";
-// REMOVE THIS IMPORT: import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { ReactNode } from "react";
 
 interface NavMainProps {
   organizationId?: string;
-  children?: React.ReactNode; // Add this prop to accept the button
+  uploadSampleButton?: ReactNode;
 }
 
-export function NavMain({ organizationId: propOrgId, children }: NavMainProps) {
-  const params = useParams();
-  
-  // Logic: Use prop if available, otherwise read from URL, otherwise undefined
-  const organizationId = propOrgId || (params?.organizationId as string);
-
-  // If no ID is found in props OR URL, hide the menu
-  if (!organizationId) {
+export function NavMain({ organizationId, uploadSampleButton }: NavMainProps) {
+  // If no valid ID is found, hide the menu
+  if (!organizationId || typeof organizationId !== "string" || organizationId.trim() === "") {
     return null;
   }
 
@@ -55,10 +47,11 @@ export function NavMain({ organizationId: propOrgId, children }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      {/* Render the passed Server Component here */}
-      <div className="flex flex-col gap-2 mb-2">
-        {children}
-      </div>
+      {uploadSampleButton && (
+        <div className="flex flex-col gap-2 mb-2">
+          {uploadSampleButton}
+        </div>
+      )}
       
       <SidebarGroupLabel>Organization</SidebarGroupLabel>
       <SidebarMenu>
