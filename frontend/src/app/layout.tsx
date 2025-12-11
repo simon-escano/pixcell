@@ -45,7 +45,14 @@ export default function RootLayout({
           </Suspense>
           <Toaster
             toastOptions={{
-              className: "bg-black text-foreground shadow-md rounded-md p-4 text-left",
+              style: {
+                backgroundColor: "var(--card)",
+                color: "var(--foreground)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.35)",
+                borderRadius: "1rem",
+                padding: "12px 14px",
+              },
             }}
           />
         </ThemeProvider>

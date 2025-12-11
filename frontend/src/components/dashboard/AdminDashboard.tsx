@@ -1,56 +1,63 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllPatientsForUser, getAllReports, getAllSamples, getAllUsersWithProfiles, getPatientGenderStats } from "@/db/queries/select";
-import { createClient } from '@supabase/supabase-js';
-import { FileText, Image as ImageIcon, User, Users } from "lucide-react";
-import AdminDashboardClient from './AdminDashboardClient';
+import type React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  getAllPatientsForUser,
+  getAllReports,
+  getAllSamples,
+  getAllUsersWithProfiles,
+  getPatientGenderStats,
+} from "@/db/queries/select"
+import { createClient } from "@supabase/supabase-js"
+import { FileText, ImageIcon, User, Users } from "lucide-react"
+import AdminDashboardClient from "./AdminDashboardClient"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Use service role key on server only!
-);
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role key on server only!
+)
 
 async function getSupabaseStorageUsage(bucket: string) {
-  let total = 0;
-  let page = 0;
-  let hasMore = true;
+  let total = 0
+  let page = 0
+  let hasMore = true
   while (hasMore) {
-    const { data, error } = await supabase.storage.from(bucket).list('', { limit: 1000, offset: page * 1000 });
-    if (error) throw error;
-    if (!data || data.length === 0) break;
+    const { data, error } = await supabase.storage.from(bucket).list("", { limit: 1000, offset: page * 1000 })
+    if (error) throw error
+    if (!data || data.length === 0) break
     for (const file of data) {
       if (file.metadata && file.metadata.size) {
-        total += file.metadata.size;
+        total += file.metadata.size
       }
     }
-    hasMore = data.length === 1000;
-    page++;
+    hasMore = data.length === 1000
+    page++
   }
-  return total;
+  return total
 }
 
 function StatCard({ title, value, icon }: { title: string; value: string | number; icon: React.ReactNode }) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 py-1.5 px-6">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-4">
         <CardTitle className="text-sm font-semibold">{title}</CardTitle>
         <span className="h-4 w-4">{icon}</span>
       </CardHeader>
-      <CardContent className="px-6 pb-2 py-1.5">
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="px-6 pb-4">
+        <div className="text-2xl font-semibold">{value}</div>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 function StoragePieChart({ used, total }: { used: number; total: number }) {
-  const radius = 48;
-  const stroke = 8; // Thinner pie chart
-  const normalizedRadius = radius - stroke / 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const percentUsed = Math.min(used / total, 1);
-  const strokeDashoffset = circumference - percentUsed * circumference;
+  const radius = 48
+  const stroke = 8 // Thinner pie chart
+  const normalizedRadius = radius - stroke / 2
+  const circumference = normalizedRadius * 2 * Math.PI
+  const percentUsed = Math.min(used / total, 1)
+  const strokeDashoffset = circumference - percentUsed * circumference
   return (
-    <svg height={radius * 2} width={radius * 2} className="mx-auto block" style={{ transform: 'rotate(-90deg)' }}>
+    <svg height={radius * 2} width={radius * 2} className="mx-auto block" style={{ transform: "rotate(-90deg)" }}>
       <circle
         stroke="#e5e7eb" // Tailwind gray-200
         fill="transparent"
@@ -64,8 +71,8 @@ function StoragePieChart({ used, total }: { used: number; total: number }) {
           stroke="#3b82f6" // Tailwind blue-500
           fill="transparent"
           strokeWidth={stroke}
-          strokeDasharray={circumference + ' ' + circumference}
-          style={{ strokeDashoffset, transition: 'stroke-dashoffset 0.35s' }}
+          strokeDasharray={circumference + " " + circumference}
+          style={{ strokeDashoffset, transition: "stroke-dashoffset 0.35s" }}
           r={normalizedRadius}
           cx={radius}
           cy={radius}
@@ -80,30 +87,30 @@ function StoragePieChart({ used, total }: { used: number; total: number }) {
         fontSize="1.25rem"
         fill="#111827"
         fontWeight="bold"
-        style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}
+        style={{ transform: "rotate(90deg)", transformOrigin: "center" }}
       >
         {Math.round(percentUsed * 100)}%
       </text>
     </svg>
-  );
+  )
 }
 
 function UsersPerRolePieChart({ roleCounts }: { roleCounts: { role: string; count: number; color: string }[] }) {
-  const radius = 48;
-  const stroke = 8; // Thinner pie chart
-  const normalizedRadius = radius - stroke / 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const total = roleCounts.reduce((sum, r) => sum + r.count, 0);
-  let prevPercent = 0;
-  let offset = 0;
+  const radius = 48
+  const stroke = 8 // Thinner pie chart
+  const normalizedRadius = radius - stroke / 2
+  const circumference = normalizedRadius * 2 * Math.PI
+  const total = roleCounts.reduce((sum, r) => sum + r.count, 0)
+  const prevPercent = 0
+  let offset = 0
   return (
     <svg height={radius * 2} width={radius * 2} className="mx-auto block">
       {roleCounts.map((r, i) => {
-        const percent = r.count / total;
-        const arcLength = percent * circumference;
-        const dashArray = `${arcLength} ${circumference - arcLength}`;
-        const dashOffset = offset;
-        offset -= arcLength;
+        const percent = r.count / total
+        const arcLength = percent * circumference
+        const dashArray = `${arcLength} ${circumference - arcLength}`
+        const dashOffset = offset
+        offset -= arcLength
         return (
           <circle
             key={r.role}
@@ -117,21 +124,13 @@ function UsersPerRolePieChart({ roleCounts }: { roleCounts: { role: string; coun
             cy={radius}
             strokeLinecap="butt"
           />
-        );
+        )
       })}
-      <text
-        x="50%"
-        y="50%"
-        textAnchor="middle"
-        dy=".3em"
-        fontSize="1.25rem"
-        fill="#111827"
-        fontWeight="bold"
-      >
+      <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="1.25rem" fill="#111827" fontWeight="bold">
         {total}
       </text>
     </svg>
-  );
+  )
 }
 
 const ROLE_COLORS = [
@@ -142,52 +141,56 @@ const ROLE_COLORS = [
   "#ef4444", // red-500
   "#a855f7", // purple-500
   "#fbbf24", // yellow-400
-];
+]
 
 interface AdminDashboardProps {
-  profileId: string;
-  organizationId: string;
+  profileId: string
+  organizationId: string
 }
 
 // Change to accept profileId as a prop
 export default async function AdminDashboard({ profileId, organizationId }: AdminDashboardProps) {
   if (!organizationId) {
-    return <div>Please select an organization to view the dashboard.</div>;
+    return <div>Please select an organization to view the dashboard.</div>
   }
-  const patients = await getAllPatientsForUser(profileId, "Administrator", organizationId);
-  const samples = await getAllSamples(organizationId);
-  const reports = await getAllReports(organizationId);
-  const usersWithProfiles = await getAllUsersWithProfiles(organizationId);
-  const genderStats = await getPatientGenderStats(organizationId);
+  const patients = await getAllPatientsForUser(profileId, "Administrator", organizationId)
+  const samples = await getAllSamples(organizationId)
+  const reports = await getAllReports(organizationId)
+  const usersWithProfiles = await getAllUsersWithProfiles(organizationId)
+  const genderStats = await getPatientGenderStats(organizationId)
   // Calculate storage used in the 'sample-images' bucket
-  let storageUsed = 0;
+  let storageUsed = 0
   try {
-    storageUsed = await getSupabaseStorageUsage('sample-images');
+    storageUsed = await getSupabaseStorageUsage("sample-images")
   } catch (e) {
-    storageUsed = 0;
+    storageUsed = 0
   }
-  const storageUsedMB = (storageUsed / (1024 * 1024)).toFixed(2);
-  const storageCapacityMB = 5 * 1024; // Assume 5GB total storage
-  const storageFreeMB = storageCapacityMB - parseFloat(storageUsedMB);
+  const storageUsedMB = (storageUsed / (1024 * 1024)).toFixed(2)
+  const storageCapacityMB = 5 * 1024 // Assume 5GB total storage
+  const storageFreeMB = storageCapacityMB - Number.parseFloat(storageUsedMB)
 
   // Count users per role
-  const roleMap: Record<string, number> = {};
+  const roleMap: Record<string, number> = {}
   usersWithProfiles.forEach((u) => {
-    if (!u.roleName) return;
-    roleMap[u.roleName] = (roleMap[u.roleName] || 0) + 1;
-  });
+    if (!u.roleName) return
+    roleMap[u.roleName] = (roleMap[u.roleName] || 0) + 1
+  })
   const roleCounts = Object.entries(roleMap).map(([role, count], i) => ({
     role,
     count,
     color: ROLE_COLORS[i % ROLE_COLORS.length],
-  }));
+  }))
 
   const mainMetrics = [
-    { title: "Total Users", value: usersWithProfiles.length, icon: <Users className="text-muted-foreground h-4 w-4" /> },
+    {
+      title: "Total Users",
+      value: usersWithProfiles.length,
+      icon: <Users className="text-muted-foreground h-4 w-4" />,
+    },
     { title: "Total Patients", value: patients.length, icon: <User className="text-muted-foreground h-4 w-4" /> },
     { title: "Total Images", value: samples.length, icon: <ImageIcon className="text-muted-foreground h-4 w-4" /> },
     { title: "Total Reports", value: reports.length, icon: <FileText className="text-muted-foreground h-4 w-4" /> },
-  ];
+  ]
 
   return (
     <AdminDashboardClient
@@ -198,5 +201,5 @@ export default async function AdminDashboard({ profileId, organizationId }: Admi
       roleCounts={roleCounts}
       genderStats={genderStats}
     />
-  );
-} 
+  )
+}

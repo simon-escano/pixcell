@@ -19,6 +19,7 @@ interface OrganizationDropdownProps {
     address: string | null
     createdAt: Date
     updatedAt: Date
+    color: string
   }[]
 }
 
@@ -68,7 +69,7 @@ const OrganizationDropdown = ({ organizations }: OrganizationDropdownProps) => {
             {organizations.map(org => (
               <SelectItem key={org.id} value={org.id}>
                 <div className="flex items-center gap-2">
-                  <Building className="size-4" />
+                  <Building className="size-4" style={{ color: org.color }} />
                   <span>{org.name || "Unnamed Organization"}</span>
                 </div>
               </SelectItem>

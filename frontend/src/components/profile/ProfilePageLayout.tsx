@@ -382,13 +382,13 @@ export default function ProfilePageLayout({
                   <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16 ring-4 ring-primary-foreground/30 shadow-lg">
                       <AvatarImage src={entity.imageUrl || ""} alt={`${entity.firstName} ${entity.lastName}`} />
-                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xl font-bold backdrop-blur-sm">
+                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xl font-semibold backdrop-blur-sm">
                         {entity.firstName[0]}
                         {entity.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h1 className="text-xl font-bold text-primary-foreground leading-tight">
+                      <h1 className="text-xl font-semibold text-primary-foreground leading-tight">
                         {entity.firstName} {entity.lastName}
                       </h1>
                       {entity.email && <p className="text-primary-foreground/80 text-sm mt-1">{entity.email}</p>}
@@ -426,7 +426,7 @@ export default function ProfilePageLayout({
                         <TestTube className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{samples.length}</div>
+                        <div className="text-xl font-semibold text-foreground">{samples.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Samples</div>
                       </div>
                     </div>
@@ -443,7 +443,7 @@ export default function ProfilePageLayout({
                         <FileText className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{reportCount ?? reports.length}</div>
+                        <div className="text-xl font-semibold text-foreground">{reportCount ?? reports.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Reports</div>
                       </div>
                     </div>
@@ -462,7 +462,7 @@ export default function ProfilePageLayout({
                         <Users className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{patientsCount}</div>
+                        <div className="text-xl font-semibold text-foreground">{patientsCount}</div>
                         <div className="text-xs text-muted-foreground font-medium">Patients</div>
                       </div>
                     </div>

@@ -20,6 +20,11 @@ export async function middleware(request: NextRequest) {
   const unprotectedPaths = ["/login", "/signup", "/reset-password","/reports/view"];
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
+  // If the user is authenticated and hits the root "/", send them straight to /organizations
+  if (user && path === "/") {
+    return NextResponse.redirect(new URL("/organizations", request.url));
+  }
+
   if (user && isUnprotectedPath) {
     return NextResponse.redirect(new URL("/", request.url));
   } else if (!user && !isUnprotectedPath) {
