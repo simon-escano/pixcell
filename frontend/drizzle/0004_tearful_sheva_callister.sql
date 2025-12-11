@@ -1,1 +1,0 @@
-ALTER TABLE "auth"."users" ADD COLUMN "phone" varchar;
