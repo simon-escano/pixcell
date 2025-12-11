@@ -25,7 +25,26 @@ export async function getUserById(id: string) {
 
 export async function getAllUsers() {
   return await db.select().from(user);
-} 
+}
+
+export async function getAllUsersWithProfiles2() {
+  return await db
+    .select({
+      id: user.id,
+      email: user.email,
+      phone: user.phone,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      imageId: profile.imageId,
+      imageUrl: image.imageUrl,
+      roleId: profile.roleId,
+      roleName: role.name,
+    })
+    .from(user)
+    .innerJoin(profile, eq(user.id, profile.userId))
+    .innerJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(image, eq(profile.imageId, image.id));
+}
 
 export async function getAllUsersWithProfiles(organizationId: string) {
   return await db

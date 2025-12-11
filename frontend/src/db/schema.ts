@@ -160,7 +160,7 @@ export const organizationStaff = pgTable("organization_staff", {
   id: uuid("id").primaryKey().defaultRandom(), 
   organizationId: uuid("organization_id").references(() => organization.id),
   staffId: uuid("staff_id").references(() => profile.id),
-  role: text('role'),
+  roleId: uuid("role_id").references(() => role.id).references(() => role.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 })

@@ -4,9 +4,12 @@ import { UserDialog } from "./user-dialog";
 import { Button } from "../ui/button";
 import { Edit } from "lucide-react";
 import { updateUser } from "@/actions/users";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function EditUserDialogTrigger({ user, profile, role }: { user: any, profile: any, role: string }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const handleEditSubmit = async (data: {
     firstName: string;
@@ -15,16 +18,27 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
     roleId: string;
     file?: File;
   }) => {
-    await updateUser(
-      user.id,
-      data.firstName,
-      data.lastName,
-      data.email,
-      data.roleId,
-      undefined,
-      data.file
-    );
-    setOpen(false);
+    try {
+      const result = await updateUser(
+        user.id,
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.roleId,
+        undefined,
+        data.file
+      );
+      
+      if (result.success) {
+        toast.success("User updated successfully.");
+        setOpen(false);
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to update user.");
+      }
+    } catch (error) {
+      toast.error("Failed to update user.");
+    }
   };
 
   return (

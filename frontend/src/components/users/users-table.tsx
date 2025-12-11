@@ -45,10 +45,10 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
   );
 }
 
-export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
+export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; organizationId: string }) => {
   const router = useRouter();
   const params = useParams();
-  const orgId = (params as any)?.organizationId || "";
+  const orgId = organizationId || (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -92,6 +92,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     formData.append("email", data.email);
     formData.append("roleId", data.roleId);
     formData.append("licenseNo", ""); // Add empty license number for now
+    formData.append("organizationId", organizationId);
     if (data.file) formData.append("file", data.file);
 
     const res = await createUserWithAutoPasswordAction(formData);
@@ -101,12 +102,14 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       router.refresh();
     } else {
       // Handle specific error cases
-      if (res.errorMessage.includes("already registered")) {
+      if (res.errorMessage.includes("already registered") || res.errorMessage.includes("already exists")) {
         toast.error("This email is already registered. Please use a different email address.");
       } else if (res.errorMessage.includes("password")) {
         toast.error("Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.");
       } else if (res.errorMessage.includes("email")) {
         toast.error("Please enter a valid email address.");
+      } else if (res.errorMessage.includes("Organization ID")) {
+        toast.error("Organization ID is missing. Please refresh the page and try again.");
       } else {
         toast.error(`Failed to add user: ${res.errorMessage}`);
       }
@@ -128,7 +131,10 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
           const response = await fetch("/api/users/batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(results.data),
+            body: JSON.stringify({
+              users: results.data,
+              organizationId: organizationId,
+            }),
           });
           const result = await response.json();
           if (response.ok) {

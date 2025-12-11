@@ -1,11 +1,11 @@
 'use server'
 
 import { db } from "@/db";
-import { profile, user, role, image } from "@/db/schema";
+import { profile, user, role, image, organizationStaff } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/utils"
 import { createClient } from "@supabase/supabase-js";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -403,6 +403,7 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
     const lastName = formData.get("lastName") as string;
     const roleId = formData.get("roleId") as string;
     const licenseNo = formData.get("licenseNo") as string;
+    const organizationId = formData.get("organizationId") as string;
 
     // Generate a secure random password
     const generatePassword = () => {
@@ -458,16 +459,50 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
       throw new Error(`Role with id "${roleId}" not found in the database`);
     }
 
-    await db.insert(profile).values({
-      id: userId,
-      firstName,
-      lastName,
-      userId,
-      roleId,
-      imageId,
-      licenseNo,
-      mustChangePassword: true,
+    // Validate organizationId
+    if (!organizationId || organizationId.trim() === "") {
+      throw new Error("Organization ID is required");
+    }
+
+    logServer("Creating user with organizationId", { userId, organizationId, profileId: userId });
+
+    // Use transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Insert profile
+      await tx.insert(profile).values({
+        id: userId,
+        firstName,
+        lastName,
+        userId,
+        roleId,
+        imageId,
+        licenseNo,
+        mustChangePassword: true,
+      });
+
+      // Create organizationStaff entry to link user to organization
+      logServer("Inserting into organizationStaff", { organizationId, staffId: userId });
+      const [orgStaffResult] = await tx.insert(organizationStaff).values({
+        organizationId,
+        staffId: userId, // profile.id is the same as userId
+      }).returning();
+      logServer("Successfully inserted into organizationStaff", orgStaffResult);
     });
+
+    // Verify the organizationStaff entry was created
+    const verifyOrgStaff = await db.select().from(organizationStaff)
+      .where(and(
+        eq(organizationStaff.staffId, userId),
+        eq(organizationStaff.organizationId, organizationId)
+      ))
+      .limit(1);
+    
+    if (verifyOrgStaff.length === 0) {
+      logServer("WARNING: organizationStaff entry not found after insert", { userId, organizationId });
+      throw new Error("Failed to create organization staff relationship");
+    }
+
+    logServer("Verified organizationStaff entry exists", verifyOrgStaff[0]);
 
     return { errorMessage: null };
   } catch (error) {
