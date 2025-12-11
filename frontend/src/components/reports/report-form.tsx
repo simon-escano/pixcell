@@ -1,7 +1,7 @@
 "use client"
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -34,7 +34,7 @@ import ImprovedReportPreview from "./report-preview"
 // Types (keeping the same as original)
 import type { Role } from "@/db/schema"
 import { PatientSearchCombobox } from "../patients/patient-search-combobox"
-import type { MetaPatient } from "@/app/samples/types"
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types"
 
 export interface Profile {
   id: string
@@ -292,6 +292,8 @@ export default function ImprovedReportForm({
   initialSampleId,
 }: ReportFormProps) {
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const [isLoading, setIsLoading] = useState(false)
   const [selectedPatientId, setSelectedPatientId] = useState<string>(initialPatientId || "")
   const [samples, setSamples] = useState<Sample[]>([])
@@ -527,7 +529,8 @@ export default function ImprovedReportForm({
       const result = await onSubmit(mode === "edit" && reportId ? [reportId, submitData] : submitData)
       if (result.success) {
         toast.success(mode === "edit" ? "Report updated successfully" : "Report created successfully")
-        router.push("/reports")
+        if (orgId) router.push(`/organizations/${orgId}/reports`)
+        else router.push("/reports")
       } else {
         toast.error(result.error || (mode === "edit" ? "Failed to update report" : "Failed to create report"))
       }
@@ -562,7 +565,7 @@ export default function ImprovedReportForm({
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-3xl font-semibold text-foreground">
                 {mode === "edit" ? "Edit Report" : "Create New Report"}
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -881,7 +884,10 @@ export default function ImprovedReportForm({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/reports")}
+                  onClick={() => {
+                    if (orgId) router.push(`/organizations/${orgId}/reports`)
+                    else router.push("/reports")
+                  }}
                   disabled={isLoading}
                   className="order-2 sm:order-1"
                 >

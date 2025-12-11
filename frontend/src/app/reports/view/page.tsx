@@ -25,7 +25,7 @@ import {
   Sun
 } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { useState } from "react"
 
 export default function ImprovedReportViewPage() {

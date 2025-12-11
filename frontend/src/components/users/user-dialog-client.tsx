@@ -4,9 +4,12 @@ import { UserDialog } from "./user-dialog";
 import { Button } from "../ui/button";
 import { Edit } from "lucide-react";
 import { updateUser } from "@/actions/users";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-export default function EditUserDialogTrigger({ user, profile, role }: { user: any, profile: any, role: string }) {
+export default function EditUserDialogTrigger({ user, profile, role, roleId, organizationId }: { user: any, profile: any, role: string, roleId?: string, organizationId?: string }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const handleEditSubmit = async (data: {
     firstName: string;
@@ -15,16 +18,32 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
     roleId: string;
     file?: File;
   }) => {
-    await updateUser(
-      user.id,
-      data.firstName,
-      data.lastName,
-      data.email,
-      data.roleId,
-      undefined,
-      data.file
-    );
-    setOpen(false);
+    if (!organizationId) {
+      toast.error("Organization ID is required to update user.");
+      return;
+    }
+    try {
+      const result = await updateUser(
+        user.id,
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.roleId,
+        organizationId,
+        undefined,
+        data.file
+      );
+      
+      if (result.success) {
+        toast.success("User updated successfully.");
+        setOpen(false);
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to update user.");
+      }
+    } catch (error) {
+      toast.error("Failed to update user.");
+    }
   };
 
   return (
@@ -49,7 +68,7 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
           lastName: profile.lastName,
           imageId: profile.imageId,
           imageUrl: profile.imageUrl,
-          roleId: profile.roleId,
+          roleId: roleId || "",
           roleName: role,
         }}
         onSubmit={handleEditSubmit}

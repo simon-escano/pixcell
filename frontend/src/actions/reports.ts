@@ -13,11 +13,14 @@ export async function addReport(data: {
   isAiGenerated: boolean;
   generatedBy: string;
   status?: "Draft" | "Finalized" | "UNDER_REVIEW" | "REJECTED" | "ARCHIVED";
+  organizationId?: string;
 }) {
   try {
     await db.insert(report).values({
       ...data,
       status: data.status || "Draft",
+      // Persist organization if provided; otherwise set to null
+      organizationId: data.organizationId ?? null,
       createdAt: new Date(),
     });
     return { success: true };

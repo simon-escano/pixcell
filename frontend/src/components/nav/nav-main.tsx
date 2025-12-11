@@ -1,4 +1,4 @@
-import { ContactRound, FileText, House, Images, LayoutDashboard } from "lucide-react";
+"use client";
 
 import { Collapsible } from "@/components/ui/collapsible";
 import {
@@ -8,53 +8,64 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import UploadSampleWrapper from "../samples/upload-sample-wrapper";
+import { ContactRound, FileText, Images, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export function NavMain() {
+interface NavMainProps {
+  organizationId?: string;
+}
+
+export function NavMain({ organizationId }: NavMainProps) {
+  const pathname = usePathname();
+  
+  // If no valid ID is found, hide the menu
+  if (!organizationId || typeof organizationId !== "string" || organizationId.trim() === "") {
+    return null;
+  }
+
   const items = [
     {
       title: "Dashboard",
-      url: "/",
+      url: `/organizations/${organizationId}/dashboard`,
       icon: LayoutDashboard,
     },
     {
       title: "Patients",
-      url: "/patients",
+      url: `/organizations/${organizationId}/patients`,
       icon: ContactRound,
-      isActive: true,
     },
     {
       title: "Samples",
-      url: "/samples",
+      url: `/organizations/${organizationId}/samples`,
       icon: Images,
     },
     {
       title: "Reports",
-      url: "/reports",
+      url: `/organizations/${organizationId}/reports`,
       icon: FileText,
     },
   ];
+
   return (
     <SidebarGroup>
-      {/* Upload Sample and Camera buttons at the top, separated from dashboard links */}
-      <div className="flex flex-col gap-2 mb-2">
-        <UploadSampleWrapper />
-      </div>
-      <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+      <SidebarGroupLabel>Organization</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <Link href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </Collapsible>
-        ))}
+        {items.map((item) => {
+          const isActive = pathname === item.url || pathname?.startsWith(item.url + "/");
+          return (
+            <Collapsible key={item.title} asChild defaultOpen={isActive}>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );

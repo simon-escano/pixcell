@@ -26,7 +26,7 @@ import {
   Archive,
   Loader2,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import JSZip from "jszip"
 
 interface DetectionResultDialogProps {
@@ -49,6 +49,8 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
   sampleId,
 }) => {
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid")
   const [isExporting, setIsExporting] = useState(false)
@@ -155,7 +157,8 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           sampleId,
         }),
       )
-      router.push("/reports/ai-generate")
+      if (orgId) router.push(`/organizations/${orgId}/reports/ai-generate`)
+      else router.push(`/reports/ai-generate`)
     }
   }
 
@@ -244,7 +247,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           {/* Clean Header */}
           <div className="bg-primary text-primary-foreground p-6 rounded-t-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <DialogTitle className="text-2xl font-semibold flex items-center gap-3">
                 <div className="p-2 bg-primary-foreground/20 rounded-md">
                   <Eye className="w-6 h-6" />
                 </div>
@@ -305,17 +308,17 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                           <CardContent className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-bold mb-1 text-foreground">{images.length}</div>
+                                <div className="text-3xl font-semibold mb-1 text-foreground">{images.length}</div>
                                 <div className="text-muted-foreground text-sm font-medium">Images Processed</div>
                               </div>
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-bold mb-1 text-foreground">
+                                <div className="text-3xl font-semibold mb-1 text-foreground">
                                   {detectionResults.total_detections}
                                 </div>
                                 <div className="text-muted-foreground text-sm font-medium">Total Detections</div>
                               </div>
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-bold mb-1 text-foreground">
+                                <div className="text-3xl font-semibold mb-1 text-foreground">
                                   {detectionResults.detections ? Object.keys(detectionResults.detections).length : 0}
                                 </div>
                                 <div className="text-muted-foreground text-sm font-medium">Object Types</div>
@@ -337,7 +340,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                       <span className="font-semibold capitalize text-foreground">
                                         {cls.replace("_", " ")}
                                       </span>
-                                      <Badge variant="secondary" className="font-bold text-sm">
+                                      <Badge variant="secondary" className="font-semibold text-sm">
                                         {count as number}
                                       </Badge>
                                     </div>
@@ -630,7 +633,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                                   <span className="font-semibold capitalize text-foreground">
                                     {cls.replace("_", " ")}
                                   </span>
-                                  <Badge variant="secondary" className="font-bold text-sm">
+                                  <Badge variant="secondary" className="font-semibold text-sm">
                                     {count as number}
                                   </Badge>
                                 </div>

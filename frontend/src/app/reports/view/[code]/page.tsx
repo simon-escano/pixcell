@@ -20,6 +20,30 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { Suspense } from "react"
+import { Metadata } from "next"
+import { getReportByCode } from "@/db/queries/select"
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const report = await getReportByCode(paramsObj.code);
+  
+  const title = report?.title 
+    ? truncate(report.title)
+    : "Report";
+  
+  return {
+    title: `PixCell | ${title}`,
+  };
+}
 
 // Loading component
 function ReportViewSkeleton() {
@@ -122,7 +146,7 @@ function ReportHeader({ reportData, code }: { reportData: any; code: string }) {
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-2">
               {reportData.formData.title || "Medical Report"}
             </h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -156,8 +180,8 @@ function ReportHeader({ reportData, code }: { reportData: any; code: string }) {
 }
 
 // Main component
-export default async function ImprovedReportViewByCodePage({ params }: { params: { code: string } }) {
-  const { code } = params
+export default async function ImprovedReportViewByCodePage({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params
   const baseUrl = "http://localhost:3000"
 
   try {
@@ -265,7 +289,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
 }
 
 // Export with Suspense wrapper for better loading experience
-export function ReportViewByCodePageWithSuspense({ params }: { params: { code: string } }) {
+export function ReportViewByCodePageWithSuspense({ params }: { params: Promise<{ code: string }> }) {
   return (
     <Suspense fallback={<ReportViewSkeleton />}>
       <ImprovedReportViewByCodePage params={params} />

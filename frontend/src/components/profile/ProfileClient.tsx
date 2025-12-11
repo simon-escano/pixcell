@@ -9,6 +9,7 @@ const UploadSampleDrawerForPatient = dynamic(() => import("@/components/samples/
 const AssignDoctorToPatient = dynamic(() => import("./AssignDoctorToPatient"), { ssr: false });
 const AssignPatientToDoctor = dynamic(() => import("./AssignPatientToDoctor"), { ssr: false });
 import { Button } from "@/components/ui/button";
+import { useRouter, useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 type ProfileClientProps =
@@ -17,6 +18,8 @@ type ProfileClientProps =
       user: any;
       profile: any;
       role: string;
+      roleId?: string;
+      organizationId?: string;
       samples: any[];
       reports: any[];
       metaUser: any;
@@ -36,23 +39,29 @@ type ProfileClientProps =
 export default function ProfileClient(props: ProfileClientProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<string>("");
+  const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
 
   useEffect(() => {
     async function fetchUserAndRole() {
       const supabase = createClientComponentClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const res = await fetch(`/api/profile-with-role?userId=${user.id}`);
+        const url = orgId 
+          ? `/api/profile-with-role?userId=${user.id}&organizationId=${orgId}`
+          : `/api/profile-with-role?userId=${user.id}`;
+        const res = await fetch(url);
         const { profile, role } = await res.json();
         setCurrentUser(profile);
         setCurrentRole(role?.name || "");
       }
     }
     fetchUserAndRole();
-  }, []);
+  }, [orgId]);
 
   if (props.type === "user") {
-    const { user, profile, role, samples, reports, metaUser, patients = [] } = props;
+    const { user, profile, role, roleId, organizationId, samples, reports, metaUser, patients = [] } = props;
     // Details section for user
     const details = (
       <div className="space-y-2 text-xs">
@@ -85,7 +94,10 @@ export default function ProfileClient(props: ProfileClientProps) {
             <button
               key={patient.id}
               className="p-3 bg-muted rounded-lg w-full text-left hover:bg-muted/80 transition-all"
-              onClick={() => window.location.href = `/patients/${patient.id}`}
+              onClick={() => {
+                const path = orgId ? `/organizations/${orgId}/patients/${patient.id}` : `/patients/${patient.id}`;
+                router.push(path);
+              }}
               type="button"
             >
               <div className="font-medium text-card-foreground text-sm">
@@ -122,7 +134,7 @@ export default function ProfileClient(props: ProfileClientProps) {
         samples={uniqueSamples}
         reports={reports}
         metaEntity={metaUser}
-        editDialogTrigger={<EditUserDialogTrigger user={user} profile={profile} role={role} />}
+        editDialogTrigger={<EditUserDialogTrigger user={user} profile={profile} role={role} roleId={roleId} organizationId={organizationId} />}
         details={details}
         reportList={reportList}
         patientsList={patients}
@@ -192,8 +204,8 @@ export default function ProfileClient(props: ProfileClientProps) {
     
     let actions = (
       <div className="space-y-2">
-        <UploadSampleDrawerForPatient patientId={patient.id} />
-        <form action={`/reports`} method="get">
+        <UploadSampleDrawerForPatient patientId={patient.id} organizationId={orgId} />
+        <form action={orgId ? `/organizations/${orgId}/reports` : `/reports`} method="get">
           <input type="hidden" name="search" value={`${patient.firstName} ${patient.lastName}`} />
           <Button
             type="submit"
@@ -209,7 +221,7 @@ export default function ProfileClient(props: ProfileClientProps) {
     if (currentRole === "Administrator") {
       actions = (
         <>
-          <AssignDoctorToPatient patientId={patient.id} onUpdate={fetchDoctors} />
+          <AssignDoctorToPatient patientId={patient.id} organizationId={orgId} onUpdate={fetchDoctors} />
           {actions}
         </>
       );

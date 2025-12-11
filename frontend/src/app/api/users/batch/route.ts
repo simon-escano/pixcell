@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db"; // adjust import as needed
-import { user, profile, role } from "@/db/schema";
+import { user, profile, role, organizationStaff } from "@/db/schema";
 import { v4 as uuidv4 } from "uuid";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
-    const users = await req.json();
+    const body = await req.json();
+    const { users, organizationId } = body;
+    
     if (!Array.isArray(users)) {
       return NextResponse.json({ message: "Invalid data format" }, { status: 400 });
+    }
+    
+    if (!organizationId) {
+      return NextResponse.json({ message: "Organization ID is required" }, { status: 400 });
     }
     const results = [];
     for (const u of users) {
@@ -31,14 +37,20 @@ export async function POST(req: NextRequest) {
           email: u.email,
           phone: u.phone || null,
         });
-        // Create profile
+        // Create profile (without roleId)
+        const profileId = uuidv4();
         await db.insert(profile).values({
-          id: uuidv4(),
+          id: profileId,
           firstName: u.firstName,
           lastName: u.lastName,
           userId: userId,
-          roleId: u.roleId,
           imageId: u.imageId || null,
+        });
+        // Create organizationStaff entry to link user to organization with roleId
+        await db.insert(organizationStaff).values({
+          organizationId,
+          staffId: profileId,
+          roleId: u.roleId,
         });
         results.push({ email: u.email, success: true });
       } catch (err: any) {

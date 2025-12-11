@@ -2,7 +2,7 @@
 
 import { deletePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
@@ -12,6 +12,7 @@ import UserButton from "../users/user-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CirclePlus, Plus, Upload, XCircle, Trash2 } from "lucide-react";
+import ClientDate from "../client-date";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 
@@ -36,6 +37,8 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
 
 const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -46,15 +49,17 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [currentDoctorId, setCurrentDoctorId] = useState<string>("");
 
-  // Fetch doctors once on mount
+  // Fetch doctors once on mount with organizationId
   useEffect(() => {
     async function fetchDoctors() {
-      const res = await fetch('/api/doctors');
-      const allDoctors = await res.json();
-      setDoctors(allDoctors);
+      if (orgId) {
+        const res = await fetch(`/api/doctors?organizationId=${orgId}`);
+        const allDoctors = await res.json();
+        setDoctors(allDoctors);
+      }
     }
     fetchDoctors();
-  }, []);
+  }, [orgId]);
 
   // Fetch current doctor when editing a patient
   useEffect(() => {
@@ -186,9 +191,10 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   return (
     <div>
       <DataTable
-        data={[...patients].sort((a, b) => a.firstName.localeCompare(b.firstName))}
-        excludeColumns={["id", "imageId", "birthDate", "createdAt", "imageUrl", "createdBy","lastName"]}
+        data={patients}
+        excludeColumns={["id", "imageId", "birthDate", "imageUrl", "createdBy","lastName"]}
         defaultHiddenColumns={ ["height", "weight"]}
+        defaultSorting={[{ id: "createdAt", desc: true }]}
         searchPlaceholder="Search patients..."
         searchableColumns={["firstName", "lastName", "email", "bloodType"]}
         columnConfigs={[
@@ -199,16 +205,22 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
             customRender: (_: any, row?: any) => {
               // fallback: just render the first name if row is not available
               if (!row) return String(_);
-              return (
+                return (
                 <UserButton
                   imageUrl={row.imageUrl || ""}
                   firstName={row.firstName}
                   lastName={row.lastName}
-                  redirectUrl={`/patients/${row.id}`}
+                  redirectUrl={orgId ? `/organizations/${orgId}/patients/${row.id}` : `/patients/${row.id}`}
                   roleName={"Patient"}
                 />
               );
             },
+          },
+          { 
+            key: "createdAt", 
+            header: "Date", 
+            enableSorting: true, 
+            customRender: (value: string | Date) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null 
           },
         ]}
         actionItems={actionItems}
@@ -225,7 +237,8 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
           </div>
         }
         onRowClick={(patient: Patient) => {
-          router.push(`/patients/${patient.id}`);
+          if (orgId) router.push(`/organizations/${orgId}/patients/${patient.id}`)
+          else router.push(`/patients/${patient.id}`)
         }}
         selectedRowIds={selectedIds}
         onSelectedRowIdsChange={setSelectedIds}
@@ -248,6 +261,8 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         open={addOpen}
         setOpen={setAddOpen}
         showTrigger={false}
+        doctors={doctors}
+        organizationId={orgId}
       />
       <CustomAlertDialog
         open={batchDeleteOpen}

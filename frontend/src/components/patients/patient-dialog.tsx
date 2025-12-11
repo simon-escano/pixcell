@@ -48,6 +48,7 @@ type Props = {
   doctors?: Doctor[];
   currentDoctorId?: string;
   onDoctorChange?: (doctorId: string) => void;
+  organizationId?: string; // <-- Add organizationId prop
 };
 
 export function PatientDialog({
@@ -59,6 +60,7 @@ export function PatientDialog({
   doctors = [],
   currentDoctorId = "",
   onDoctorChange,
+  organizationId,
 }: Props) {
   const isControlled =
     controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -167,21 +169,31 @@ export function PatientDialog({
         toast.success("Patient updated", { id: toastId });
         router.refresh();
       } else {
-        if (!profile) return; // or show loading
+        if (!profile) {
+          toast.error("Profile not found. Please refresh and try again.", { id: toastId });
+          return;
+        }
+        
+        if (!organizationId) {
+          toast.error("Organization ID is required. Please refresh and try again.", { id: toastId });
+          return;
+        }
 
         const result = await addPatient({
           firstName,
           lastName,
-          email,
-          contactNumber,
-          address,
-          height: Number(height),
-          weight: Number(weight),
+          email: email.trim() || "",
+          contactNumber: contactNumber.trim() || "",
+          address: address.trim() || "",
+          height: height ? Number(height) : 0,
+          weight: weight ? Number(weight) : 0,
           sex,
-          bloodType,
-          birthDate: date?.toISOString().slice(0, 10) || "",
+          bloodType: bloodType.trim() || "",
+          birthDate: date ? date.toISOString().slice(0, 10) : "",
           file: file ?? undefined,
           createdBy: profile.id,
+          organizationId,
+          doctorId: selectedDoctor || undefined,
         });
         if (result && result.success === false && result.error) {
           toast.error(result.error, { id: toastId });

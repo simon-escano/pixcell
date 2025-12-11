@@ -1,19 +1,23 @@
 "use client";
+import { deleteReport } from "@/actions/reports";
 import { Report } from "@/db/schema";
+import { CirclePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { DataTable } from "../data-table";
 import { CustomAlertDialog } from "../custom-alert-dialog";
+import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
-import { deleteReport } from "@/actions/reports";
-import { format } from "date-fns";
-import StatusUpdate from "./status-update";
 import UserButton from "../users/user-button";
-import { CirclePlus } from "lucide-react";
+import StatusUpdate from "./status-update";
+import ClientDate from "../client-date";
 
-const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSearch?: string }) => {
+interface ReportsTableProps {
+  reports: Report[];
+  organizationId: string;
+}
+
+const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -31,7 +35,7 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
     {
       label: "View Report",
       onClick: (report: Report) => {
-        router.push(`/reports/${report.id}`);
+        router.push(`/organizations/${organizationId}/reports/${report.id}`);
       },
     },
     {
@@ -66,6 +70,7 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
           'generatedByImage',
           'generatedByRole',]}
         defaultHiddenColumns={[]}
+        defaultSorting={[{ id: "createdAt", desc: true }]}
         searchPlaceholder="Search reports..."
         searchableColumns={["id", "title", "patientName", "testType", "status", "generatedByName" , "createdAt"]}
         columnConfigs={[
@@ -83,13 +88,13 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
                 roleName={undefined} // Patient role is not available
                 onClick={e => {
                   e.stopPropagation();
-                  if (row.patientId) router.push(`/patients/${row.patientId}`);
+                  if (row.patientId) router.push(`/organizations/${organizationId}/patients/${row.patientId}`);
                 }}
               />
             );
           } },
           { key: "testType", maxWidth: 140 },
-          { key: "createdAt", header: "Date Created", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
+          { key: "createdAt", header: "Date", enableSorting: true, customRender: (value: string) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null },
           {
             key: "generatedByName", header:"Medical Professional",
             customRender: (_value, row) => {
@@ -106,7 +111,7 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
                     console.log('UserButton clicked for doctor');
                     console.log('generatedById:', row.generatedById);
                     e.stopPropagation();
-                    router.push(`/users/${row.generatedById}`);
+                    router.push(`/organizations/${organizationId}/users/${row.generatedById}`);
                   }}
                 />
               );
@@ -126,10 +131,10 @@ const ReportsTable = ({ reports, initialSearch }: { reports: Report[], initialSe
         ]}
         actionItems={actionItems}
         onRowClick={(report: any) => {
-          router.push(`/reports/${report.id}`);
+          router.push(`/organizations/${organizationId}/reports/${report.id}`);
         }}
         customHeaderContent={
-          <Button onClick={() => router.push("/reports/create")}>
+          <Button onClick={() => router.push(`/organizations/${organizationId}/reports/create`)}>
             <CirclePlus/>
             Create Report
           </Button>

@@ -3,11 +3,14 @@
 import { deleteUser, updateUser } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
-import React, { useRef, useState, useEffect } from "react";
+import { Camera, CirclePlus } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CustomAlertDialog } from "./custom-alert-dialog";
 import { DataTable } from "./data-table";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { PhoneInput } from "./ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -26,9 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Camera, CirclePlus } from "lucide-react";
-import { PhoneInput } from "./ui/phone-input";
 
 type CombinedUser = {
   id: User["id"];
@@ -42,8 +42,10 @@ type CombinedUser = {
   roleId: Role["id"];
 };
 
-export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
+export const UsersTable = ({ users, organizationId }: { users: CombinedUser[], organizationId?: string }) => {
   const router = useRouter();
+  const params = useParams();
+  const orgId = organizationId || (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<CombinedUser | null>(null);
@@ -104,6 +106,41 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     }
   };
 
+  const handleAddUser = async (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    roleId: string;
+    file?: File;
+  }) => {
+    const { createUserWithAutoPasswordAction } = await import("@/actions/users");
+    const formData = new FormData();
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
+    formData.append("email", data.email);
+    formData.append("roleId", data.roleId);
+    formData.append("licenseNo", "");
+    if (orgId) formData.append("organizationId", orgId);
+    if (data.file) formData.append("file", data.file);
+
+    const res = await createUserWithAutoPasswordAction(formData);
+    if (!res.errorMessage) {
+      toast.success("User added successfully. Password has been auto-generated and will be required to be changed on first login.");
+      setEditOpen(false);
+      router.refresh();
+    } else {
+      if (res.errorMessage.includes("already registered")) {
+        toast.error("This email is already registered. Please use a different email address.");
+      } else if (res.errorMessage.includes("password")) {
+        toast.error("Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.");
+      } else if (res.errorMessage.includes("email")) {
+        toast.error("Please enter a valid email address.");
+      } else {
+        toast.error(`Failed to add user: ${res.errorMessage}`);
+      }
+    }
+  };
+
   const actionItems = [
     {
       label: "Copy User ID",
@@ -131,6 +168,9 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     },
   ];
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({ firstName: "", lastName: "", email: "", roleId: "", file: undefined as File | undefined });
+
   const addUserButton = (
     <Button className="ml-2" variant="default">
        <CirclePlus />
@@ -147,7 +187,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/users/${user.id}`);
+          router.push(`/organizations/${orgId}/users/${user.id}`)
         }}
         customHeaderContent={addUserButton}
       />

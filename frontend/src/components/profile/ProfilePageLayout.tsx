@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -284,6 +284,8 @@ export default function ProfilePageLayout({
   doctorsCount,
 }: ProfilePageLayoutProps) {
   const router = useRouter()
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Search and filter states
@@ -380,13 +382,13 @@ export default function ProfilePageLayout({
                   <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16 ring-4 ring-primary-foreground/30 shadow-lg">
                       <AvatarImage src={entity.imageUrl || ""} alt={`${entity.firstName} ${entity.lastName}`} />
-                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xl font-bold backdrop-blur-sm">
+                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xl font-semibold backdrop-blur-sm">
                         {entity.firstName[0]}
                         {entity.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h1 className="text-xl font-bold text-primary-foreground leading-tight">
+                      <h1 className="text-xl font-semibold text-primary-foreground leading-tight">
                         {entity.firstName} {entity.lastName}
                       </h1>
                       {entity.email && <p className="text-primary-foreground/80 text-sm mt-1">{entity.email}</p>}
@@ -424,7 +426,7 @@ export default function ProfilePageLayout({
                         <TestTube className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{samples.length}</div>
+                        <div className="text-xl font-semibold text-foreground">{samples.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Samples</div>
                       </div>
                     </div>
@@ -441,7 +443,7 @@ export default function ProfilePageLayout({
                         <FileText className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{reportCount ?? reports.length}</div>
+                        <div className="text-xl font-semibold text-foreground">{reportCount ?? reports.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Reports</div>
                       </div>
                     </div>
@@ -460,7 +462,7 @@ export default function ProfilePageLayout({
                         <Users className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-foreground">{patientsCount}</div>
+                        <div className="text-xl font-semibold text-foreground">{patientsCount}</div>
                         <div className="text-xs text-muted-foreground font-medium">Patients</div>
                       </div>
                     </div>
@@ -575,7 +577,10 @@ export default function ProfilePageLayout({
                                 key={`${sample.id}-${index}`}
                                 sample={sample}
                                 index={samples.indexOf(sample)}
-                                onClick={() => router.push(`/samples/${sample.id}`)}
+                                onClick={() => {
+                                  if (orgId) router.push(`/organizations/${orgId}/samples/${sample.id}`)
+                                  else router.push(`/samples/${sample.id}`)
+                                }}
                               />
                             ))}
                           </div>
@@ -640,7 +645,10 @@ export default function ProfilePageLayout({
                               key={`${report.id}-${index}`}
                               report={report}
                               index={reports.indexOf(report)}
-                              onClick={() => router.push(`/reports/${report.id}`)}
+                              onClick={() => {
+                                if (orgId) router.push(`/organizations/${orgId}/reports/${report.id}`)
+                                else router.push(`/reports/${report.id}`)
+                              }}
                             />
                           ))}
                         </div>
@@ -680,7 +688,10 @@ export default function ProfilePageLayout({
                                 key={`${patient.id}-${index}`}
                                 patient={patient}
                                 index={index}
-                                onClick={() => router.push(`/patients/${patient.id}`)}
+                                onClick={() => {
+                                  if (orgId) router.push(`/organizations/${orgId}/patients/${patient.id}`)
+                                  else router.push(`/patients/${patient.id}`)
+                                }}
                               />
                             ))}
                           </div>
@@ -720,7 +731,9 @@ export default function ProfilePageLayout({
                                 key={`${doctor.id}-${index}`}
                                 doctor={doctor}
                                 index={index}
-                                onClick={() => router.push(`/users/${doctor.id}`)}
+                                onClick={() => {
+                                  router.push(`/organizations/${orgId}/users/${doctor.id}`)
+                                }}
                               />
                             ))}
                           </div>

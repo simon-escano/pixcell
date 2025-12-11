@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button"
 import { CustomAlertDialog } from "@/components/custom-alert-dialog"
 import { AlertCircle, ArrowLeft, XCircle } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import React from "react"
 
 export default function ReportNotFound({ code }: { code: string }) {
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   return (
     <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
       <Card className="w-full max-w-md">
@@ -33,7 +36,7 @@ export default function ReportNotFound({ code }: { code: string }) {
             />
             <div className="flex gap-3 justify-center">
               <Button variant="outline" asChild>
-                <Link href="/reports/view">
+                <Link href={orgId ? `/organizations/${orgId}/reports/view` : `/reports/view`}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Try Another Code
                 </Link>

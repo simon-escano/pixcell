@@ -1,13 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { sample, sampleImage, image, profile } from "@/db/schema";
-import sizeOf from "image-size";
+import { getProfileByUserId } from "@/db/queries/select";
+import { image, profile, sample, sampleImage } from "@/db/schema";
 import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
 import { eq, inArray } from "drizzle-orm";
-import { MetaPatient } from "@/app/samples/types";
-import { getProfileByUserId } from "@/db/queries/select";
+import sizeOf from "image-size";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -113,7 +112,8 @@ async function ensureSampleImagesBucket() {
 export async function uploadSampleAction(
   patientId: string,
   files: File[],
-  sampleName: string
+  sampleName: string,
+  organizationId?: string
 ) {
   // Validate inputs
   if (!files?.length || !patientId || !sampleName.trim()) {
@@ -143,6 +143,7 @@ export async function uploadSampleAction(
         patientId,
         sampleName: sampleName.trim(),
         createdBy: currentUser.id,
+        organizationId: organizationId || crypto.randomUUID(),
       })
       .returning();
 

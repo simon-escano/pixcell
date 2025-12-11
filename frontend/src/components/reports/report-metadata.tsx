@@ -19,6 +19,7 @@ import {
   Eye,
 } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import { format } from "date-fns"
 
 function StatusBadge({ status }: { status: string }) {
@@ -51,6 +52,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function ReportMetadata({ reportData }: { reportData: any }) {
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || ""
   const handlePrint = () => {
     window.print()
   }
@@ -104,7 +107,7 @@ export default function ReportMetadata({ reportData }: { reportData: any }) {
             Share Report
           </Button>
           <Button variant="outline" size="sm" asChild className="w-full flex items-center gap-2 bg-transparent">
-            <Link href="/reports/view">
+            <Link href={orgId ? `/organizations/${orgId}/reports/view` : `/reports/view`}>
               <ArrowLeft className="h-4 w-4" />
               View Another Report
             </Link>

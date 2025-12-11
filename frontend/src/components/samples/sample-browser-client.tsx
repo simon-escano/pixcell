@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import {
   FileImage,
   Grid3X3,
@@ -17,7 +16,6 @@ import {
 import { useMemo, useState } from "react"
 import SampleCard from "./sample-card"
 import SampleDrawer from "./upload-sample-drawer"
-import { MetaPatient } from "@/app/samples/types"
 
 
 export default function SampleBrowserClient({ samples, currentUser, patients }: { samples: any[]; currentUser: any, patients: MetaPatient[] }) {
@@ -30,7 +28,7 @@ export default function SampleBrowserClient({ samples, currentUser, patients }: 
   const PAGE_SIZE = 15;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Filtering and sorting logic
+// Filtering and sorting logic
   const filteredSamples = useMemo(() => {
     let filtered = samples
     // Debug: log incoming samples

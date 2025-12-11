@@ -1,6 +1,5 @@
 "use client";
 
-import { MetaPatient } from "@/app/samples/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Role } from "@/db/schema";
@@ -11,6 +10,7 @@ import { useEffect, useState } from "react";
 import { getPatientInitials } from "../patients/patient-search-combobox";
 import { PDFExport, ReportPDF } from "./pdf-export";
 import PixCellLogo from "../pixcell-logo";
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types";
 
 interface TableData {
   id: string;
@@ -229,7 +229,7 @@ export default function ReportPreview({
             <div className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">
+                  <h1 className="text-2xl font-semibold text-gray-800">
                     {formData.title || "Medical Report"}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">
@@ -318,7 +318,7 @@ export default function ReportPreview({
           {/* Footer: always present, doctor signatory only on last page */}
           {pageIdx === totalPages - 1 && (
             <div className="mb-4">
-              <h3 className="font-bold uppercase">{doctorName}</h3>
+              <h3 className="font-semibold uppercase">{doctorName}</h3>
               <p className="uppercase">{doctorRole.name}</p>
               <p>Licence: {doctorLicense}</p>
             </div>

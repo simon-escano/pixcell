@@ -35,6 +35,7 @@ export const profile = pgTable("profile", {
   roleId: uuid("role_id").notNull().references(() => role.id),
   imageId: uuid("image_id").references(() => image.id),
   licenseNo: text("license_no"),
+
   mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
@@ -60,8 +61,9 @@ export const patient = pgTable("patient", {
 export const sample = pgTable("sample", {
   id: uuid("id").primaryKey().defaultRandom(),
   patientId: uuid("patient_id").notNull().references(() => patient.id),
+  organizationId: uuid("organization_id").notNull().references(() => organization.id),
   sampleName: text("sample_name"),
-  createdBy: uuid("created_by").notNull().references(()=>user.id),
+  createdBy: uuid("created_by").notNull().references(()=> user.id),
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -101,6 +103,7 @@ export const report = pgTable("report", {
   testType: text("test_type"),
   status: reportStatusEnum("status"),
   code: text('code'),
+  organizationId: uuid("organization_id").notNull().references(() => organization.id),
 });
 
 export const session = pgTable("session", {
@@ -151,15 +154,25 @@ export const organization = pgTable("organization", {
   address: varchar('address',{ length: 512 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  color: text("color").notNull().default("#7E7E82"),
 });
 
-export const organization_staff = pgTable("organization_staff", {
-   id: uuid("id").primaryKey().defaultRandom(), 
-   organizationId: uuid("organization_id").references(() => organization.id),
-   staffId: uuid("staff_id").references(() => profile.id),
-   role: text('role'),
+export const organizationStaff = pgTable("organization_staff", {
+  id: uuid("id").primaryKey().defaultRandom(), 
+  organizationId: uuid("organization_id").references(() => organization.id),
+  staffId: uuid("staff_id").references(() => profile.id),
+  roleId: uuid("role_id").references(() => role.id).references(() => role.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const organizationPatient = pgTable("organization_patient", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
+  patientId: uuid("patient_id").defaultRandom(),
+  organizationId: uuid("organization_id").defaultRandom(),
+  status: varchar("status"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
 })
 
 export type Role = typeof role.$inferSelect;
@@ -173,7 +186,8 @@ export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 export type Organization = typeof organization.$inferSelect;
-export type OrganizationStaff = typeof organization_staff.$inferSelect;
+export type OrganizationStaff = typeof organizationStaff.$inferSelect;
+export type OrganizationPatient = typeof organizationPatient.$inferSelect;
 
 // Combined type for sample with image data
 export type SampleWithImage = Sample & {

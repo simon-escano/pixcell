@@ -77,6 +77,7 @@ export type DataTableProps<TData> = {
   bulkActions?: (selectedRowIds: string[], selectedRows: any[]) => React.ReactNode;
   onBulkDelete?: (selectedRowIds: string[], selectedRows: TData[]) => void;
   hideSearchInput?: boolean;
+  defaultSorting?: SortingState; // Add default sorting prop
 };
 
 export function DataTable<TData extends Record<string, any>>({
@@ -102,10 +103,11 @@ export function DataTable<TData extends Record<string, any>>({
   bulkActions,
   onBulkDelete,
   hideSearchInput = false,
+  defaultSorting = [],
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(defaultSorting);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(() => {
     const initialVisibility: VisibilityState = {};
@@ -274,12 +276,23 @@ export function DataTable<TData extends Record<string, any>>({
 
           // Use custom renderer if provided
           if (config?.customRender) {
-            return <div>{config.customRender(value, row.original)}</div>;
+            const rendered = config.customRender(value, row.original);
+            // If customRender returns a React element (like ClientDate), return it directly
+            if (React.isValidElement(rendered)) {
+              return rendered;
+            }
+            // Otherwise wrap in div
+            return <div>{rendered}</div>;
           }
 
+          // Check if value is a date at render time (not just during column generation)
+          const isValueDate = value instanceof Date || 
+            (typeof value === "string" && value && !isNaN(Date.parse(value)));
+
           // Format dates
-          if (isDate && value) {
-            return <div><ClientDate date={value as string} /></div>;
+          if (isValueDate && value) {
+            const dateStr = value instanceof Date ? value.toISOString() : value;
+            return <div suppressHydrationWarning><ClientDate date={dateStr} /></div>;
           }
 
           // Format booleans
@@ -389,6 +402,7 @@ export function DataTable<TData extends Record<string, any>>({
       pagination: {
         pageSize: maxRowsPerPage,
       },
+      sorting: defaultSorting,
       columnVisibility: defaultHiddenColumns.reduce((acc, column) => {
         acc[column] = false;
         return acc;

@@ -8,19 +8,19 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { CircleOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { MetaProfile, MetaSample, MetaSampleImage } from "../../app/samples/types";
 import ProfileCard from "./profile-card";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useEffect } from "react";
+import { MetaProfile, MetaSample, MetaSampleImage } from "@/app/organizations/[organizationId]/samples/types";
 
 export const handleCopySampleId = (sample: MetaSample) => {
     navigator.clipboard.writeText(sample.id);
     toast.success("Sample ID copied to clipboard");
   };
 
-export const handleDeleteSample = async (sample: MetaSample, router: AppRouterInstance) => {
+export const handleDeleteSample = async (sample: MetaSample, router: AppRouterInstance, orgId?: string) => {
   const loadingToast = toast.loading("Deleting sample...");
   
   try {
@@ -31,7 +31,8 @@ export const handleDeleteSample = async (sample: MetaSample, router: AppRouterIn
     
     if (res.success) {
       toast.success("Sample deleted successfully");
-      router.push("/samples");
+      if (orgId) router.push(`/organizations/${orgId}/samples`)
+      else router.push("/samples");
     } else {
       toast.error(res.error || "Failed to delete sample");
     }
@@ -64,6 +65,8 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
   const displayImages = sampleImages.slice(0, 3);
   const remainingCount = Math.max(0, sampleImages.length - 3);
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
 
   // Fetch all images at once
   const renderImageGrid = () => {
@@ -150,7 +153,9 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
     <ContextMenuTrigger>
       <div
         onClick={() => {
-          router.push(`/samples/${sample.id}${sampleImages.length ? `/${sampleImages[0].id}` : ""}`);
+          const path = `/samples/${sample.id}${sampleImages.length ? `/${sampleImages[0].id}` : ""}`;
+          if (orgId) router.push(`/organizations/${orgId}${path}`)
+          else router.push(path)
         }}
         className="bg-card flex cursor-pointer flex-col overflow-hidden rounded-md border transition-shadow hover:shadow-lg"
       >
@@ -174,8 +179,8 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
       </ContextMenuItem>
       {(currentUser.id == sample.createdBy?.id || currentUser.role == "Administrator") ? <ContextMenuItem
           className="text-red-500 hover:text-red-700"
-          onClick={() => {
-            handleDeleteSample(sample, router)
+            onClick={() => {
+            handleDeleteSample(sample, router, orgId)
           }}
         >
         Delete Sample

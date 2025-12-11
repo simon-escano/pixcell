@@ -23,17 +23,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const truncate = (text: string, limit = 13) =>
+  text.length > limit ? text.slice(0, limit) + "…" : text
+
+
 const Header = () => {
-  const pathname = usePathname();
-  const pathArray = [" ", ...pathname.split("/").filter(Boolean)];
+  const pathname = usePathname() || "";
+  const pathArray = pathname.split("/").filter(Boolean)
   const { theme, setTheme } = useTheme();
 
-  const formatSegment = (segment: string) => {
-    if (!segment) return "PixCell";
-    return /^[a-zA-Z]/.test(segment)
-      ? segment.charAt(0).toUpperCase() + segment.slice(1)
-      : segment;
-  };
+  const formatSegment = (segment: string) =>
+  /^[a-zA-Z]/.test(segment)
+    ? segment.charAt(0).toUpperCase() + segment.slice(1)
+    : segment;
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2">
@@ -44,7 +46,7 @@ const Header = () => {
           <Breadcrumb>
             <BreadcrumbList>
               {pathArray.map((segment, index) => {
-                const href = "/" + pathArray.slice(1, index + 1).join("/");
+                const href = "/" + pathArray.slice(0, index + 1).join("/");
                 const isLast = index === pathArray.length - 1;
 
                 return (
@@ -56,11 +58,11 @@ const Header = () => {
                     >
                       {isLast ? (
                         <BreadcrumbPage>
-                          {formatSegment(segment === " " ? "PixCell" : segment)}
+                          {truncate(formatSegment(segment))}
                         </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink href={href}>
-                          {formatSegment(segment === " " ? "PixCell" : segment)}
+                          {truncate(formatSegment(segment))}
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>

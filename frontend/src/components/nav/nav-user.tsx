@@ -26,7 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { logoutAction } from "@/actions/users";
 import { Badge } from "../ui/badge";
@@ -45,6 +45,8 @@ export function NavUser({
   const { isMobile } = useSidebar();
 
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     await logoutAction();
@@ -53,7 +55,7 @@ export function NavUser({
   };
 
   const handleProfile = async () => {
-    router.push(`/users/${user.id}`);
+    router.push(`/organizations/${orgId}/users/${user.id}`)
   };
 
   // Default values if profile is null

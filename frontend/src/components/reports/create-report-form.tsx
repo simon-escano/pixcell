@@ -1,10 +1,11 @@
 "use client"
 import ImprovedReportForm from "./report-form"
 import { addReport } from "@/actions/reports"
+import { useParams } from "next/navigation"
 import type { Role } from "@/db/schema"
 import { useEffect, useState } from "react"
 import type { ReportContent, ReportFormData, TableData } from "./report-form"
-import type { MetaPatient } from "@/app/samples/types"
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types"
 
 interface Patient {
   id: string
@@ -54,6 +55,8 @@ interface CreateReportFormProps {
 
 export default function CreateReportForm({ patients, currentUserId, profiles, role }: CreateReportFormProps) {
   console.log("CreateReportForm rendered")
+  const params = useParams()
+  const orgId = (params as any)?.organizationId || undefined
 
   const [initialReportContent, setInitialReportContent] = useState<ReportContent | undefined>(undefined)
   const [initialFormData, setInitialFormData] = useState<ReportFormData | undefined>(undefined)
@@ -209,7 +212,10 @@ export default function CreateReportForm({ patients, currentUserId, profiles, ro
   return (
     <ImprovedReportForm
       mode="create"
-      onSubmit={addReport}
+      onSubmit={async (data: any) => {
+        // Ensure organizationId is passed to the server action
+        return await addReport({ ...data, organizationId: orgId })
+      }}
       patients={patients}
       profiles={profiles}
       role={role}

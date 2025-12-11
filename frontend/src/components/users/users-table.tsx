@@ -3,7 +3,7 @@
 import { deleteUser, updateUser, createUserWithAutoPasswordAction } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { CustomAlertDialog } from "../custom-alert-dialog";
@@ -14,6 +14,7 @@ import { CirclePlus, Upload, XCircle } from "lucide-react";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
+import ClientDate from "../client-date";
 
 type CombinedUser = {
   id: User["id"];
@@ -24,6 +25,7 @@ type CombinedUser = {
   imageId: Profile["imageId"];
   roleId: Role["id"];
   roleName: Role["name"];
+  updatedAt?: Date | string | null;
 };
 
 function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
@@ -45,8 +47,10 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
   );
 }
 
-export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
+export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; organizationId: string }) => {
   const router = useRouter();
+  const params = useParams();
+  const orgId = organizationId || (params as any)?.organizationId || "";
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -69,6 +73,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       data.lastName,
       data.email,
       data.roleId,
+      organizationId,
       undefined,
       data.file
     );
@@ -90,6 +95,7 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
     formData.append("email", data.email);
     formData.append("roleId", data.roleId);
     formData.append("licenseNo", ""); // Add empty license number for now
+    formData.append("organizationId", organizationId);
     if (data.file) formData.append("file", data.file);
 
     const res = await createUserWithAutoPasswordAction(formData);
@@ -99,12 +105,14 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
       router.refresh();
     } else {
       // Handle specific error cases
-      if (res.errorMessage.includes("already registered")) {
+      if (res.errorMessage.includes("already registered") || res.errorMessage.includes("already exists")) {
         toast.error("This email is already registered. Please use a different email address.");
       } else if (res.errorMessage.includes("password")) {
         toast.error("Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.");
       } else if (res.errorMessage.includes("email")) {
         toast.error("Please enter a valid email address.");
+      } else if (res.errorMessage.includes("Organization ID")) {
+        toast.error("Organization ID is missing. Please refresh the page and try again.");
       } else {
         toast.error(`Failed to add user: ${res.errorMessage}`);
       }
@@ -126,7 +134,10 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
           const response = await fetch("/api/users/batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(results.data),
+            body: JSON.stringify({
+              users: results.data,
+              organizationId: organizationId,
+            }),
           });
           const result = await response.json();
           if (response.ok) {
@@ -211,13 +222,22 @@ export const UsersTable = ({ users }: { users: CombinedUser[] }) => {
   return (
     <div>
       <DataTable
-        data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
+        data={users}
         excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
         defaultHiddenColumns={["phone"]}
-        columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
+        defaultSorting={[{ id: "updatedAt", desc: true }]}
+        columnConfigs={[
+          { key: "imageId", maxWidth: 200 },
+          { 
+            key: "updatedAt", 
+            header: "Date", 
+            enableSorting: true, 
+            customRender: (value: string | Date | null) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null 
+          },
+        ]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/users/${user.id}`);
+          router.push(`/organizations/${orgId}/users/${user.id}`)
         }}
         customHeaderContent={
           <div className="flex items-center gap-2">
