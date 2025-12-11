@@ -346,7 +346,7 @@ function CompactStatCard({
       </CardHeader>
       <CardContent className="px-3 pb-2">
         <div className="flex items-baseline space-x-1">
-          <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{value.toLocaleString()}</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{value.toLocaleString()}</div>
           {change !== null && (
             <div
               className={`flex items-center text-xs font-medium ${

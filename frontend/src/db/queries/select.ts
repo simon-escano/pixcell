@@ -775,6 +775,7 @@ export const getOrganizationsByProfileId = async (profileId: string) => {
       id: organization.id,
       name: organization.name,
       address: organization.address,
+      color: organization.color,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,
     })

@@ -36,7 +36,7 @@ function StatCard({ title, value, icon }: { title: string; value: string | numbe
         <span className="h-4 w-4">{icon}</span>
       </CardHeader>
       <CardContent className="px-6 pb-2 py-1.5">
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-semibold">{value}</div>
       </CardContent>
     </Card>
   );

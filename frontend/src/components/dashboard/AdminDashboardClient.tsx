@@ -21,7 +21,7 @@ function CompactStatCard({ title, value, icon }: { title: string; value: string 
         </div>
       </CardHeader>
       <CardContent className="px-3 pb-2">
-        <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+        <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           {typeof value === "number" ? value.toLocaleString() : value}
         </div>
       </CardContent>
@@ -37,7 +37,7 @@ function ProfessionalStorageChart({ used, total }: { used: number; total: number
     <div className="space-y-4">
       {/* Storage Overview */}
       <div className="text-center space-y-2">
-        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{Math.round(percentUsed * 100)}%</div>
+        <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{Math.round(percentUsed * 100)}%</div>
         <div className="text-xs text-gray-500 dark:text-gray-400">Storage Used</div>
       </div>
 
@@ -79,7 +79,7 @@ function ProfessionalUserDistribution({
     <div className="space-y-4">
       {/* Total Users Overview */}
       <div className="text-center space-y-2">
-        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{total}</div>
+        <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{total}</div>
         <div className="text-xs text-gray-500 dark:text-gray-400">Total Users</div>
       </div>
 
@@ -162,7 +162,7 @@ export default function AdminDashboardCompact({
     if (!active || !payload || payload.length === 0) return null;
     return (
       <div className="rounded-md border bg-white dark:bg-gray-900 p-2 shadow min-w-[90px]">
-        <div className="font-bold text-sm mb-1 text-gray-900 dark:text-gray-100">
+        <div className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">
           {format(new Date(label + "-01"), "MMMM yyyy")}
         </div>
         <div className="space-y-0.5">
