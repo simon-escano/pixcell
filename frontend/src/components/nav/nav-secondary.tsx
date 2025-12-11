@@ -12,6 +12,7 @@ import {
   SidebarMenuItem
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface NavSecondaryProps {
   isAdmin: boolean;
@@ -19,6 +20,8 @@ interface NavSecondaryProps {
 }
 
 export function NavSecondary({ isAdmin, organizationId }: NavSecondaryProps) {
+  const pathname = usePathname();
+  
   // If no valid organization ID, hide the menu
   if (!organizationId || typeof organizationId !== "string" || organizationId.trim() === "") {
     return null;
@@ -38,16 +41,19 @@ export function NavSecondary({ isAdmin, organizationId }: NavSecondaryProps) {
     <SidebarGroup>
       <SidebarGroupLabel>Administration</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild tooltip={item.title}>
-              <Link href={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+        {items.map((item) => {
+          const isActive = pathname === item.url || pathname?.startsWith(item.url + "/");
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
+                <Link href={item.url}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );

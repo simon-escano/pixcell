@@ -71,9 +71,13 @@ export async function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <OrganizationDropdown organizations={organizations} />
+        {organizationIdFromUrl && (
+          <div className="flex flex-col gap-2 mb-2 px-2">
+            <UploadSampleWrapper organizationId={organizationIdFromUrl} patientsRaw={patientsRaw} />
+          </div>
+        )}
         <NavMain 
           organizationId={organizationIdFromUrl}
-          patientsRaw={patientsRaw}
         />
       </SidebarContent>
       <NavSecondaryWrapper params={params} />

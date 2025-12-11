@@ -703,20 +703,20 @@ export async function getAllDoctors(organizationId?: string) {
         )
       );
   } else {
-    return await db
-      .select({
-        id: profile.id,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        userId: profile.userId,
-        imageUrl: image.imageUrl,
-        roleName: role.name,
-      })
-      .from(profile)
-      .leftJoin(image, eq(profile.imageId, image.id))
+  return await db
+    .select({
+      id: profile.id,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      userId: profile.userId,
+      imageUrl: image.imageUrl,
+      roleName: role.name,
+    })
+    .from(profile)
+    .leftJoin(image, eq(profile.imageId, image.id))
       .innerJoin(organizationStaff, eq(organizationStaff.staffId, profile.id))
       .innerJoin(role, eq(organizationStaff.roleId, role.id))
-      .where(sql`${role.name} != 'Administrator'`);
+    .where(sql`${role.name} != 'Administrator'`);
   }
 }
 
