@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import PatientsTable from "@/components/patients/patients-table";
-import { getAllPatientsForUser, getProfileByUserId, getRoleById } from "@/db/queries/select";
+import { getAllPatientsForUser, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
 export default async function PatientsPage({
@@ -12,8 +12,8 @@ export default async function PatientsPage({
   const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
-  const role = await getRoleById(profile.roleId);
-  const patients = await getAllPatientsForUser(profile.id, role.name, organizationId);
+  const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
+  const patients = await getAllPatientsForUser(profile.id, role?.name || "", organizationId);
 
   return (
     <Base params={paramsObj}>

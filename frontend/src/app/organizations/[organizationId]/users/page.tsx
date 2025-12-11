@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import { UsersTable } from "@/components/users/users-table";
-import { getAllRoles, getAllUsersWithProfiles, getProfileByUserId, getRoleById } from "@/db/queries/select";
+import { getAllRoles, getAllUsersWithProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -9,10 +9,10 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
   const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
-  const role = await getRoleById(profile.roleId);
+  const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
 
   // Redirect non-administrators to organization dashboard
-  if (role.name !== "Administrator") {
+  if (!role || role.name !== "Administrator") {
     redirect(`/organizations/${organizationId}`);
   }
 

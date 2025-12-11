@@ -18,6 +18,8 @@ type ProfileClientProps =
       user: any;
       profile: any;
       role: string;
+      roleId?: string;
+      organizationId?: string;
       samples: any[];
       reports: any[];
       metaUser: any;
@@ -46,17 +48,20 @@ export default function ProfileClient(props: ProfileClientProps) {
       const supabase = createClientComponentClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const res = await fetch(`/api/profile-with-role?userId=${user.id}`);
+        const url = orgId 
+          ? `/api/profile-with-role?userId=${user.id}&organizationId=${orgId}`
+          : `/api/profile-with-role?userId=${user.id}`;
+        const res = await fetch(url);
         const { profile, role } = await res.json();
         setCurrentUser(profile);
         setCurrentRole(role?.name || "");
       }
     }
     fetchUserAndRole();
-  }, []);
+  }, [orgId]);
 
   if (props.type === "user") {
-    const { user, profile, role, samples, reports, metaUser, patients = [] } = props;
+    const { user, profile, role, roleId, organizationId, samples, reports, metaUser, patients = [] } = props;
     // Details section for user
     const details = (
       <div className="space-y-2 text-xs">
@@ -129,7 +134,7 @@ export default function ProfileClient(props: ProfileClientProps) {
         samples={uniqueSamples}
         reports={reports}
         metaEntity={metaUser}
-        editDialogTrigger={<EditUserDialogTrigger user={user} profile={profile} role={role} />}
+        editDialogTrigger={<EditUserDialogTrigger user={user} profile={profile} role={role} roleId={roleId} organizationId={organizationId} />}
         details={details}
         reportList={reportList}
         patientsList={patients}

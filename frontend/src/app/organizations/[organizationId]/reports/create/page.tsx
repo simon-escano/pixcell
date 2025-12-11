@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleById } from "@/db/queries/select";
+import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import CreateReportForm from "@/components/reports/create-report-form";
 
@@ -12,10 +12,10 @@ export default async function CreateReportPage({
   const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
-  const role = await getRoleById(profile.roleId);
+  const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
   
   // Get patients based on user role
-  const patientsRaw = await getAllPatientsForUser(profile.id, role.name, organizationId, true);
+  const patientsRaw = await getAllPatientsForUser(profile.id, role?.name || "", organizationId, true);
   let patients = patientsRaw.map((p: any) => ({
     ...p,
     fullName: `${p.firstName} ${p.lastName}`,

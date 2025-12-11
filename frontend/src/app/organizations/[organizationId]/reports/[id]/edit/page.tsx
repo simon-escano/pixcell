@@ -15,7 +15,7 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
   if (!report) return notFound();
 
   const user = await getUser();
-  const profile = await getMetaProfileByUserId(user.id);
+  const profile = await getMetaProfileByUserId(user.id, organizationId);
   const patientsRaw = await getAllPatientsForUser(profile!.id, profile!.role, organizationId, true);
   let patients = patientsRaw.map((p: any) => ({
     ...p,

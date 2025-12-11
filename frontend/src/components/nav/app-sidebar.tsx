@@ -16,7 +16,7 @@ import {
   getAllPatientsForUser,
   getOrganizationsByProfileId,
   getProfileByUserId,
-  getRoleById
+  getRoleByUserIdAndOrganizationId
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import Link from "next/link";
@@ -34,7 +34,6 @@ export async function AppSidebar({
 }) {
   const user = await getUser();
   const profileData = await getProfileByUserId(user.id);
-  const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
   
   // 2. Logic Fix: await the params safely
@@ -44,6 +43,9 @@ export async function AppSidebar({
   const resolvedParams = params ? await params : null;
   const organizationIdFromUrl = resolvedParams?.organizationId || undefined;
   const selectedOrganizationId = organizationIdFromUrl || organizations[0]?.id || undefined;
+
+  // Get role for the selected organization
+  const profileRoleData = selectedOrganizationId ? await getRoleByUserIdAndOrganizationId(user.id, selectedOrganizationId) : null;
 
   // Fetch patients for the selected organization
   const patientsRaw = selectedOrganizationId && profileData?.id && profileRoleData?.name

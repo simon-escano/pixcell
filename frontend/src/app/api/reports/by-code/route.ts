@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReportByCode, getPatientById, getSampleById, getProfileByUserId, getRoleById } from "@/db/queries/select";
+import { getReportByCode, getPatientById, getSampleById, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
   const patient = report.patientId ? await getPatientById(report.patientId) : null;
   const sample = report.sampleId ? await getSampleById(report.sampleId) : null;
   let doctor = null, role = null;
-  if (sample?.createdBy) {
+  if (sample?.createdBy && report.organizationId) {
     doctor = await getProfileByUserId(sample.createdBy);
-    if (doctor?.roleId) role = await getRoleById(doctor.roleId);
+    if (doctor) role = await getRoleByUserIdAndOrganizationId(sample.createdBy, report.organizationId);
   }
   const contentObj = (typeof report.content === "object" && report.content !== null)
     ? report.content as any

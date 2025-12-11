@@ -7,7 +7,7 @@ import { updateUser } from "@/actions/users";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-export default function EditUserDialogTrigger({ user, profile, role }: { user: any, profile: any, role: string }) {
+export default function EditUserDialogTrigger({ user, profile, role, roleId, organizationId }: { user: any, profile: any, role: string, roleId?: string, organizationId?: string }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -18,6 +18,10 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
     roleId: string;
     file?: File;
   }) => {
+    if (!organizationId) {
+      toast.error("Organization ID is required to update user.");
+      return;
+    }
     try {
       const result = await updateUser(
         user.id,
@@ -25,6 +29,7 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
         data.lastName,
         data.email,
         data.roleId,
+        organizationId,
         undefined,
         data.file
       );
@@ -63,7 +68,7 @@ export default function EditUserDialogTrigger({ user, profile, role }: { user: a
           lastName: profile.lastName,
           imageId: profile.imageId,
           imageUrl: profile.imageUrl,
-          roleId: profile.roleId,
+          roleId: roleId || "",
           roleName: role,
         }}
         onSubmit={handleEditSubmit}

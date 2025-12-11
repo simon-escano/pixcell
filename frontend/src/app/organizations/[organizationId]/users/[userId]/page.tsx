@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { getProfileByUserId, getReportsByGeneratedBy, getRoleById, getSamplesByUserId, getUserById, getAllPatientsForUser } from "@/db/queries/select";
+import { getProfileByUserId, getReportsByGeneratedBy, getRoleByUserIdAndOrganizationId, getSamplesByUserId, getUserById, getAllPatientsForUser } from "@/db/queries/select";
 import UserProfileClient from "./UserProfileClient";
 import { getMetaProfileByUserId, getMetaSampleImagesBySampleId } from "@/app/organizations/[organizationId]/samples/queries";
 
@@ -15,8 +15,10 @@ export default async function UserPage({
   const profile = await getProfileByUserId(userId);
   const samples = await getSamplesByUserId(userId, organizationId);
   const reports = await getReportsByGeneratedBy(userId);
-  const role = (await getRoleById(profile.roleId)).name;
-  const metaUser = await getMetaProfileByUserId(userId);
+  const roleData = await getRoleByUserIdAndOrganizationId(userId, organizationId);
+  const role = roleData?.name || "";
+  const roleId = roleData?.id || "";
+  const metaUser = await getMetaProfileByUserId(userId, organizationId);
 
   // Fetch patients for this user
   const patients = await getAllPatientsForUser(profile.id, role, organizationId);
@@ -35,6 +37,8 @@ export default async function UserPage({
         user={user}
         profile={profile}
         role={role}
+        roleId={roleId}
+        organizationId={organizationId}
         samples={samplesWithImages}
         reports={reports}
         metaUser={metaUser}

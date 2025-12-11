@@ -222,13 +222,13 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function updateUser(userId: string, firstname: string, lastName: string, email: string, roleId: string, phone?: string, file?: File) {
+export async function updateUser(userId: string, firstname: string, lastName: string, email: string, roleId: string, organizationId: string, phone?: string, file?: File) {
   try {
-    if (!userId || !firstname || !lastName || !email || !roleId) {
-      throw new Error("Missing required fields: userId, firstname, lastName, email, and roleId are required.");
+    if (!userId || !firstname || !lastName || !email || !roleId || !organizationId) {
+      throw new Error("Missing required fields: userId, firstname, lastName, email, roleId, and organizationId are required.");
     }
 
-    logServer("Starting user update process", { userId, firstname, lastName, email, roleId });
+    logServer("Starting user update process", { userId, firstname, lastName, email, roleId, organizationId });
 
     // Get current profile data to check for existing image
     const profileData = await db.select().from(profile).where(eq(profile.userId, userId)).limit(1);
@@ -313,7 +313,7 @@ export async function updateUser(userId: string, firstname: string, lastName: st
     }
 
     try {
-      logServer("Updating user and profile records");
+      logServer("Updating user, profile, and organizationStaff records");
       await db.transaction(async (tx) => {
         // Update user table - only include phone if it has a value
         const userUpdateData = {
@@ -326,11 +326,10 @@ export async function updateUser(userId: string, firstname: string, lastName: st
           .set(userUpdateData)
           .where(eq(user.id, userId));
 
-        // Update profile table
+        // Update profile table (without roleId)
         const profileUpdateData = {
           firstName: firstname,
           lastName,
-          roleId,
           ...(imageId ? { imageId } : {})
         };
         logServer("Updating profile with data", profileUpdateData);
@@ -338,9 +337,20 @@ export async function updateUser(userId: string, firstname: string, lastName: st
         await tx.update(profile)
           .set(profileUpdateData)
           .where(eq(profile.userId, userId));
+
+        // Update organizationStaff roleId for this specific organization
+        logServer("Updating organizationStaff roleId", { profileId: profileData[0].id, organizationId, roleId });
+        await tx.update(organizationStaff)
+          .set({ roleId })
+          .where(
+            and(
+              eq(organizationStaff.staffId, profileData[0].id),
+              eq(organizationStaff.organizationId, organizationId)
+            )
+          );
       });
 
-      logServer("Successfully updated user and profile");
+      logServer("Successfully updated user, profile, and organizationStaff");
       return { success: true };
     } catch (error) {
       logServer("Database update failed", { error });
@@ -468,23 +478,28 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
 
     // Use transaction to ensure atomicity
     await db.transaction(async (tx) => {
-      // Insert profile
+      // Insert profile (roleId is temporary placeholder - will be removed when column is deleted)
+      // Get first role as placeholder since roleId is still required in schema
+      const [firstRole] = await tx.select().from(role).limit(1);
+      const placeholderRoleId = firstRole?.id || crypto.randomUUID();
+      
       await tx.insert(profile).values({
         id: userId,
         firstName,
         lastName,
         userId,
-        roleId,
+        roleId: placeholderRoleId, // Temporary - will be removed when roleId column is deleted
         imageId,
         licenseNo,
         mustChangePassword: true,
       });
 
-      // Create organizationStaff entry to link user to organization
-      logServer("Inserting into organizationStaff", { organizationId, staffId: userId });
+      // Create organizationStaff entry to link user to organization with roleId
+      logServer("Inserting into organizationStaff", { organizationId, staffId: userId, roleId });
       const [orgStaffResult] = await tx.insert(organizationStaff).values({
         organizationId,
         staffId: userId, // profile.id is the same as userId
+        roleId,
       }).returning();
       logServer("Successfully inserted into organizationStaff", orgStaffResult);
     });

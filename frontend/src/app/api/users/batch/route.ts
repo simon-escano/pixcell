@@ -37,20 +37,20 @@ export async function POST(req: NextRequest) {
           email: u.email,
           phone: u.phone || null,
         });
-        // Create profile
+        // Create profile (without roleId)
         const profileId = uuidv4();
         await db.insert(profile).values({
           id: profileId,
           firstName: u.firstName,
           lastName: u.lastName,
           userId: userId,
-          roleId: u.roleId,
           imageId: u.imageId || null,
         });
-        // Create organizationStaff entry to link user to organization
+        // Create organizationStaff entry to link user to organization with roleId
         await db.insert(organizationStaff).values({
           organizationId,
           staffId: profileId,
+          roleId: u.roleId,
         });
         results.push({ email: u.email, success: true });
       } catch (err: any) {

@@ -57,7 +57,7 @@ const SamplesPage = async ({
   const paramsObj = await params;
   const organizationId = paramsObj.organizationId;
   const currentUser = await getUser()
-  const metaUser = await getMetaProfileByUserId(currentUser.id)
+  const metaUser = await getMetaProfileByUserId(currentUser.id, organizationId)
   const samples = (metaUser?.role == "Administrator") ? await getAllSamples(organizationId) : await getSamplesByUserId(currentUser.id, organizationId);
   const reports = (metaUser?.role == "Administrator") ? await import("@/db/queries/select").then(m => m.getAllReports(organizationId)) : await import("@/db/queries/select").then(m => m.getAllReportsByUserId(currentUser.id))
   let patientsRaw = await getAllPatientsForUser(metaUser?.id!, metaUser?.role!, organizationId);

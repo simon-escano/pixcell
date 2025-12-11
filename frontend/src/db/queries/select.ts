@@ -27,6 +27,8 @@ export async function getAllUsers() {
   return await db.select().from(user);
 }
 
+// Note: This function is deprecated - use getAllUsersWithProfiles(organizationId) instead
+// Keeping for backward compatibility but roleId/roleName will be null without organizationId
 export async function getAllUsersWithProfiles2() {
   return await db
     .select({
@@ -37,13 +39,11 @@ export async function getAllUsersWithProfiles2() {
       lastName: profile.lastName,
       imageId: profile.imageId,
       imageUrl: image.imageUrl,
-      roleId: profile.roleId,
-      roleName: role.name,
     })
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
-    .innerJoin(role, eq(profile.roleId, role.id))
-    .leftJoin(image, eq(profile.imageId, image.id));
+    .leftJoin(image, eq(profile.imageId, image.id))
+    .then(results => results.map(r => ({ ...r, roleId: null as string | null, roleName: null as string | null })));
 }
 
 export async function getAllUsersWithProfiles(organizationId: string) {
@@ -56,16 +56,14 @@ export async function getAllUsersWithProfiles(organizationId: string) {
       lastName: profile.lastName,
       imageId: profile.imageId,
       imageUrl: image.imageUrl,
-      roleId: profile.roleId,
+      roleId: organizationStaff.roleId,
       roleName: role.name,
     })
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
-    .innerJoin(role, eq(profile.roleId, role.id))
+    .innerJoin(organizationStaff, eq(profile.id, organizationStaff.staffId))
+    .innerJoin(role, eq(organizationStaff.roleId, role.id))
     .leftJoin(image, eq(profile.imageId, image.id))
-    // 1. Join the profile table to the organizationStaff junction table
-    .innerJoin(organizationStaff, eq(profile.id, organizationStaff.staffId)) 
-    // 2. Filter using the organizationId column on the organizationStaff table
     .where(eq(organizationStaff.organizationId, organizationId));
 }
 
@@ -286,7 +284,6 @@ export async function getProfileByUserId(userId: string) {
       firstName: profile.firstName,
       lastName: profile.lastName,
       userId: profile.userId,
-      roleId: profile.roleId,
       imageId: profile.imageId,
       imageUrl: image.imageUrl,
       licenseNo: profile.licenseNo,
@@ -301,6 +298,25 @@ export async function getProfileByUserId(userId: string) {
 export async function getRoleById(id: string) {
   const result = await db.select().from(role).where(eq(role.id, id));
   return result[0];
+}
+
+export async function getRoleByUserIdAndOrganizationId(userId: string, organizationId: string) {
+  const result = await db
+    .select({
+      id: role.id,
+      name: role.name,
+    })
+    .from(organizationStaff)
+    .innerJoin(profile, eq(organizationStaff.staffId, profile.id))
+    .innerJoin(role, eq(organizationStaff.roleId, role.id))
+    .where(
+      and(
+        eq(profile.userId, userId),
+        eq(organizationStaff.organizationId, organizationId)
+      )
+    )
+    .limit(1);
+  return result[0] || null;
 }
 
 export async function getAllRoles() {
@@ -350,7 +366,11 @@ export async function getReportsByGeneratedBy(userId: string) {
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
     .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
-    .leftJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(organizationStaff, and(
+      eq(organizationStaff.staffId, profile.id),
+      eq(organizationStaff.organizationId, report.organizationId)
+    ))
+    .leftJoin(role, eq(organizationStaff.roleId, role.id))
     .where(eq(report.generatedBy, userId))
     .orderBy(report.createdAt);
 }
@@ -588,7 +608,11 @@ export async function getAllReports(organizationId: string) {
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
     .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
-    .leftJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(organizationStaff, and(
+      eq(organizationStaff.staffId, profile.id),
+      eq(organizationStaff.organizationId, report.organizationId)
+    ))
+    .leftJoin(role, eq(organizationStaff.roleId, role.id))
     .orderBy(report.createdAt);
 }
 
@@ -620,7 +644,11 @@ export async function getAllReportsByUserId(userId: string) {
     .leftJoin(user, eq(report.generatedBy, user.id))
     .leftJoin(profile, eq(user.id, profile.userId))
     .leftJoin(generatedByImage, eq(profile.imageId, generatedByImage.id))
-    .leftJoin(role, eq(profile.roleId, role.id))
+    .leftJoin(organizationStaff, and(
+      eq(organizationStaff.staffId, profile.id),
+      eq(organizationStaff.organizationId, report.organizationId)
+    ))
+    .leftJoin(role, eq(organizationStaff.roleId, role.id))
     .where(eq(report.generatedBy, userId))
     .orderBy(report.createdAt);
 }
@@ -648,21 +676,46 @@ export async function getFeedbackByUser(userId: string) {
     .orderBy(desc(feedback.createdAt));
 }
 
-export async function getAllDoctors() {
+export async function getAllDoctors(organizationId?: string) {
   // Return all profiles as doctors, excluding those with role 'Administrator'
-  return await db
-    .select({
-      id: profile.id,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      userId: profile.userId,
-      imageUrl: image.imageUrl,
-      roleName: role.name,
-    })
-    .from(profile)
-    .leftJoin(image, eq(profile.imageId, image.id))
-    .innerJoin(role, eq(profile.roleId, role.id))
-    .where(sql`${role.name} != 'Administrator'`);
+  // If organizationId is provided, only return doctors from that organization
+  // Otherwise, return doctors from any organization (may have duplicates if user has doctor role in multiple orgs)
+  if (organizationId) {
+    return await db
+      .select({
+        id: profile.id,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        userId: profile.userId,
+        imageUrl: image.imageUrl,
+        roleName: role.name,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .innerJoin(organizationStaff, eq(organizationStaff.staffId, profile.id))
+      .innerJoin(role, eq(organizationStaff.roleId, role.id))
+      .where(
+        and(
+          sql`${role.name} != 'Administrator'`,
+          eq(organizationStaff.organizationId, organizationId)
+        )
+      );
+  } else {
+    return await db
+      .select({
+        id: profile.id,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        userId: profile.userId,
+        imageUrl: image.imageUrl,
+        roleName: role.name,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .innerJoin(organizationStaff, eq(organizationStaff.staffId, profile.id))
+      .innerJoin(role, eq(organizationStaff.roleId, role.id))
+      .where(sql`${role.name} != 'Administrator'`);
+  }
 }
 
 export async function getDoctorForPatient(patientId: string) {

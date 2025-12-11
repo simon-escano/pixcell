@@ -16,7 +16,7 @@ export default async function UploadSampleWrapper({organizationId, patientsRaw}:
   }
   
   const user = await getUser();
-  const profile = await getMetaProfileByUserId(user.id);
+  const profile = await getMetaProfileByUserId(user.id, organizationId);
   let patients = patientsRaw.map((p: any) => ({
     ...p,
     fullName: `${p.firstName} ${p.lastName}`,

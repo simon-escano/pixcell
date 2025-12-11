@@ -1,7 +1,7 @@
 import { generateColorFromId } from "@/utils";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
-import { image, patient, profile, role, sample, sampleImage } from "@/db/schema";
+import { image, patient, profile, role, sample, sampleImage, organizationStaff } from "@/db/schema";
 import { MetaPatient, MetaProfile, MetaSample, MetaSampleImage } from "./types";
 
 export async function getUserMetaByUserId(userId: string) {
@@ -39,6 +39,7 @@ export async function getMetaSampleById(id: string): Promise<MetaSample | undefi
       sampleName: sample.sampleName,
       patientId: sample.patientId,
       createdById: sample.createdBy,
+      organizationId: sample.organizationId,
       createdAt: sample.createdAt,
     })
     .from(sample)
@@ -49,7 +50,7 @@ export async function getMetaSampleById(id: string): Promise<MetaSample | undefi
 
   const [patient, createdBy] = await Promise.all([
     getMetaPatientById(row.patientId),
-    getMetaProfileByUserId(row.createdById),
+    getMetaProfileByUserId(row.createdById, row.organizationId),
   ]);
 
   return {
@@ -61,29 +62,59 @@ export async function getMetaSampleById(id: string): Promise<MetaSample | undefi
   };
 }
 
-export async function getMetaProfileByUserId(userId: string): Promise<MetaProfile | undefined> {
-  const result = await db
-    .select({
-      id: profile.userId,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      role: role.name,
-      imageUrl: image.imageUrl,
-    })
-    .from(profile)
-    .leftJoin(image, eq(profile.imageId, image.id))
-    .leftJoin(role, eq(profile.roleId, role.id))
-    .where(eq(profile.userId, userId));
+export async function getMetaProfileByUserId(userId: string, organizationId?: string): Promise<MetaProfile | undefined> {
+  if (organizationId) {
+    const result = await db
+      .select({
+        id: profile.userId,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        role: role.name,
+        imageUrl: image.imageUrl,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .innerJoin(organizationStaff, eq(organizationStaff.staffId, profile.id))
+      .innerJoin(role, eq(organizationStaff.roleId, role.id))
+      .where(
+        and(
+          eq(profile.userId, userId),
+          eq(organizationStaff.organizationId, organizationId)
+        )
+      );
 
-  const row = result[0];
-  if (!row) return undefined;
+    const row = result[0];
+    if (!row) return undefined;
 
-  return {
-    id: row.id,
-    fullName: `${row.firstName} ${row.lastName}`,
-    role: row.role!,
-    imageUrl: row.imageUrl,
-  };
+    return {
+      id: row.id,
+      fullName: `${row.firstName} ${row.lastName}`,
+      role: row.role || "Unknown",
+      imageUrl: row.imageUrl,
+    };
+  } else {
+    // If no organizationId, don't join role - return "Unknown" for role
+    const result = await db
+      .select({
+        id: profile.userId,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        imageUrl: image.imageUrl,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .where(eq(profile.userId, userId));
+
+    const row = result[0];
+    if (!row) return undefined;
+
+    return {
+      id: row.id,
+      fullName: `${row.firstName} ${row.lastName}`,
+      role: "Unknown",
+      imageUrl: row.imageUrl,
+    };
+  }
 }
 
 export async function getMetaPatientById(id: string): Promise<MetaPatient | undefined> {
@@ -130,6 +161,15 @@ export async function getMetaPatientById(id: string): Promise<MetaPatient | unde
 }
 
 export async function getMetaSampleImagesBySampleId(sampleId: string): Promise<MetaSampleImage[]> {
+  // First get the sample to get organizationId
+  const sampleResult = await db
+    .select({ organizationId: sample.organizationId })
+    .from(sample)
+    .where(eq(sample.id, sampleId))
+    .limit(1);
+  
+  const organizationId = sampleResult[0]?.organizationId;
+
   const results = await db
     .select({
       id: sampleImage.id,
@@ -149,7 +189,7 @@ export async function getMetaSampleImagesBySampleId(sampleId: string): Promise<M
 
       let profile: MetaProfile | null = null;
       if (row.uploadedBy) {
-        const resolved = await getMetaProfileByUserId(row.uploadedBy);
+        const resolved = await getMetaProfileByUserId(row.uploadedBy, organizationId);
         profile = resolved ?? null;
       }
 

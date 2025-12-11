@@ -4,7 +4,7 @@ import StatusBadge from "@/components/reports/status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { getPatientById, getProfileByUserId, getReportById, getRoleById, getSampleById } from "@/db/queries/select"
+import { getPatientById, getProfileByUserId, getReportById, getRoleByUserIdAndOrganizationId, getSampleById } from "@/db/queries/select"
 import { format } from "date-fns"
 import { ArrowLeft, Sparkles, XCircle } from "lucide-react"
 import Link from "next/link"
@@ -109,9 +109,9 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
 
   let doctor = null,
     role = null
-  if (sample?.createdBy) {
+  if (sample?.createdBy && organizationId) {
     doctor = await getProfileByUserId(sample.createdBy)
-    if (doctor?.roleId) role = await getRoleById(doctor.roleId)
+    if (doctor) role = await getRoleByUserIdAndOrganizationId(sample.createdBy, organizationId)
   }
 
   // Ensure content is always an object with string text and array tables

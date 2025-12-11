@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import ReportsTable from "@/components/reports/reports-table";
-import { getAllReports, getProfileByUserId, getReportsByGeneratedBy, getRoleById } from "@/db/queries/select";
+import { getAllReports, getProfileByUserId, getReportsByGeneratedBy, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
 interface ReportPageProps {
@@ -17,10 +17,10 @@ export default async function ReportsPage({
   const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
-  const role = await getRoleById(profile.roleId);
+  const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
   
   // If user is admin, show all reports, otherwise show only user's reports
-  const reports = role.name === "Administrator"
+  const reports = role && role.name === "Administrator"
     ? await getAllReports(organizationId)
     : await getReportsByGeneratedBy(user.id);
 

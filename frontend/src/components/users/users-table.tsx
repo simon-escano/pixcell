@@ -71,6 +71,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
       data.lastName,
       data.email,
       data.roleId,
+      organizationId,
       undefined,
       data.file
     );

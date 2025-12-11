@@ -26,7 +26,8 @@ const SampleImagePage = async ({
   
   const sampleImages = await getMetaSampleImagesBySampleId(sample.id);
   const currentUser = await getUser();
-  const metaUser = await getMetaProfileByUserId(currentUser.id);
+  const organizationId = paramsObj.organizationId;
+  const metaUser = await getMetaProfileByUserId(currentUser.id, organizationId);
   const isDoctorAssociated = await isDoctorAssociatedWithPatient(currentUser.id, sample.patient?.id!);
 
   // SECURITY FIX: Check if user has access to view this sample

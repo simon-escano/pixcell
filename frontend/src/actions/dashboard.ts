@@ -11,7 +11,7 @@ import {
   getRecentUploadsByUser,
   getReportCountByPatientId,
   getReportsLast30DaysByUser,
-  getRoleById,
+  getRoleByUserIdAndOrganizationId,
   getSamplesByUserId
 } from "@/db/queries/select";
 import { patient, report, sample, sampleImage } from "@/db/schema";
@@ -83,7 +83,7 @@ export async function getDashboardStats(organizationId: string) {
   try {
     const user = await getUser();
     const profile = await getProfileByUserId(user.id);
-    const role = await getRoleById(profile.roleId);
+    const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
 
     console.log(profile)
     console.log(role)
@@ -96,7 +96,7 @@ export async function getDashboardStats(organizationId: string) {
       genderStats,
       monthlyStats
     ] = await Promise.all([
-      getAllPatientsForUser(profile.id, role.name, organizationId),
+      getAllPatientsForUser(profile.id, role?.name || "", organizationId),
       getSamplesByUserId(user.id, organizationId),
       getReportsLast30DaysByUser(user.id),
       getPatientsWithLastReportByUser(user.id),
