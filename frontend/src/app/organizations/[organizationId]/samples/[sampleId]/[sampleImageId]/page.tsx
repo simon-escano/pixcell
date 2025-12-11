@@ -9,15 +9,16 @@ import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleI
 const SampleImagePage = async ({
   params,
 }: {
-  params: Promise<{ sampleId: string; sampleImageId: string }>;
+  params: Promise<{ sampleId: string; sampleImageId: string; organizationId?: string }>;
 }) => {
-  const { sampleId, sampleImageId } = await params;
+  const paramsObj = await params;
+  const { sampleId, sampleImageId } = paramsObj;
   const sample = await getMetaSampleById(sampleId);
   
   // Check if sample exists
   if (!sample) {
     return (
-      <Base>
+      <Base params={paramsObj}>
         <AccessDeniedToast message="You have no access to this image or the image does not exist" />
       </Base>
     );
@@ -36,7 +37,7 @@ const SampleImagePage = async ({
   // If user doesn't have access, show toast and redirect
   if (!hasAccess) {
     return (
-      <Base>
+      <Base params={paramsObj}>
         <AccessDeniedToast message="You have no access to this image or the image does not exist" />
       </Base>
     );
@@ -45,7 +46,7 @@ const SampleImagePage = async ({
   const canEdit = metaUser?.role === "Administrator" || isDoctorAssociated || sample.createdBy?.id === currentUser.id;
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <SamplePageWrapper
         sample={sample}
         sampleImages={sampleImages}

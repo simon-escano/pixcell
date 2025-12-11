@@ -8,8 +8,9 @@ export default async function UserPage({
 }: {
   params: Promise<{ userId: string, organizationId: string }>;
 }) {
-  const userId = (await params).userId;
-  const organizationId = (await params).organizationId;
+  const paramsObj = await params;
+  const userId = paramsObj.userId;
+  const organizationId = paramsObj.organizationId;
   const user = await getUserById(userId);
   const profile = await getProfileByUserId(userId);
   const samples = await getSamplesByUserId(userId, organizationId);
@@ -29,7 +30,7 @@ export default async function UserPage({
   );
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <UserProfileClient
         user={user}
         profile={profile}

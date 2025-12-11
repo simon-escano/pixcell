@@ -7,8 +7,9 @@ import { getMetaProfileByUserId } from "../../../samples/queries";
 
 // We'll inline the edit form logic here for now, but ideally this would be a shared component
 export default async function EditReportPage({ params }: { params: Promise<{ id: string, organizationId: string }> }) {
-  const { id } = await params;
-  const organizationId = (await params).organizationId;
+  const paramsObj = await params;
+  const { id } = paramsObj;
+  const organizationId = paramsObj.organizationId;
   const reportId = id;
   const report = await getReportById(reportId);
   if (!report) return notFound();
@@ -54,7 +55,7 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
   // We'll use a client component for the form to handle state and submission
   // Pass initial values and an onSubmit handler that calls updateReport
   return (
-    <Base>
+    <Base params={paramsObj}>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <EditReportForm

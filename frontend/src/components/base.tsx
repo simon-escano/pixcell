@@ -3,14 +3,15 @@ import { SidebarInset, SidebarProvider } from "./ui/sidebar";
 import { AppSidebar } from "./nav/app-sidebar";
 import Header from "./header";
 
-const Base = ({
-  children,
-}: Readonly<{
+type BaseProps = Readonly<{
   children: React.ReactNode;
-}>) => {
+  params?: { organizationId?: string } | null;
+}>;
+
+const Base = ({ children, params }: BaseProps) => {
   return (
     <SidebarProvider className="h-screen overflow-hidden">
-      <AppSidebar />
+      <AppSidebar params={params} />
       <SidebarInset className="flex flex-col overflow-hidden">
         <Header />
         <div className="-mt-4 flex-1 overflow-y-auto">{children}</div>

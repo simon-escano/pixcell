@@ -37,10 +37,13 @@ export async function AppSidebar({
   const profileRoleData = profileData?.roleId ? await getRoleById(profileData.roleId) : null;
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
   
-  // 2. Logic Fix: await the params safely, then apply the fallbacks
-  // Logic: URL Param -> First Org ID -> Empty String
+  // 2. Logic Fix: await the params safely
+  // We'll keep two values:
+  // - organizationIdFromUrl: only present when the URL contains the param (used to show/hide nav)
+  // - selectedOrganizationId: the resolved selection (URL param fallback to first org)
   const resolvedParams = params ? await params : null;
-  const selectedOrganizationId = resolvedParams?.organizationId || organizations[0]?.id || undefined;
+  const organizationIdFromUrl = resolvedParams?.organizationId || undefined;
+  const selectedOrganizationId = organizationIdFromUrl || organizations[0]?.id || undefined;
 
   // Fetch patients for the selected organization
   const patientsRaw = selectedOrganizationId && profileData?.id && profileRoleData?.name
@@ -67,12 +70,8 @@ export async function AppSidebar({
       <SidebarContent>
         <OrganizationDropdown organizations={organizations} />
         <NavMain 
-          organizationId={selectedOrganizationId}
-          uploadSampleButton={
-            selectedOrganizationId ? (
-              <UploadSampleWrapper organizationId={selectedOrganizationId} patientsRaw={patientsRaw} />
-            ) : null
-          }
+          organizationId={organizationIdFromUrl}
+          patientsRaw={patientsRaw}
         />
       </SidebarContent>
       <NavSecondaryWrapper params={params} />

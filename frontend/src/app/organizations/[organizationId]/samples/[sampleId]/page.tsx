@@ -13,14 +13,15 @@ const SamplePage = async ({
 }: {
   params: Promise<{ sampleId: string; organizationId: string }>;
 }) => {
-  const sampleId = (await params).sampleId;
-  const organizationId = (await params).organizationId;
+  const paramsObj = await params;
+  const sampleId = paramsObj.sampleId;
+  const organizationId = paramsObj.organizationId;
   const sample = await getSampleById(sampleId);
   
   // Check if sample exists
   if (!sample) {
     return (
-      <Base>
+      <Base params={paramsObj}>
         <AccessDeniedToast message="You have no access to this image or the image does not exist" />
       </Base>
     );
@@ -38,7 +39,7 @@ const SamplePage = async ({
   // If user doesn't have access, show toast and redirect
   if (!hasAccess) {
     return (
-      <Base>
+      <Base params={paramsObj}>
         <AccessDeniedToast message="You have no access to this image or the image does not exist" />
       </Base>
     );

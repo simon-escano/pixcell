@@ -9,13 +9,14 @@ import {
 import { ContactRound, FileText, Images, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import UploadSampleWrapper from "@/components/samples/upload-sample-wrapper";
 
 interface NavMainProps {
   organizationId?: string;
-  uploadSampleButton?: ReactNode;
+  patientsRaw?: any[];
 }
 
-export function NavMain({ organizationId, uploadSampleButton }: NavMainProps) {
+export async function NavMain({ organizationId, patientsRaw }: NavMainProps) {
   // If no valid ID is found, hide the menu
   if (!organizationId || typeof organizationId !== "string" || organizationId.trim() === "") {
     return null;
@@ -47,12 +48,13 @@ export function NavMain({ organizationId, uploadSampleButton }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      {uploadSampleButton && (
+      {organizationId && (
         <div className="flex flex-col gap-2 mb-2">
-          {uploadSampleButton}
+          {/* Server-rendered upload button/wrapper for the current organization */}
+          <UploadSampleWrapper organizationId={organizationId} patientsRaw={patientsRaw || []} />
         </div>
       )}
-      
+
       <SidebarGroupLabel>Organization</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (

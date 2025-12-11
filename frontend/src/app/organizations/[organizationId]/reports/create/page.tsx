@@ -8,7 +8,8 @@ export default async function CreateReportPage({
 }: {
   params: Promise<{ organizationId: string }>;
 }) {
-  const organizationId = (await params).organizationId;
+  const paramsObj = await params;
+  const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
@@ -31,7 +32,7 @@ export default async function CreateReportPage({
   });
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
 

@@ -54,7 +54,8 @@ const SamplesPage = async ({
 }: {
   params: Promise<{ organizationId: string }>;
 }) => {
-  const organizationId = (await params).organizationId;
+  const paramsObj = await params;
+  const organizationId = paramsObj.organizationId;
   const currentUser = await getUser()
   const metaUser = await getMetaProfileByUserId(currentUser.id)
   const samples = (metaUser?.role == "Administrator") ? await getAllSamples(organizationId) : await getSamplesByUserId(currentUser.id, organizationId);
@@ -149,7 +150,7 @@ const SamplesPage = async ({
   }).length;
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <div className="min-h-screen" style={{ background: "var(--background)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Section */}

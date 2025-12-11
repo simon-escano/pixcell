@@ -6,9 +6,10 @@ import { getMetaPatientById, getMetaSampleImagesBySampleId } from "../../samples
 export default async function PatientPage({
   params,
 }: {
-  params: Promise<{ patientId: string }>;
+  params: Promise<{ patientId: string; organizationId: string }>;
 }) {
-  const patientId = (await params).patientId;
+  const paramsObj = await params;
+  const patientId = paramsObj.patientId;
   const patientData = await getPatientById(patientId);
   const samplesRaw = await getSamplesByPatientId(patientId);
   // Deduplicate samples by id
@@ -31,7 +32,7 @@ export default async function PatientPage({
   );
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <PatientProfileClient
         patient={patientData}
         metaPatient={metaPatient}

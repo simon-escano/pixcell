@@ -13,7 +13,8 @@ export default async function ReportsPage({
   searchParams,
 }: ReportPageProps) {
   const params = await searchParams;
-  const organizationId = (await _).organizationId;
+  const paramsObj = await _;
+  const organizationId = paramsObj.organizationId;
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleById(profile.roleId);
@@ -44,7 +45,7 @@ export default async function ReportsPage({
   console.log("reports", reports);
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
         {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
         <ReportsTable reports={normalizedReports as any} organizationId={organizationId} />

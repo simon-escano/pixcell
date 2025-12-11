@@ -93,8 +93,9 @@ function AiGeneratedBadge() {
 
 // Main component
 export default async function ImprovedReportPage({ params }: { params: Promise<{ id: string | string[], organizationId: string }> }) {
-  const { id } = await params
-  const organizationId = (await params).organizationId
+  const paramsObj = await params;
+  const { id } = paramsObj;
+  const organizationId = paramsObj.organizationId;
   const reportId = Array.isArray(id) ? id[0] : (id ?? "")
 
   const report = await getReportById(reportId)
@@ -134,7 +135,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
   const doctorLicense = doctor && "licenseNo" in doctor && (doctor as any).licenseNo ? (doctor as any).licenseNo : "N/A"
 
   return (
-    <Base>
+    <Base params={paramsObj}>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto p-8">
           {/* Header */}
