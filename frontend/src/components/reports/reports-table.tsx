@@ -94,7 +94,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
             );
           } },
           { key: "testType", maxWidth: 140 },
-          { key: "createdAt", header: "Modified At", enableSorting: true, customRender: (value: string) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null },
+          { key: "createdAt", header: "Date", enableSorting: true, customRender: (value: string) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null },
           {
             key: "generatedByName", header:"Medical Professional",
             customRender: (_value, row) => {

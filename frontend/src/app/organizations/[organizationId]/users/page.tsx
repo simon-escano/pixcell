@@ -30,6 +30,7 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
     id: user.id,
     imageId: user.imageId || null,
     imageUrl: user.imageUrl || null,
+    updatedAt: user.updatedAt || null,
   }));
 
   return (

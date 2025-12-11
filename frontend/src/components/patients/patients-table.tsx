@@ -12,6 +12,7 @@ import UserButton from "../users/user-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CirclePlus, Plus, Upload, XCircle, Trash2 } from "lucide-react";
+import ClientDate from "../client-date";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 
@@ -190,9 +191,10 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   return (
     <div>
       <DataTable
-        data={[...patients].sort((a, b) => a.firstName.localeCompare(b.firstName))}
-        excludeColumns={["id", "imageId", "birthDate", "createdAt", "imageUrl", "createdBy","lastName"]}
+        data={patients}
+        excludeColumns={["id", "imageId", "birthDate", "imageUrl", "createdBy","lastName"]}
         defaultHiddenColumns={ ["height", "weight"]}
+        defaultSorting={[{ id: "createdAt", desc: true }]}
         searchPlaceholder="Search patients..."
         searchableColumns={["firstName", "lastName", "email", "bloodType"]}
         columnConfigs={[
@@ -213,6 +215,12 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
                 />
               );
             },
+          },
+          { 
+            key: "createdAt", 
+            header: "Date", 
+            enableSorting: true, 
+            customRender: (value: string | Date) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null 
           },
         ]}
         actionItems={actionItems}

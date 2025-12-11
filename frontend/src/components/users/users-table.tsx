@@ -14,6 +14,7 @@ import { CirclePlus, Upload, XCircle } from "lucide-react";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
+import ClientDate from "../client-date";
 
 type CombinedUser = {
   id: User["id"];
@@ -24,6 +25,7 @@ type CombinedUser = {
   imageId: Profile["imageId"];
   roleId: Role["id"];
   roleName: Role["name"];
+  updatedAt?: Date | string | null;
 };
 
 function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
@@ -220,10 +222,19 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
   return (
     <div>
       <DataTable
-        data={[...users].sort((a, b) => a.firstName.localeCompare(b.firstName))}
+        data={users}
         excludeColumns={["roleId", "id", "imageId", "imageUrl"]}
         defaultHiddenColumns={["phone"]}
-        columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
+        defaultSorting={[{ id: "updatedAt", desc: true }]}
+        columnConfigs={[
+          { key: "imageId", maxWidth: 200 },
+          { 
+            key: "updatedAt", 
+            header: "Date", 
+            enableSorting: true, 
+            customRender: (value: string | Date | null) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null 
+          },
+        ]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
           router.push(`/organizations/${orgId}/users/${user.id}`)

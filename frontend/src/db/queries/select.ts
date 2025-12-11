@@ -58,13 +58,15 @@ export async function getAllUsersWithProfiles(organizationId: string) {
       imageUrl: image.imageUrl,
       roleId: organizationStaff.roleId,
       roleName: role.name,
+      updatedAt: organizationStaff.updatedAt,
     })
     .from(user)
     .innerJoin(profile, eq(user.id, profile.userId))
     .innerJoin(organizationStaff, eq(profile.id, organizationStaff.staffId))
     .innerJoin(role, eq(organizationStaff.roleId, role.id))
     .leftJoin(image, eq(profile.imageId, image.id))
-    .where(eq(organizationStaff.organizationId, organizationId));
+    .where(eq(organizationStaff.organizationId, organizationId))
+    .orderBy(desc(organizationStaff.updatedAt));
 }
 
 export async function getAllProfiles() {
