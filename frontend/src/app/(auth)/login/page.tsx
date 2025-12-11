@@ -21,5 +21,5 @@ export default function LoginPage() {
 }
 
 export const metadata = {
-  title: "Login - PixCell",
+  title: "PixCell | Login",
 };

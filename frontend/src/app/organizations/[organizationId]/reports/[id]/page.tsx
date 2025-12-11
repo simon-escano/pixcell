@@ -12,6 +12,30 @@ import { Suspense } from "react"
 import AiGeneratedNoticeClient from "./ai-generated-notice-client"
 import ReportActions, { ReportActionButtons } from "./report-actions-client"
 import { ReportStatus } from "@/lib/status-config"
+import { Metadata } from "next"
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string | string[]; organizationId: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const reportId = Array.isArray(paramsObj.id) ? paramsObj.id[0] : (paramsObj.id ?? "");
+  const report = await getReportById(reportId);
+  
+  const title = report?.title 
+    ? truncate(report.title)
+    : "Report";
+  
+  return {
+    title: `PixCell | ${title}`,
+  };
+}
 
 // Loading component
 function ReportPageSkeleton() {

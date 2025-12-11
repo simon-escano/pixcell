@@ -2,6 +2,28 @@ import Base from "@/components/base";
 import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId } from "@/db/queries/select";
 import PatientProfileClient from "./PatientProfileClient";
 import { getMetaPatientById, getMetaSampleImagesBySampleId } from "../../samples/queries";
+import { Metadata } from "next";
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ patientId: string; organizationId: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const patient = await getPatientById(paramsObj.patientId);
+  const patientName = patient 
+    ? truncate(`${patient.firstName} ${patient.lastName}`)
+    : "Patient";
+  
+  return {
+    title: `PixCell | ${patientName}`,
+  };
+}
 
 export default async function PatientPage({
   params,

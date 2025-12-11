@@ -4,6 +4,29 @@ import { getAllPatientsForUser, getAllProfiles, getReportById } from "@/db/queri
 import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { getMetaProfileByUserId } from "../../../samples/queries";
+import { Metadata } from "next";
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; organizationId: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const report = await getReportById(paramsObj.id);
+  
+  const title = report?.title 
+    ? truncate(report.title)
+    : "Edit Report";
+  
+  return {
+    title: `PixCell | ${title}`,
+  };
+}
 
 // We'll inline the edit form logic here for now, but ideally this would be a shared component
 export default async function EditReportPage({ params }: { params: Promise<{ id: string, organizationId: string }> }) {

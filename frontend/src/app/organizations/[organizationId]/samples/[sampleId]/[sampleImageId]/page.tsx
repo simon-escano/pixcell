@@ -5,6 +5,28 @@ import SamplePageWrapper from "./wrapper";
 import { redirect } from "next/navigation";
 import AccessDeniedToast from "./access-denied-toast";
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
+import { Metadata } from "next";
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ sampleId: string; sampleImageId: string; organizationId?: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const sample = await getMetaSampleById(paramsObj.sampleId);
+  const sampleName = sample?.sampleName 
+    ? truncate(sample.sampleName)
+    : "Sample";
+  
+  return {
+    title: `PixCell | ${sampleName}`,
+  };
+}
 
 const SampleImagePage = async ({
   params,

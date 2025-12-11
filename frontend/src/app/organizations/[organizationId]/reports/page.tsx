@@ -8,6 +8,10 @@ interface ReportPageProps {
   searchParams: Promise<{ search?: string }>;
 }
 
+export const metadata = {
+  title: "PixCell | Reports",
+};
+
 export default async function ReportsPage({
   params: _,
   searchParams,

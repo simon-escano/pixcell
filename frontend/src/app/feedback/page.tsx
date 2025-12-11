@@ -3,6 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FeedbackForm } from "./feedback-form";
 import { getUser } from "@/lib/auth";
 
+export const metadata = {
+  title: "PixCell | Feedback",
+};
+
 export default async function FeedbackPage() {
   const user = await getUser();
 

@@ -3,6 +3,10 @@ import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleByUse
 import { getUser } from "@/lib/auth";
 import CreateReportForm from "@/components/reports/create-report-form";
 
+export const metadata = {
+  title: "PixCell | Create Report",
+};
+
 export default async function CreateReportPage({
   params,
 }: {

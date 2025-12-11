@@ -3,6 +3,10 @@ import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleByUse
 import { getUser } from "@/lib/auth";
 import ClientCreateReportForm from "./ClientCreateReportForm";
 
+export const metadata = {
+  title: "PixCell | AI Generate Report",
+};
+
 export default async function AiGenerateReportPage({
   params,
 }: {

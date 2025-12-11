@@ -1,6 +1,28 @@
 import Base from '@/components/base';
 import { getOrganizationById } from '@/db/queries/select';
 import React from 'react'
+import { Metadata } from 'next';
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ organizationId: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const organization = await getOrganizationById(paramsObj.organizationId);
+  const orgName = organization?.name 
+    ? truncate(organization.name)
+    : "Organization";
+  
+  return {
+    title: `PixCell | ${orgName}`,
+  };
+}
 
 const OrganizationPage = async ({
   params,

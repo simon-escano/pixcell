@@ -2,6 +2,28 @@ import Base from "@/components/base";
 import { getProfileByUserId, getReportsByGeneratedBy, getRoleByUserIdAndOrganizationId, getSamplesByUserId, getUserById, getAllPatientsForUser } from "@/db/queries/select";
 import UserProfileClient from "./UserProfileClient";
 import { getMetaProfileByUserId, getMetaSampleImagesBySampleId } from "@/app/organizations/[organizationId]/samples/queries";
+import { Metadata } from "next";
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ userId: string; organizationId: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const profile = await getProfileByUserId(paramsObj.userId);
+  const userName = profile 
+    ? truncate(`${profile.firstName} ${profile.lastName}`)
+    : "User";
+  
+  return {
+    title: `PixCell | ${userName}`,
+  };
+}
 
 export default async function UserPage({
   params,

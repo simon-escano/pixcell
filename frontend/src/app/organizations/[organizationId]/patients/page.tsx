@@ -25,5 +25,5 @@ export default async function PatientsPage({
 }
 
 export const metadata = {
-  title: "Patients - PixCell",
+  title: "PixCell | Patients",
 };

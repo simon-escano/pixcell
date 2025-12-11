@@ -4,6 +4,10 @@ import { getOrganizationsByProfileId, getProfileByUserId } from '@/db/queries/se
 import { getUser } from '@/lib/auth';
 import Link from 'next/link';
 
+export const metadata = {
+  title: "PixCell | Organizations",
+};
+
 const OrganizationsPage = async () => {
     const user = await getUser();
     const profileData = await getProfileByUserId(user.id);

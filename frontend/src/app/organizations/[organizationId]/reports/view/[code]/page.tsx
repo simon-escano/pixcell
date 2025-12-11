@@ -20,6 +20,30 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { Suspense } from "react"
+import { Metadata } from "next"
+import { getReportByCode } from "@/db/queries/select"
+
+function truncate(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ code: string; organizationId?: string }>;
+}): Promise<Metadata> {
+  const paramsObj = await params;
+  const report = await getReportByCode(paramsObj.code);
+  
+  const title = report?.title 
+    ? truncate(report.title)
+    : "Report";
+  
+  return {
+    title: `PixCell | ${title}`,
+  };
+}
 
 // Loading component
 function ReportViewSkeleton() {

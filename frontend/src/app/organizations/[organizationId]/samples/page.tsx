@@ -211,4 +211,8 @@ const SamplesPage = async ({
   )
 }
 
+export const metadata = {
+  title: "PixCell | Samples",
+};
+
 export default SamplesPage

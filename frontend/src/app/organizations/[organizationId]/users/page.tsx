@@ -43,5 +43,5 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
 }
 
 export const metadata = {
-  title: "Manage Users - PixCell",
+  title: "PixCell | Manage Users",
 };

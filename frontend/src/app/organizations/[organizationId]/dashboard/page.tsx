@@ -4,6 +4,10 @@ import { Dashboard } from "@/components/dashboard/dashboard";
 import { getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
+export const metadata = {
+  title: "PixCell | Dashboard",
+};
+
 export default async function Page({
   params,
 }: {

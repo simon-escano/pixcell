@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SettingsAppearance } from "@/components/settings/appearance";
 import { SettingsAccount } from "@/components/settings/account";
 
+export const metadata = {
+  title: "PixCell | Settings",
+};
+
 export default function SettingsPage() {
   return (
     <Base>
