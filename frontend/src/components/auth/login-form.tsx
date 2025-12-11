@@ -130,7 +130,7 @@ export function LoginForm({
                 </div>
                 <div className="text-center text-sm">
                   Are you a patient?{" "}
-                  <Link href={orgId ? `/organizations/${orgId}/reports/view` : `/reports/view`} className="underline underline-offset-4 text-primary">
+                  <Link href={`/reports/view`} className="underline underline-offset-4 text-primary">
                     View reports
                   </Link>
                 </div>
