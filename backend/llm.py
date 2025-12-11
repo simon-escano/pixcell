@@ -6,11 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY environment variable is not set. Please set it in your environment or .env file.")
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+# Set a working US proxy (test and replace; this one is from free lists as of Dec 2025)
+# Find fresh ones at free-proxy-list.net or proxylister.com — filter for US, HTTP, high uptime
+#os.environ['HTTP_PROXY'] = 'http://198.199.86.11:80'
+#os.environ['HTTPS_PROXY'] = 'http://198.199.86.11:80'
 
 # Get API key from environment variable
 # Check GC LOL -molt
@@ -58,10 +61,11 @@ def analyze_detections(class_counts: Dict[str, int], sample_type: str = "Blood s
     """
     try:
         # Configure the API key
-        genai.configure(api_key=GEMINI_API_KEY)
+        genai.configure(api_key=GEMINI_API_KEY,transport='rest')
+        #print("Gemini configured with proxy successfully.")
         
         # Initialize the Gemini model
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Build the prompt
         prompt = build_prompt_from_counts(class_counts, sample_type, stain, magnification)
