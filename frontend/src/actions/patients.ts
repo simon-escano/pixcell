@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { patient, image, doctorPatient } from "@/db/schema"
+import { patient, image, doctorPatient, organizationPatient } from "@/db/schema"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm"
 
@@ -217,12 +217,16 @@ export async function addPatient(data: {
   bloodType: string;
   birthDate: string;
   file?: File | null;
-  createdBy: string; // <-- Add this!
+  createdBy: string;
+  organizationId: string; // <-- Add organizationId
+  doctorId?: string; // <-- Optional doctor assignment
 }) {
-  // Check if email already exists
-  const existing = await db.select().from(patient).where(eq(patient.email, data.email)).limit(1);
-  if (existing.length > 0) {
-    return { success: false, error: "Email already exists." };
+  // Check if email already exists (only if email is provided and not empty)
+  if (data.email && data.email.trim() !== "") {
+    const existing = await db.select().from(patient).where(eq(patient.email, data.email.trim())).limit(1);
+    if (existing.length > 0) {
+      return { success: false, error: "Email already exists." };
+    }
   }
   let imageId: string | undefined;
 
@@ -261,18 +265,47 @@ export async function addPatient(data: {
     }
   }
 
-  const insertData = { ...data };
-  delete insertData.file;
+  // Prepare insert data, converting empty strings to null for optional fields
+  const insertData: any = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email && data.email.trim() !== "" ? data.email.trim() : null,
+    contactNumber: data.contactNumber && data.contactNumber.trim() !== "" ? data.contactNumber.trim() : null,
+    address: data.address && data.address.trim() !== "" ? data.address.trim() : null,
+    height: data.height || null,
+    weight: data.weight || null,
+    sex: data.sex,
+    bloodType: data.bloodType && data.bloodType.trim() !== "" ? data.bloodType.trim() : null,
+    birthDate: data.birthDate && data.birthDate.trim() !== "" ? data.birthDate : null,
+    createdAt: new Date(),
+    createdBy: data.createdBy,
+  };
+  
   if (imageId) {
-    Object.assign(insertData, { imageId });
+    insertData.imageId = imageId;
   }
 
   try {
-    await db.insert(patient).values({
-      ...insertData,
-      createdAt: new Date(),
-      createdBy: data.createdBy,
+    // Insert patient and organizationPatient in a transaction
+    await db.transaction(async (tx) => {
+      const [newPatient] = await tx.insert(patient).values(insertData).returning();
+
+      // Link patient to organization
+      await tx.insert(organizationPatient).values({
+        patientId: newPatient.id,
+        organizationId: data.organizationId,
+        status: "Active",
+      });
+
+      // If doctorId is provided, assign doctor to patient
+      if (data.doctorId) {
+        await tx.insert(doctorPatient).values({
+          doctorId: data.doctorId,
+          patientId: newPatient.id,
+        });
+      }
     });
+    
     return { success: true };
   } catch (error) {
     console.error("Failed to add patient:", error);
@@ -283,9 +316,8 @@ export async function addPatient(data: {
 export async function setDoctorForPatient(patientId: string, doctorId: string) {
   // Remove any existing doctor-patient relationship for this patient
   await db.delete(doctorPatient).where(eq(doctorPatient.patientId, patientId));
-  // Insert the new doctor-patient relationship
+  // Insert the new doctor-patient relationship (id is auto-generated)
   await db.insert(doctorPatient).values({
-    id: crypto.randomUUID(),
     doctorId,
     patientId
   });

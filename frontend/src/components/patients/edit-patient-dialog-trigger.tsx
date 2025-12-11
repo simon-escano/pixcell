@@ -3,22 +3,25 @@ import { useState, useEffect } from "react";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export function EditPatientDialogTrigger({ patient }: { patient: any }) {
   const [open, setOpen] = useState(false);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [currentDoctorId, setCurrentDoctorId] = useState<string>("");
   const router = useRouter();
+  const params = useParams();
+  const orgId = (params as any)?.organizationId || "";
 
   useEffect(() => {
     async function fetchDoctors() {
-      const res = await fetch('/api/doctors');
+      const url = orgId ? `/api/doctors?organizationId=${orgId}` : '/api/doctors';
+      const res = await fetch(url);
       const allDoctors = await res.json();
       setDoctors(allDoctors);
     }
     fetchDoctors();
-  }, []);
+  }, [orgId]);
 
   useEffect(() => {
     async function fetchCurrentDoctor() {

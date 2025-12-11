@@ -1,7 +1,6 @@
 "use client";
 import { deleteReport } from "@/actions/reports";
 import { Report } from "@/db/schema";
-import { format } from "date-fns";
 import { CirclePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +10,7 @@ import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
 import UserButton from "../users/user-button";
 import StatusUpdate from "./status-update";
+import ClientDate from "../client-date";
 
 interface ReportsTableProps {
   reports: Report[];
@@ -70,6 +70,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
           'generatedByImage',
           'generatedByRole',]}
         defaultHiddenColumns={[]}
+        defaultSorting={[{ id: "createdAt", desc: true }]}
         searchPlaceholder="Search reports..."
         searchableColumns={["id", "title", "patientName", "testType", "status", "generatedByName" , "createdAt"]}
         columnConfigs={[
@@ -93,7 +94,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
             );
           } },
           { key: "testType", maxWidth: 140 },
-          { key: "createdAt", header: "Date Created", enableSorting: true, customRender: (value: string) => value ? format(new Date(value), "MMMM d, yyyy") : "" },
+          { key: "createdAt", header: "Modified At", enableSorting: true, customRender: (value: string) => value ? <ClientDate date={value} options={{ month: "long", day: "numeric", year: "numeric" }} /> : null },
           {
             key: "generatedByName", header:"Medical Professional",
             customRender: (_value, row) => {

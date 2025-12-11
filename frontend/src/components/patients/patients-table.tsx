@@ -48,15 +48,17 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [currentDoctorId, setCurrentDoctorId] = useState<string>("");
 
-  // Fetch doctors once on mount
+  // Fetch doctors once on mount with organizationId
   useEffect(() => {
     async function fetchDoctors() {
-      const res = await fetch('/api/doctors');
-      const allDoctors = await res.json();
-      setDoctors(allDoctors);
+      if (orgId) {
+        const res = await fetch(`/api/doctors?organizationId=${orgId}`);
+        const allDoctors = await res.json();
+        setDoctors(allDoctors);
+      }
     }
     fetchDoctors();
-  }, []);
+  }, [orgId]);
 
   // Fetch current doctor when editing a patient
   useEffect(() => {
@@ -251,6 +253,8 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
         open={addOpen}
         setOpen={setAddOpen}
         showTrigger={false}
+        doctors={doctors}
+        organizationId={orgId}
       />
       <CustomAlertDialog
         open={batchDeleteOpen}

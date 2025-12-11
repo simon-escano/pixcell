@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAllDoctors } from "@/db/queries/select";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const doctors = await getAllDoctors();
+    const { searchParams } = new URL(req.url);
+    const organizationId = searchParams.get("organizationId");
+    
+    const doctors = await getAllDoctors(organizationId || undefined);
     // Only return id, firstName, lastName for dropdown
     const result = doctors.map((doc: any) => ({
       id: doc.id,
