@@ -40,9 +40,11 @@ interface Doctor {
 
 export default function AssignDoctorToPatient({
   patientId,
+  organizationId,
   onUpdate,
 }: {
   patientId: string
+  organizationId?: string
   onUpdate?: () => void
 }) {
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -60,10 +62,13 @@ export default function AssignDoctorToPatient({
     async function fetchDoctors() {
       setLoading(true)
       try {
-        const res = await fetch("/api/doctors")
+        const url = organizationId ? `/api/doctors?organizationId=${organizationId}` : "/api/doctors"
+        const res = await fetch(url)
         if (res.ok) {
           const allDoctors = await res.json()
-          setDoctors(allDoctors)
+          // Deduplicate doctors by id since a user can have doctor role in multiple organizations
+          const deduplicatedDoctors = Array.from(new Map((allDoctors as Doctor[]).map((doc: Doctor) => [doc.id, doc])).values())
+          setDoctors(deduplicatedDoctors)
         } else {
           toast.error("Failed to load doctors")
         }
@@ -74,7 +79,7 @@ export default function AssignDoctorToPatient({
       }
     }
     fetchDoctors()
-  }, [])
+  }, [organizationId])
 
   // Fetch assigned doctors for this patient
   useEffect(() => {

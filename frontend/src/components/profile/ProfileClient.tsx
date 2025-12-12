@@ -221,7 +221,7 @@ export default function ProfileClient(props: ProfileClientProps) {
     if (currentRole === "Administrator") {
       actions = (
         <>
-          <AssignDoctorToPatient patientId={patient.id} onUpdate={fetchDoctors} />
+          <AssignDoctorToPatient patientId={patient.id} organizationId={orgId} onUpdate={fetchDoctors} />
           {actions}
         </>
       );
