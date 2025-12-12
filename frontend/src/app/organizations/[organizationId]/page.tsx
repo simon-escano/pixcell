@@ -149,7 +149,7 @@ const OrganizationPage = async ({
       <div className="h-full overflow-y-auto">
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-10">
           <div
-            className="relative overflow-hidden p-4 sm:p-4 md:p-6 lg:p-8 p-4 rounded-xl shadow-xl"
+            className="relative overflow-hidden sm:p-4 md:p-6 lg:p-8 p-4 rounded-xl shadow-xl"
             style={{
               background: `linear-gradient(135deg, ${lightColor} 0%, ${darkColor} 100%)`,
             }}
@@ -255,7 +255,7 @@ const OrganizationPage = async ({
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-semibold">{patients.length}</p>
+                      <p className="text-2xl font-bold">{patients.length}</p>
                       <p className="text-sm text-muted-foreground">{patients.length === 1 ? "patient" : "patients"}</p>
                     </div>
                   </Link>
@@ -292,7 +292,7 @@ const OrganizationPage = async ({
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-semibold">{doctors.length}</p>
+                      <p className="text-2xl font-bold">{doctors.length}</p>
                       <p className="text-sm text-muted-foreground">{doctors.length === 1 ? "member" : "members"}</p>
                     </div>
                   </Link>

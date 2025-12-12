@@ -242,7 +242,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[95vw] !max-w-7xl w-full p-0 bg-background rounded-lg shadow-lg border">
+      <DialogContent className="!max-w-7xl w-full p-0 bg-background rounded-lg shadow-lg border">
         <div className="flex flex-col max-h-[90vh]">
           {/* Clean Header */}
           <div className="bg-primary text-primary-foreground p-6 rounded-t-lg">
