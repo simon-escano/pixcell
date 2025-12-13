@@ -4,6 +4,8 @@ import { db } from "@/db"
 import { patient, image, doctorPatient, organizationPatient } from "@/db/schema"
 import { createClient } from "@supabase/supabase-js";
 import { eq } from "drizzle-orm"
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -113,6 +115,11 @@ export async function updatePatient(id: string, data: {
         .where(eq(patient.id, id)),
       DB_TIMEOUT
     );
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.patients);
+    revalidateTag(`patient-${id}`);
+    revalidatePath('/organizations');
     
     return { success: true };
   } catch (error) {
@@ -191,6 +198,11 @@ export async function deletePatient(patientId: string) {
         throw new Error(`Failed to delete image record: ${imageDeleteError}`);
       }
     }
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.patients);
+    revalidateTag(`patient-${patientId}`);
+    revalidatePath('/organizations');
 
     return { success: true };
   } catch (error) {
@@ -287,8 +299,10 @@ export async function addPatient(data: {
 
   try {
     // Insert patient and organizationPatient in a transaction
+    let newPatientId: string;
     await db.transaction(async (tx) => {
       const [newPatient] = await tx.insert(patient).values(insertData).returning();
+      newPatientId = newPatient.id;
 
       // Link patient to organization
       await tx.insert(organizationPatient).values({
@@ -305,6 +319,10 @@ export async function addPatient(data: {
         });
       }
     });
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.patients);
+    revalidatePath('/organizations');
     
     return { success: true };
   } catch (error) {
@@ -321,5 +339,11 @@ export async function setDoctorForPatient(patientId: string, doctorId: string) {
     doctorId,
     patientId
   });
+
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.patients);
+  revalidateTag(`patient-${patientId}`);
+  revalidatePath('/organizations');
+
   return { success: true };
 }

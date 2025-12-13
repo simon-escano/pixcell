@@ -7,6 +7,8 @@ import { getUser } from "@/lib/auth";
 import { createClient } from '@supabase/supabase-js';
 import { eq, inArray } from "drizzle-orm";
 import sizeOf from "image-size";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -156,6 +158,11 @@ export async function uploadSampleAction(
     // Wait for all uploads to complete
     await Promise.all(uploadPromises);
 
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.samples);
+    revalidateTag(`patient-${patientId}`);
+    revalidatePath('/organizations');
+
     return { 
       success: true, 
       sampleId: sampleRecord.id,
@@ -177,6 +184,11 @@ export async function editSampleAction(sampleId: string, files: File[]) {
   
   // Wait for all uploads to complete
   await Promise.all(uploadPromises);
+
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.samples);
+  revalidateTag(`sample-${sampleId}`);
+  revalidatePath('/organizations');
 
   return { 
     success: true, 
@@ -243,6 +255,11 @@ export async function deleteSample(sampleId: string) {
     // Finally, delete the sample record
     await db.delete(sample).where(eq(sample.id, sampleId));
 
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.samples);
+    revalidateTag(`sample-${sampleId}`);
+    revalidatePath('/organizations');
+
     return { success: true };
   } catch (error) {
     console.error("Failed to delete sample:", error);
@@ -289,6 +306,10 @@ export async function deleteSampleImage(sampleImageId: string) {
         }
       }
     }
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.samples);
+    revalidatePath('/organizations');
 
     return { success: true };
   } catch (error) {

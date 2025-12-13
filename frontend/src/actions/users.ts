@@ -6,6 +6,8 @@ import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/utils"
 import { createClient } from "@supabase/supabase-js";
 import { eq, and } from "drizzle-orm";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -102,6 +104,11 @@ export const signupAction = async (formData: FormData) => {
     });
 
     console.log("Role query result:", result);
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.users);
+    revalidateTag(CACHE_TAGS.profiles);
+    revalidateTag(`user-${userId}`);
 
     return { errorMessage: null };
   } catch (error) {
@@ -215,6 +222,12 @@ export async function deleteUser(userId: string) {
     }
 
     logServer("User deletion completed successfully");
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.users);
+    revalidateTag(CACHE_TAGS.profiles);
+    revalidatePath('/organizations');
+
     return { success: true };
   } catch (error) {
     logServer("Failed to delete user", { error });
@@ -351,6 +364,13 @@ export async function updateUser(userId: string, firstname: string, lastName: st
       });
 
       logServer("Successfully updated user, profile, and organizationStaff");
+
+      // Revalidate cache
+      revalidateTag(CACHE_TAGS.users);
+      revalidateTag(CACHE_TAGS.profiles);
+      revalidateTag(`user-${userId}`);
+      revalidatePath('/organizations');
+
       return { success: true };
     } catch (error) {
       logServer("Database update failed", { error });
@@ -399,6 +419,10 @@ export const changePasswordAction = async (currentPassword: string, newPassword:
     await db.update(profile)
       .set({ mustChangePassword: false })
       .where(eq(profile.userId, user.id));
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.profiles);
+    revalidateTag(`user-${user.id}`);
 
     return { errorMessage: null };
   } catch (error) {
@@ -519,6 +543,12 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
 
     logServer("Verified organizationStaff entry exists", verifyOrgStaff[0]);
 
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.users);
+    revalidateTag(CACHE_TAGS.profiles);
+    revalidateTag(`user-${userId}`);
+    revalidatePath('/organizations');
+
     return { errorMessage: null };
   } catch (error) {
     return { errorMessage: getErrorMessage(error) };
@@ -602,6 +632,10 @@ export const setupInitialPasswordAction = async (email: string, newPassword: str
       await db.update(profile)
         .set({ mustChangePassword: false })
         .where(eq(profile.userId, userId));
+
+      // Revalidate cache
+      revalidateTag(CACHE_TAGS.profiles);
+      revalidateTag(`user-${userId}`);
 
       return { errorMessage: null };
     } catch (adminError) {

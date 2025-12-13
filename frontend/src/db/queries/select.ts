@@ -2,7 +2,7 @@ import { doctorPatient, feedback, image, organization, organizationStaff, organi
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
-
+import { withCache, CACHE_TAGS, CACHE_REVALIDATE_TIMES } from "@/lib/cache";
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -279,22 +279,33 @@ export async function getAllSamples(organizationId: string) {
     .where(eq(sample.organizationId, organizationId));
 }
 
+const getProfileByUserIdCached = withCache(
+  async (userId: string) => {
+    const result = await db
+      .select({
+        id: profile.id,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        userId: profile.userId,
+        imageId: profile.imageId,
+        imageUrl: image.imageUrl,
+        licenseNo: profile.licenseNo,
+        mustChangePassword: profile.mustChangePassword,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .where(eq(profile.userId, userId));
+    return result[0];
+  },
+  ['profile-by-user-id'],
+  {
+    tags: [CACHE_TAGS.profiles],
+    revalidate: CACHE_REVALIDATE_TIMES.medium,
+  }
+);
+
 export async function getProfileByUserId(userId: string) {
-  const result = await db
-    .select({
-      id: profile.id,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      userId: profile.userId,
-      imageId: profile.imageId,
-      imageUrl: image.imageUrl,
-      licenseNo: profile.licenseNo,
-      mustChangePassword: profile.mustChangePassword,
-    })
-    .from(profile)
-    .leftJoin(image, eq(profile.imageId, image.id))
-    .where(eq(profile.userId, userId));
-  return result[0];
+  return getProfileByUserIdCached(userId);
 }
 
 export async function getRoleById(id: string) {
@@ -302,23 +313,34 @@ export async function getRoleById(id: string) {
   return result[0];
 }
 
-export async function getRoleByUserIdAndOrganizationId(userId: string, organizationId: string) {
-  const result = await db
-    .select({
-      id: role.id,
-      name: role.name,
-    })
-    .from(organizationStaff)
-    .innerJoin(profile, eq(organizationStaff.staffId, profile.id))
-    .innerJoin(role, eq(organizationStaff.roleId, role.id))
-    .where(
-      and(
-        eq(profile.userId, userId),
-        eq(organizationStaff.organizationId, organizationId)
+const getRoleByUserIdAndOrganizationIdCached = withCache(
+  async (userId: string, organizationId: string) => {
+    const result = await db
+      .select({
+        id: role.id,
+        name: role.name,
+      })
+      .from(organizationStaff)
+      .innerJoin(profile, eq(organizationStaff.staffId, profile.id))
+      .innerJoin(role, eq(organizationStaff.roleId, role.id))
+      .where(
+        and(
+          eq(profile.userId, userId),
+          eq(organizationStaff.organizationId, organizationId)
+        )
       )
-    )
-    .limit(1);
-  return result[0] || null;
+      .limit(1);
+    return result[0] || null;
+  },
+  ['role-by-user-org'],
+  {
+    tags: [CACHE_TAGS.profiles, CACHE_TAGS.organizations],
+    revalidate: CACHE_REVALIDATE_TIMES.medium,
+  }
+);
+
+export async function getRoleByUserIdAndOrganizationId(userId: string, organizationId: string) {
+  return getRoleByUserIdAndOrganizationIdCached(userId, organizationId);
 }
 
 export async function getAllRoles() {
@@ -761,12 +783,23 @@ export async function getReportsByPatientId(patientId: string) {
     .orderBy(report.createdAt);
 }
 
+const getOrganizationByIdCached = withCache(
+  async (organizationId: string) => {
+    const organizations = await db
+      .select()
+      .from(organization)
+      .where(eq(organization.id, organizationId));
+    return organizations[0];
+  },
+  ['organization-by-id'],
+  {
+    tags: [CACHE_TAGS.organizations],
+    revalidate: CACHE_REVALIDATE_TIMES.long,
+  }
+);
+
 export const getOrganizationById = async (organizationId: string) => {
-  const organizations = await db
-    .select()
-    .from(organization)
-    .where(eq(organization.id, organizationId));
-  return organizations[0];
+  return getOrganizationByIdCached(organizationId);
 }
 
 export const getOrganizationsByProfileId = async (profileId: string) => {

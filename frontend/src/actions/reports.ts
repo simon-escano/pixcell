@@ -3,6 +3,8 @@
 import { db } from "@/db"
 import { report } from "@/db/schema"
 import { eq } from "drizzle-orm"
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 export async function addReport(data: {
   title: string;
@@ -23,6 +25,12 @@ export async function addReport(data: {
       organizationId: data.organizationId ?? null,
       createdAt: new Date(),
     });
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.reports);
+    revalidatePath('/organizations');
+    revalidatePath('/reports');
+
     return { success: true };
   } catch (error) {
     console.error("Failed to add report:", error);
@@ -44,6 +52,13 @@ export async function updateReport(id: string, data: {
     await db.update(report)
       .set({ ...data, status: mappedStatus })
       .where(eq(report.id, id));
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.reports);
+    revalidateTag(`report-${id}`);
+    revalidatePath('/organizations');
+    revalidatePath('/reports');
+
     return { success: true };
   } catch (error) {
     console.error("Failed to update report:", error);
@@ -60,6 +75,13 @@ export async function deleteReport(reportId: string) {
     }
 
     await db.delete(report).where(eq(report.id, reportId));
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.reports);
+    revalidateTag(`report-${reportId}`);
+    revalidatePath('/organizations');
+    revalidatePath('/reports');
+
     return { success: true };
   } catch (error) {
     console.error("Failed to delete report:", error);

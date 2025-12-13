@@ -3,6 +3,8 @@ import { db } from '@/db';
 import { sampleImage, image } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { CACHE_TAGS } from '@/lib/cache';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -46,6 +48,11 @@ export async function POST(req: NextRequest) {
       .update(sampleImage)
       .set({ imageId: imageRecord.id })
       .where(eq(sampleImage.id, sampleImageId));
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.samples);
+    revalidateTag(`sample-image-${sampleImageId}`);
+    revalidatePath('/organizations');
 
     return NextResponse.json({ success: true, imageUrl });
   } catch (error: any) {
