@@ -233,31 +233,38 @@ const getMetaSampleImagesBySampleIdCached = withCache(
 
     const organizationId = sampleResult[0]?.organizationId;
 
-    // Parallelize profile lookups for all uploadedBy users
-    const metaImages: MetaSampleImage[] = await Promise.all(
-      imageResults.map(async (row) => {
-        const meta = row.metadata as { type?: string; width?: number; height?: number };
+    // Collect unique uploadedBy IDs to batch fetch profiles
+    const uniqueUploaderIds = [...new Set(imageResults.map(r => r.uploadedBy).filter(Boolean))];
+    
+    // Batch fetch all profiles in parallel
+    const profilesMap = new Map<string, MetaProfile | null>();
+    if (uniqueUploaderIds.length > 0 && organizationId) {
+      const profilePromises = uniqueUploaderIds.map(async (uploaderId) => {
+        const profile = await getMetaProfileByUserId(uploaderId!, organizationId);
+        return [uploaderId!, profile ?? null] as const;
+      });
+      const profileResults = await Promise.all(profilePromises);
+      profileResults.forEach(([id, profile]) => profilesMap.set(id, profile));
+    }
 
-        let profile: MetaProfile | null = null;
-        if (row.uploadedBy) {
-          const resolved = await getMetaProfileByUserId(row.uploadedBy, organizationId);
-          profile = resolved ?? null;
-        }
+    // Map results using pre-fetched profiles
+    const metaImages: MetaSampleImage[] = imageResults.map((row) => {
+      const meta = row.metadata as { type?: string; width?: number; height?: number };
+      const profile = row.uploadedBy ? profilesMap.get(row.uploadedBy) ?? null : null;
 
-        return {
-          id: row.id,
-          sampleId: row.sampleId,
-          uploadedBy: profile,
-          capturedAt: row.capturedAt ? row.capturedAt.toLocaleString() : "",
-          imageUrl: row.imageUrl,
-          metadata: {
-            type: meta.type ?? "",
-            width: meta.width ?? 0,
-            height: meta.height ?? 0,
-          },
-        };
-      })
-    );
+      return {
+        id: row.id,
+        sampleId: row.sampleId,
+        uploadedBy: profile,
+        capturedAt: row.capturedAt ? row.capturedAt.toLocaleString() : "",
+        imageUrl: row.imageUrl,
+        metadata: {
+          type: meta.type ?? "",
+          width: meta.width ?? 0,
+          height: meta.height ?? 0,
+        },
+      };
+    });
 
     return metaImages;
   },

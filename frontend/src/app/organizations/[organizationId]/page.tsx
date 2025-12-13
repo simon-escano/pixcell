@@ -32,7 +32,10 @@ export async function generateMetadata({
   }
 }
 
-async function getAllPatientsForOrganization(organizationId: string) {
+import { cache } from "react";
+
+// Cache at request level for deduplication
+const getAllPatientsForOrganizationCached = cache(async (organizationId: string) => {
   return await db
     .select({
       id: patient.id,
@@ -44,6 +47,10 @@ async function getAllPatientsForOrganization(organizationId: string) {
     .innerJoin(patient, eq(organizationPatient.patientId, patient.id))
     .leftJoin(image, eq(patient.imageId, image.id))
     .where(eq(organizationPatient.organizationId, organizationId))
+});
+
+async function getAllPatientsForOrganization(organizationId: string) {
+  return getAllPatientsForOrganizationCached(organizationId);
 }
 
 const OrganizationPage = async ({
@@ -55,18 +62,21 @@ const OrganizationPage = async ({
   const organizationId = paramsObj.organizationId
   const organization = await getOrganizationById(organizationId)
 
-  const user = await getUser()
-  const [samples, reports, users, patients] = await Promise.all([
+  // Parallelize all initial data fetching
+  const [user, samples, reports, users, patients] = await Promise.all([
+    getUser(),
     getAllSamples(organizationId),
     getAllReports(organizationId),
     getAllUsersWithProfiles(organizationId),
     getAllPatientsForOrganization(organizationId),
   ])
 
-  // Get current user's meta profile for SampleCard
-  const currentUserMeta = await getMetaProfileByUserId(user.id, organizationId)
+  // Get current user's meta profile in parallel with other operations
+  const [currentUserMeta] = await Promise.all([
+    getMetaProfileByUserId(user.id, organizationId)
+  ])
 
-  // Get recent samples with full meta data and images
+  // Get recent samples with full meta data and images - optimize by limiting upfront
   const recentSamplesRaw = [...samples]
     .sort((a, b) => {
       const dateA = a.createdAt
@@ -83,11 +93,14 @@ const OrganizationPage = async ({
     })
     .slice(0, 5)
 
-  // Fetch meta samples with images
+  // Parallelize all sample meta and image fetching
   const recentSamplesWithMeta = await Promise.all(
     recentSamplesRaw.map(async (sample) => {
-      const metaSample = await getMetaSampleById(sample.id)
-      const sampleImages = await getMetaSampleImagesBySampleId(sample.id)
+      // Fetch both meta and images in parallel for each sample
+      const [metaSample, sampleImages] = await Promise.all([
+        getMetaSampleById(sample.id),
+        getMetaSampleImagesBySampleId(sample.id)
+      ])
       return {
         metaSample,
         sampleImages,

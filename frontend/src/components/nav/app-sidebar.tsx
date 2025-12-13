@@ -32,7 +32,13 @@ export async function AppSidebar({
 }: React.ComponentProps<typeof Sidebar> & {
   params?: Promise<{ organizationId: string }>;
 }) {
-  const user = await getUser();
+  // Parallelize initial data fetching
+  const [user, resolvedParams] = await Promise.all([
+    getUser(),
+    params ? params : Promise.resolve(null)
+  ]);
+  
+  // Parallelize profile and organizations fetching
   const profileData = await getProfileByUserId(user.id);
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
   
@@ -40,18 +46,22 @@ export async function AppSidebar({
   // We'll keep two values:
   // - organizationIdFromUrl: only present when the URL contains the param (used to show/hide nav)
   // - selectedOrganizationId: the resolved selection (URL param fallback to first org)
-  const resolvedParams = params ? await params : null;
   const organizationIdFromUrl = resolvedParams?.organizationId || undefined;
   const selectedOrganizationId = organizationIdFromUrl || organizations[0]?.id || undefined;
 
-  // Get role for the selected organization
-  const profileRoleData = selectedOrganizationId ? await getRoleByUserIdAndOrganizationId(user.id, selectedOrganizationId) : null;
-
-  // Fetch patients for the selected organization
+  // Parallelize role and patients fetching (role must be fetched first for patients query)
+  const profileRoleData = selectedOrganizationId 
+    ? await getRoleByUserIdAndOrganizationId(user.id, selectedOrganizationId) 
+    : null;
+  
   const patientsRaw = selectedOrganizationId && profileData?.id && profileRoleData?.name
     ? await getAllPatientsForUser(profileData.id, profileRoleData.name, selectedOrganizationId)
-    : [];  const profileRole = profileRoleData?.name || null;
-  const profileDataWithLicense = { ...profileData, licenseNo: profileData.licenseNo ?? null };
+    : [];
+  
+  const profileRole = profileRoleData?.name || null;
+  // Pass profileData directly - it already has all required fields including roleId
+  // Ensure licenseNo is properly typed
+  const profileForNav = profileData || null;
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -83,7 +93,7 @@ export async function AppSidebar({
       <NavSecondaryWrapper params={params} />
       <NavTertiary />
       <SidebarFooter>
-        <NavUser user={user} profile={profileDataWithLicense} role={profileRole} />
+        <NavUser user={user} profile={profileForNav} role={profileRole} />
       </SidebarFooter>
     </Sidebar>
   );

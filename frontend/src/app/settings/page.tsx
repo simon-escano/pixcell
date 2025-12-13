@@ -2,10 +2,14 @@ import Base from "@/components/base";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SettingsAppearance } from "@/components/settings/appearance";
 import { SettingsAccount } from "@/components/settings/account";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "PixCell | Settings",
 };
+
+// Force dynamic rendering for settings (needs auth)
+export const dynamic = 'force-dynamic';
 
 export default function SettingsPage() {
   return (
@@ -25,7 +29,9 @@ export default function SettingsPage() {
                 <CardTitle>Appearance</CardTitle>
               </CardHeader>
               <CardContent>
-                <SettingsAppearance />
+                <Suspense fallback={<div className="h-20 animate-pulse bg-muted rounded" />}>
+                  <SettingsAppearance />
+                </Suspense>
               </CardContent>
             </Card>
 
@@ -34,7 +40,9 @@ export default function SettingsPage() {
                 <CardTitle>Account Settings</CardTitle>
               </CardHeader>
               <CardContent>
-                <SettingsAccount />
+                <Suspense fallback={<div className="h-20 animate-pulse bg-muted rounded" />}>
+                  <SettingsAccount />
+                </Suspense>
               </CardContent>
             </Card>
           </div>

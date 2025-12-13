@@ -2,7 +2,8 @@ import { doctorPatient, feedback, image, organization, organizationStaff, organi
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
-import { withCache, CACHE_TAGS, CACHE_REVALIDATE_TIMES } from "@/lib/cache";
+import { withCache, CACHE_TAGS, CACHE_REVALIDATE_TIMES, withRequestCache } from "@/lib/cache";
+import { cache } from "react";
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -46,7 +47,8 @@ export async function getAllUsersWithProfiles2() {
     .then(results => results.map(r => ({ ...r, roleId: null as string | null, roleName: null as string | null })));
 }
 
-export async function getAllUsersWithProfiles(organizationId: string) {
+// Cache at request level for deduplication
+const getAllUsersWithProfilesCached = cache(async (organizationId: string) => {
   return await db
     .select({
       id: user.id,
@@ -67,6 +69,10 @@ export async function getAllUsersWithProfiles(organizationId: string) {
     .leftJoin(image, eq(profile.imageId, image.id))
     .where(eq(organizationStaff.organizationId, organizationId))
     .orderBy(desc(organizationStaff.updatedAt));
+});
+
+export async function getAllUsersWithProfiles(organizationId: string) {
+  return getAllUsersWithProfilesCached(organizationId);
 }
 
 export async function getAllProfiles() {
@@ -272,11 +278,16 @@ export async function getSampleById(id: string) {
   return result[0];
 }
 
-export async function getAllSamples(organizationId: string) {
+// Cache at request level for deduplication
+const getAllSamplesCached = cache(async (organizationId: string) => {
   return await db
     .select()
     .from(sample)
     .where(eq(sample.organizationId, organizationId));
+});
+
+export async function getAllSamples(organizationId: string) {
+  return getAllSamplesCached(organizationId);
 }
 
 const getProfileByUserIdCached = withCache(
@@ -287,6 +298,7 @@ const getProfileByUserIdCached = withCache(
         firstName: profile.firstName,
         lastName: profile.lastName,
         userId: profile.userId,
+        roleId: profile.roleId,
         imageId: profile.imageId,
         imageUrl: image.imageUrl,
         licenseNo: profile.licenseNo,
@@ -601,7 +613,8 @@ export async function getMonthlyStats() {
   };
 }
 
-export async function getAllReports(organizationId: string) {
+// Cache at request level for deduplication
+const getAllReportsCached = cache(async (organizationId: string) => {
   return await db
     .select({
       id: report.id,
@@ -638,6 +651,10 @@ export async function getAllReports(organizationId: string) {
     ))
     .leftJoin(role, eq(organizationStaff.roleId, role.id))
     .orderBy(report.createdAt);
+});
+
+export async function getAllReports(organizationId: string) {
+  return getAllReportsCached(organizationId);
 }
 
 export async function getAllReportsByUserId(userId: string) {
