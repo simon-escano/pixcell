@@ -46,17 +46,14 @@ interface SamplePageWrapperProps {
   canEdit?: boolean;
 }
 
-async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, router: any) {
+async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, router: any, orgId: string) {
   const toastId = toast.loading("Deleting sample image...")
   try {
     const { deleteSampleImage } = await import("@/actions/samples")
     const res = await deleteSampleImage(sampleImageId)
       if (res.success) {
         toast.success("Sample image deleted", { id: toastId })
-        const params = useParams()
-        const orgId = params?.organizationId
-        if (orgId) router.push(`/organizations/${orgId}/samples/${sampleId}`)
-        else router.push(`/samples/${sampleId}`)
+        router.push(`/organizations/${orgId}/samples/${sampleId}`)
     } else {
       toast.error(res.error || "Failed to delete sample image", { id: toastId })
     }
@@ -68,8 +65,10 @@ async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, 
 const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdit }: SamplePageWrapperProps) => {
   const selectedSampleImage = sampleImages.find((img) => img.id === selectedSampleImageId) || sampleImages[0]
   const router = useRouter()
+  const params = useParams()
   sample = sample!
-  const sampleId = useParams()?.sampleId
+  const sampleId = params?.sampleId as string
+  const orgId = params?.organizationId as string
 
   // Share dialog state
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
@@ -122,9 +121,6 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
     try {
       await navigator.clipboard.writeText(currentUrl)
       toast.success("Link copied to clipboard!")
-        const params = useParams()
-        const sampleId = params?.sampleId
-        const orgId = params?.organizationId
     } catch (error) {
       toast.error("Failed to copy link")
     }
@@ -362,7 +358,7 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                     {canEdit && (
                       <DropdownMenuItem
                         className="text-destructive hover:text-destructive/80"
-                        onClick={() => handleDeleteSample(sample, router)}
+                        onClick={() => handleDeleteSample(sample, router, orgId)}
                       >
                         Delete Sample
                       </DropdownMenuItem>
@@ -439,8 +435,7 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                             sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
                           }`}
                           onClick={() => {
-                            if (orgId) router.push(`/organizations/${orgId}/samples/${sampleId}/${sampleImage.id}`)
-                            else router.push(`/samples/${sampleId}/${sampleImage.id}`)
+                            router.push(`/organizations/${orgId}/samples/${sampleId}/${sampleImage.id}`)
                           }}
                         >
                           <TableCell className="p-2">
@@ -484,7 +479,7 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                           <ContextMenuItem
                             className="text-destructive focus:text-destructive/80"
                             onClick={async () => {
-                              await handleDeleteSampleImage(sampleImage.id, sample.id, router)
+                              await handleDeleteSampleImage(sampleImage.id, sample.id, router, orgId)
                             }}
                           >
                             Delete Sample Image

@@ -13,6 +13,8 @@ interface AccessDeniedToastProps {
 
 export default function AccessDeniedToast({ message }: AccessDeniedToastProps) {
   const router = useRouter();
+  const params = useParams();
+  const orgId = params?.organizationId as string;
 
   useEffect(() => {
     // Show toast notification
@@ -40,10 +42,7 @@ export default function AccessDeniedToast({ message }: AccessDeniedToastProps) {
           <div className="flex flex-col gap-2">
             <Button 
               onClick={() => {
-                const params = useParams();
-                const orgId = (params as any)?.organizationId || "";
-                if (orgId) router.push(`/organizations/${orgId}/samples`)
-                else router.push('/samples')
+                router.push(`/organizations/${orgId}/samples`)
               }}
               className="w-full"
               variant="default"

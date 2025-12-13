@@ -20,7 +20,7 @@ export const handleCopySampleId = (sample: MetaSample) => {
     toast.success("Sample ID copied to clipboard");
   };
 
-export const handleDeleteSample = async (sample: MetaSample, router: AppRouterInstance, orgId?: string) => {
+export const handleDeleteSample = async (sample: MetaSample, router: AppRouterInstance, orgId: string) => {
   const loadingToast = toast.loading("Deleting sample...");
   
   try {
@@ -31,8 +31,7 @@ export const handleDeleteSample = async (sample: MetaSample, router: AppRouterIn
     
     if (res.success) {
       toast.success("Sample deleted successfully");
-      if (orgId) router.push(`/organizations/${orgId}/samples`)
-      else router.push("/samples");
+      router.push(`/organizations/${orgId}/samples`)
     } else {
       toast.error(res.error || "Failed to delete sample");
     }
@@ -154,8 +153,7 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
       <div
         onClick={() => {
           const path = `/samples/${sample.id}${sampleImages.length ? `/${sampleImages[0].id}` : ""}`;
-          if (orgId) router.push(`/organizations/${orgId}${path}`)
-          else router.push(path)
+          router.push(`/organizations/${orgId}${path}`)
         }}
         className="bg-card flex cursor-pointer flex-col overflow-hidden rounded-md border transition-shadow hover:shadow-lg"
       >
