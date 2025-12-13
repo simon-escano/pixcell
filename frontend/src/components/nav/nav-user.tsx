@@ -88,8 +88,8 @@ export function NavUser({
                     {firstName} {lastName}
                   </span>
                   {role && (
-                    <Badge className="mt-1 flex-shrink-0 px-1 py-0.5 text-[10px]">
-                      {role}
+                    <Badge className="flex justify-start rounded-[3px] mt-1 flex-shrink-0 px-0.5 py-0 text-[10px] max-w-[40px]">
+                      <p className="truncate">{role}</p>
                     </Badge>
                   )}
                 </div>
