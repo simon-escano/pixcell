@@ -1,9 +1,10 @@
+import { LoadingSpinner } from "@/components/loading-spinner"
 import styles from "./Loading.module.css";
 
-export function Loading() {
+export function LiveblocksLoading() {
   return (
     <div className={styles.loading}>
-      <img src="https://liveblocks.io/loading.svg" alt="Loading" />
+      <LoadingSpinner />
     </div>
-  );
+  )
 }

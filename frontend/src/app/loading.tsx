@@ -1,14 +1,10 @@
-import Base from "@/components/base";
-import { Spinner } from "@/components/ui/spinner";
+import Base from "@/components/base"
+import { LoadingScreen } from "@/components/loading-screen"
 
-export default function Page() {
+export default function Loading() {
   return (
     <Base>
-      <div className="flex h-full flex-1 flex-col items-center justify-center gap-4 p-4 md:p-12">
-        <Spinner size={"large"}>
-          <span className="text-muted-foreground">Loading...</span>
-        </Spinner>
-      </div>
+      <LoadingScreen />
     </Base>
-  );
+  )
 }
