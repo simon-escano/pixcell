@@ -35,7 +35,7 @@ export function OrganizationBanner({
   return (
     <div className="flex flex-col gap-6 md:gap-8">
       <div
-        className="relative overflow-hidden p-12 sm:p-12 md:p-14 lg:p-16 shadow-xl"
+        className="relative overflow-hidden p-8 sm:p-8 md:p-10 lg:p-12 shadow-xl"
         style={{
           background: `linear-gradient(135deg, ${colors.lightColor} 0%, ${colors.darkColor} 100%)`,
         }}
@@ -49,10 +49,10 @@ export function OrganizationBanner({
           className="absolute bottom-0 left-0 w-72 h-72 opacity-10 rounded-full blur-3xl"
           style={{ backgroundColor: colors.primaryColor }}
         />
-      </div>
-      <div className="flex relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-10">
+
+        <div className="relative z-10 max-w-7xl mx-auto">
           {/* Organization Info */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4 md:mb-6 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-4 flex-1">
             <div className="flex items-center gap-3">
               <OrganizationAvatar imageUrl={imageUrl} name={name} className="size-8 md:size-12" />
               <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
@@ -67,6 +67,7 @@ export function OrganizationBanner({
             )}
           </div>
         </div>
+      </div>
     </div>
   )
 }
