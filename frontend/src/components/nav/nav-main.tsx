@@ -86,7 +86,7 @@ export function NavMain({ organizations }: NavMainProps) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Organizations</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu className="gap-px">
         {organizations.map((org) => {
           const isOpen = openStates[org.id] ?? true;
 
@@ -101,18 +101,18 @@ export function NavMain({ organizations }: NavMainProps) {
                 <div className="flex items-center w-full">
                   <Link 
                     href={`/organizations/${org.id}`}
-                    className="flex items-center gap-2 flex-1 min-w-0 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
+                    className="flex items-center gap-2 flex-1 min-w-0 p-2 rounded-md hover:bg-sidebar-accent transition-colors text-xs"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLastSelectedOrganizationId(org.id);
                     }}
                   >
                     <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
-                    <span className="flex-1 text-left truncate text-sm font-medium">{org.name || "Unnamed Organization"}</span>
+                    <span className="flex-1 text-left truncate font-medium">{org.name || "Unnamed Organization"}</span>
                   </Link>
                   <CollapsibleTrigger asChild>
                     <button
-                      className="flex-shrink-0 p-1.5 mx-1 rounded-md hover:bg-accent transition-colors"
+                      className="flex-shrink-0 p-1.5 mx-1 rounded-md hover:bg-sidebar-accent transition-colors"
                       aria-label={isOpen ? "Collapse" : "Expand"}
                     >
                       {isOpen ? (

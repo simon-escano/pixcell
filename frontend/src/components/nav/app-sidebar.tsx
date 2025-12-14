@@ -67,23 +67,18 @@ export async function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
-                <PixCellLogo />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">PixCell</span>
-                </div>
+            <div className="flex items-center justify-between gap-2 p-0.5">
+              <Link href="/" className="flex flex-1 items-center">
+                <PixCellLogo withText className="w-[82px]"/>
               </Link>
-            </SidebarMenuButton>
+              {organizationIdFromUrl && (
+                <UploadSampleWrapper organizationId={organizationIdFromUrl} patientsRaw={patientsRaw} />
+              )}
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {organizationIdFromUrl && (
-          <div className="flex flex-col gap-2 mb-2 px-2">
-            <UploadSampleWrapper organizationId={organizationIdFromUrl} patientsRaw={patientsRaw} />
-          </div>
-        )}
         <NavMain 
           organizations={organizations.map(org => ({
             id: org.id,
