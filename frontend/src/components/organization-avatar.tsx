@@ -52,7 +52,7 @@ export function OrganizationAvatar({ imageUrl, name, className }: OrganizationAv
         }} 
       />
       <AvatarFallback 
-        className={`font-medium bg-muted text-muted-foreground flex items-center justify-center rounded-[2px] ${hasCustomSize ? "text-base md:text-lg" : "text-[10px]"}`}
+        className={`font-normal bg-muted text-muted-foreground flex items-center justify-center rounded-[2px] ${hasCustomSize ? "text-sm md:text-base" : "text-[10px]"}`}
         style={{ borderRadius: "2px" }}
       >
         {initials}

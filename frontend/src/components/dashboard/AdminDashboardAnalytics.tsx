@@ -16,7 +16,7 @@ function ProfessionalStorageChart({ used, total }: { used: number; total: number
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <div className="text-3xl font-semibold text-gray-900 dark:text-gray-50">{Math.round(percentUsed * 100)}%</div>
+        <div className="text-base font-normal text-gray-900 dark:text-gray-50">{Math.round(percentUsed * 100)}%</div>
         <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Storage Used</div>
       </div>
 
@@ -35,11 +35,11 @@ function ProfessionalStorageChart({ used, total }: { used: number; total: number
 
       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 dark:text-gray-50">{used} MB</div>
+          <div className="text-sm font-normal text-gray-900 dark:text-gray-50">{used} MB</div>
           <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Used Space</div>
         </div>
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 dark:text-gray-50">{total} MB</div>
+          <div className="text-sm font-normal text-gray-900 dark:text-gray-50">{total} MB</div>
           <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Total Space</div>
         </div>
       </div>
@@ -55,7 +55,7 @@ function ProfessionalUserDistribution({
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <div className="text-3xl font-semibold text-gray-900 dark:text-gray-50">{total}</div>
+        <div className="text-base font-normal text-gray-900 dark:text-gray-50">{total}</div>
         <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Users</div>
       </div>
 
@@ -93,11 +93,11 @@ function ProfessionalUserDistribution({
       <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
-            <div className="text-lg font-semibold text-gray-900 dark:text-gray-50">{roleCounts.length}</div>
+            <div className="text-sm font-normal text-gray-900 dark:text-gray-50">{roleCounts.length}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Active Roles</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+            <div className="text-sm font-normal text-gray-900 dark:text-gray-50">
               {Math.round(total / roleCounts.length)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Avg per Role</div>

@@ -136,7 +136,7 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
             />
             {remainingCount > 0 && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                <span className="text-lg font-semibold text-white">
+                <span className="text-sm font-normal text-white">
                   +{remainingCount}
                 </span>
               </div>
@@ -159,7 +159,7 @@ const SampleCard = ({ currentUser, sample, sampleImages }: SampleCardProps) => {
       >
         <div className="p-2 pb-0">{renderImageGrid()}</div>
         <div className="flex flex-col gap-2 p-3">
-          <h1 className="font-display truncate px-1 text-lg lg:text-xl">
+          <h1 className="font-normal truncate px-1 text-sm">
             {sample.sampleName}
           </h1>
           <div className="grid grid-cols-2 gap-2">
