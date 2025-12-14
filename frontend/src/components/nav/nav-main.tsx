@@ -15,7 +15,7 @@ import {
 import { ContactRound, FileText, Images, ChevronRight, ChevronDown } from "lucide-react";
 import { OrganizationAvatar } from "@/components/organization-avatar";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface Organization {
   id: string;
@@ -29,6 +29,7 @@ interface NavMainProps {
 
 export function NavMain({ organizations }: NavMainProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [openStates, setOpenStates] = React.useState<Record<string, boolean>>(() => {
     if (!organizations || organizations.length === 0) {
       return {};
@@ -91,17 +92,28 @@ export function NavMain({ organizations }: NavMainProps) {
               onOpenChange={(open) => setOpenStates(prev => ({ ...prev, [org.id]: open }))}
             >
               <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={org.name || "Unnamed Organization"}>
+                <div className="flex items-center w-full">
+                  <Link 
+                    href={`/organizations/${org.id}`}
+                    className="flex items-center gap-2 flex-1 min-w-0 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
-                    <span className="flex-1 text-left truncate">{org.name || "Unnamed Organization"}</span>
-                    {isOpen ? (
-                      <ChevronDown className="size-4 transition-transform" />
-                    ) : (
-                      <ChevronRight className="size-4 transition-transform" />
-                    )}
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
+                    <span className="flex-1 text-left truncate text-sm font-medium">{org.name || "Unnamed Organization"}</span>
+                  </Link>
+                  <CollapsibleTrigger asChild>
+                    <button
+                      className="flex-shrink-0 p-1.5 mx-1 rounded-md hover:bg-accent transition-colors"
+                      aria-label={isOpen ? "Collapse" : "Expand"}
+                    >
+                      {isOpen ? (
+                        <ChevronDown className="size-4 transition-transform" />
+                      ) : (
+                        <ChevronRight className="size-4 transition-transform" />
+                      )}
+                    </button>
+                  </CollapsibleTrigger>
+                </div>
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {menuItems.map((item) => {
