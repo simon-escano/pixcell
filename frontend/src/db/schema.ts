@@ -155,6 +155,7 @@ export const organization = pgTable("organization", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   color: text("color").notNull().default("#7E7E82"),
+  image_url: text("image_url"),
 });
 
 export const organizationStaff = pgTable("organization_staff", {

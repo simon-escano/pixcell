@@ -60,11 +60,11 @@ export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrga
 
   return (
     <Select value={currentOrgId} onValueChange={handleChange}>
-      <SelectTrigger className="h-8 w-auto min-w-[120px] max-w-[200px] border-none shadow-none bg-transparent hover:bg-accent px-2">
-        <div className="flex items-center gap-2">
+      <SelectTrigger className="w-auto min-w-[80px] max-w-[150px] border shadow-none bg-transparent hover:bg-accent overflow-hidden">
+        <div className="flex items-center gap-2 overflow-hidden w-full">
           <Building className="size-3.5 flex-shrink-0" style={{ color: currentOrg.color }} />
-          <SelectValue>
-            <span className="truncate">{currentOrg.name || "Unnamed Organization"}</span>
+          <SelectValue className="w-full flex-1 overflow-hidden">
+            <span className="truncate overflow-hidden">{currentOrg.name || "Unnamed Organization"}</span>
           </SelectValue>
         </div>
       </SelectTrigger>
