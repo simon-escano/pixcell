@@ -20,7 +20,6 @@ import {
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import Link from "next/link";
-import { NavSecondaryWrapper } from "../nav-secondary-wrapper";
 import OrganizationDropdown from "../organization-dropdown";
 import PixCellLogo from "../pixcell-logo";
 import UploadSampleWrapper from "../samples/upload-sample-wrapper";
@@ -93,7 +92,6 @@ export async function AppSidebar({
           }))}
         />
       </SidebarContent>
-      <NavSecondaryWrapper params={params} />
       <NavTertiary />
       <SidebarFooter>
         <NavUser user={user} profile={profileForNav} role={profileRole} />

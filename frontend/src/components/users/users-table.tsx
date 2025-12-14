@@ -47,7 +47,7 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
   );
 }
 
-export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; organizationId: string }) => {
+export const UsersTable = ({ users, organizationId, isAdmin = false }: { users: CombinedUser[]; organizationId: string; isAdmin?: boolean }) => {
   const router = useRouter();
   const params = useParams();
   const orgId = organizationId || (params as any)?.organizationId || "";
@@ -200,14 +200,14 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
         toast.success("User ID copied to clipboard");
       },
     },
-    {
+    ...(isAdmin ? [{
       label: "Edit User",
       onClick: (user: CombinedUser) => {
         setSelectedUser(user);
         setEditOpen(true);
       },
-    },
-    {
+    }] : []),
+    ...(isAdmin ? [{
       label: "Delete User",
       onClick: (user: CombinedUser) => {
         setSelectedUser(user);
@@ -216,7 +216,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
       customRender: () => (
         <button className="text-red-500 hover:text-red-700">Delete User</button>
       ),
-    },
+    }] : []),
   ];
 
   return (
@@ -240,22 +240,24 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
           router.push(`/organizations/${orgId}/users/${user.id}`)
         }}
         customHeaderContent={
-          <div className="flex items-center gap-2">
-            {addUserDropdown}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+          isAdmin ? (
+            <div className="flex items-center gap-2">
+              {addUserDropdown}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
+          ) : null
         }
         selectedRowIds={selectedIds}
         onSelectedRowIdsChange={setSelectedIds}
         getRowId={row => row.id}
       />
-      {selectedIds.length > 0 && (
+      {isAdmin && selectedIds.length > 0 && (
         <div className="flex justify-start mt-4">
           <Button
             variant="destructive"

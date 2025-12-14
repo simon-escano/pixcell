@@ -11,6 +11,7 @@ import {
 import { OrganizationAvatar } from "./organization-avatar"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { setLastSelectedOrganizationId } from "@/lib/organization-storage"
 
 interface BreadcrumbOrganizationDropdownProps {
   organizations: {
@@ -38,6 +39,9 @@ export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrga
   }, [pathname, organizations])
 
   const handleChange = (orgId: string) => {
+    // Save to localStorage
+    setLastSelectedOrganizationId(orgId)
+    
     const segments = pathname.split("/")
     const orgIndex = segments.indexOf("organizations")
     

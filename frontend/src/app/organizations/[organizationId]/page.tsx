@@ -1,7 +1,7 @@
 import Base from "@/components/base"
 import { getOrganizationById, getAllSamples, getAllReports, getAllUsersWithProfiles, getPatientGenderStats, getAllPatientsForUser } from "@/db/queries/select"
 import type { Metadata } from "next"
-import { MapPin, FileText, Images, Users, UserCircle, ArrowRight, Calendar, Tag } from "lucide-react"
+import { MapPin, FileText, Images, ContactRound, UsersRound, ArrowRight, Calendar, Tag } from "lucide-react"
 import { AvatarStack } from "@/components/avatar-stack"
 import Link from "next/link"
 import { format } from "date-fns"
@@ -16,6 +16,7 @@ import { getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queri
 import AdminDashboardAnalytics from "@/components/dashboard/AdminDashboardAnalytics"
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics"
 import { createClient } from "@supabase/supabase-js"
+import { OrganizationPageWrapper } from "@/components/organization-page-wrapper"
 
 function truncate(text: string, maxLength = 50): string {
   if (text.length <= maxLength) return text
@@ -241,7 +242,8 @@ const OrganizationPage = async ({
 
   return (
     <Base params={paramsObj}>
-      <div className="h-full overflow-y-auto">
+      <OrganizationPageWrapper>
+        <div className="h-full overflow-y-auto">
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-10">
           <OrganizationBanner
             name={organization?.name || null}
@@ -252,13 +254,13 @@ const OrganizationPage = async ({
 
         <div className="p-4 sm:p-6 md:p-8 lg:p-10">
           <div className="max-w-7xl mx-auto space-y-10">
-            {/* 2x2 Grid: Patients, Medical Staff, Samples, Reports */}
+            {/* 2x2 Grid: Patients, Members, Samples, Reports */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Patients */}
               <section>
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
-                    <Users className="size-5 text-primary" />
+                    <ContactRound className="size-5 text-primary" />
                     <h2 className="text-lg font-semibold">Patients</h2>
                   </div>
                   <Link
@@ -291,12 +293,12 @@ const OrganizationPage = async ({
                 )}
               </section>
 
-              {/* Medical Staff */}
+              {/* Members */}
               <section>
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
-                    <UserCircle className="size-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Medical Staff</h2>
+                    <UsersRound className="size-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Members</h2>
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/users`}
@@ -308,7 +310,7 @@ const OrganizationPage = async ({
                 </div>
                 {doctorAvatars.length === 0 ? (
                   <div className="rounded-lg border border-dashed p-12">
-                    <p className="text-sm text-muted-foreground text-center">No staff members yet</p>
+                    <p className="text-sm text-muted-foreground text-center">No members yet</p>
                   </div>
                 ) : (
                   <Link
@@ -466,6 +468,7 @@ const OrganizationPage = async ({
           </div>
         </div>
       </div>
+      </OrganizationPageWrapper>
     </Base>
   )
 }

@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, Check } from "lucide-react";
+import { Moon, Sun, Check, ContactRound, FileText, Images, Settings, Send, UsersRound } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -140,6 +140,31 @@ const Header = ({ organizations }: HeaderProps) => {
 
   const breadcrumbSegments = getBreadcrumbSegments();
 
+  // Map page segments to their icons and display names
+  const getPageInfo = (segment: string): { name: string; icon: React.ComponentType<{ className?: string }> | null } | null => {
+    // Only show icon for main page segments
+    if (segment === "patients") {
+      return { name: "Patients", icon: ContactRound };
+    }
+    if (segment === "samples") {
+      return { name: "Samples", icon: Images };
+    }
+    if (segment === "reports") {
+      return { name: "Reports", icon: FileText };
+    }
+    if (segment === "users") {
+      return { name: "Users", icon: UsersRound };
+    }
+    if (segment === "settings") {
+      return { name: "Settings", icon: Settings };
+    }
+    if (segment === "feedback") {
+      return { name: "Feedback", icon: Send };
+    }
+    
+    return null;
+  };
+
   return (
     <header className="flex h-16 shrink-0 items-center gap-2">
       <div className="flex flex-1 items-center justify-between gap-2 px-4">
@@ -164,6 +189,9 @@ const Header = ({ organizations }: HeaderProps) => {
                   : index;
                 const href = "/" + pathArray.slice(0, actualIndex + 1).join("/");
                 const isLast = index === breadcrumbSegments.length - 1;
+                const pageInfo = getPageInfo(segment);
+                const displayText = pageInfo?.name || truncate(formatSegment(segment, actualIndex));
+                const Icon = pageInfo?.icon;
 
                 return (
                   <React.Fragment key={index}>
@@ -173,12 +201,14 @@ const Header = ({ organizations }: HeaderProps) => {
                       }
                     >
                       {isLast ? (
-                        <BreadcrumbPage>
-                          {truncate(formatSegment(segment, actualIndex))}
+                        <BreadcrumbPage className="flex items-center gap-2">
+                          {Icon && <Icon className="size-4 text-primary" />}
+                          <span>{displayText}</span>
                         </BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink href={href}>
-                          {truncate(formatSegment(segment, actualIndex))}
+                        <BreadcrumbLink href={href} className="flex items-center gap-2">
+                          {Icon && <Icon className="size-4 text-primary" />}
+                          <span>{displayText}</span>
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>

@@ -12,10 +12,11 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { ContactRound, FileText, Images, ChevronRight, ChevronDown } from "lucide-react";
+import { ContactRound, FileText, Images, UsersRound, ChevronRight, ChevronDown } from "lucide-react";
 import { OrganizationAvatar } from "@/components/organization-avatar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { setLastSelectedOrganizationId } from "@/lib/organization-storage";
 
 interface Organization {
   id: string;
@@ -75,6 +76,11 @@ export function NavMain({ organizations }: NavMainProps) {
       url: (orgId: string) => `/organizations/${orgId}/reports`,
       icon: FileText,
     },
+    {
+      title: "Members",
+      url: (orgId: string) => `/organizations/${orgId}/users`,
+      icon: UsersRound,
+    },
   ];
 
   return (
@@ -96,7 +102,10 @@ export function NavMain({ organizations }: NavMainProps) {
                   <Link 
                     href={`/organizations/${org.id}`}
                     className="flex items-center gap-2 flex-1 min-w-0 px-2 py-1.5 rounded-md hover:bg-accent transition-colors"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLastSelectedOrganizationId(org.id);
+                    }}
                   >
                     <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
                     <span className="flex-1 text-left truncate text-sm font-medium">{org.name || "Unnamed Organization"}</span>
