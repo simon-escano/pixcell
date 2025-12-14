@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { BreadcrumbOrganizationDropdown } from "./breadcrumb-organization-dropdown";
 
 const truncate = (text: string, limit = 13) =>
   text.length > limit ? text.slice(0, limit) + "…" : text
@@ -55,11 +56,23 @@ const getSegmentType = (segment: string, index: number, pathArray: string[]): st
   return null;
 }
 
-const Header = () => {
+interface HeaderProps {
+  organizations: {
+    id: string;
+    name: string | null;
+    color: string;
+  }[];
+}
+
+const Header = ({ organizations }: HeaderProps) => {
   const pathname = usePathname() || "";
   const pathArray = pathname.split("/").filter(Boolean)
   const { theme, setTheme } = useTheme();
   const [segmentNames, setSegmentNames] = useState<Record<number, string>>({});
+
+  // Check if we're in an organization route
+  const orgIndex = pathArray.indexOf("organizations");
+  const isOrgRoute = orgIndex !== -1;
 
   // Fetch names for ID segments
   useEffect(() => {
@@ -114,6 +127,19 @@ const Header = () => {
       : segment;
   };
 
+  // For organization routes, simplify the breadcrumb: [org dropdown] > current page
+  // Skip "organizations" and the organization ID segments
+  const getBreadcrumbSegments = () => {
+    if (isOrgRoute && orgIndex !== -1) {
+      // Start from after the organization ID
+      const segmentsAfterOrg = pathArray.slice(orgIndex + 2);
+      return segmentsAfterOrg;
+    }
+    return pathArray;
+  };
+
+  const breadcrumbSegments = getBreadcrumbSegments();
+
   return (
     <header className="flex h-16 shrink-0 items-center gap-2">
       <div className="flex flex-1 items-center justify-between gap-2 px-4">
@@ -122,24 +148,37 @@ const Header = () => {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              {pathArray.map((segment, index) => {
-                const href = "/" + pathArray.slice(0, index + 1).join("/");
-                const isLast = index === pathArray.length - 1;
+              {isOrgRoute && organizations.length > 0 && (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbOrganizationDropdown organizations={organizations} />
+                  </BreadcrumbItem>
+                  {breadcrumbSegments.length > 0 && (
+                    <BreadcrumbSeparator className="hidden md:block" />
+                  )}
+                </>
+              )}
+              {breadcrumbSegments.map((segment, index) => {
+                const actualIndex = isOrgRoute 
+                  ? orgIndex + 2 + index 
+                  : index;
+                const href = "/" + pathArray.slice(0, actualIndex + 1).join("/");
+                const isLast = index === breadcrumbSegments.length - 1;
 
                 return (
                   <React.Fragment key={index}>
                     <BreadcrumbItem
                       className={
-                        index < pathArray.length - 1 ? "hidden md:block" : ""
+                        index < breadcrumbSegments.length - 1 ? "hidden md:block" : ""
                       }
                     >
                       {isLast ? (
                         <BreadcrumbPage>
-                          {truncate(formatSegment(segment, index))}
+                          {truncate(formatSegment(segment, actualIndex))}
                         </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink href={href}>
-                          {truncate(formatSegment(segment, index))}
+                          {truncate(formatSegment(segment, actualIndex))}
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>

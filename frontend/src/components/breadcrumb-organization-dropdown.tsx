@@ -1,0 +1,86 @@
+"use client"
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+import { Building } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+
+interface BreadcrumbOrganizationDropdownProps {
+  organizations: {
+    id: string
+    name: string | null
+    color: string
+  }[]
+}
+
+export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrganizationDropdownProps) {
+  const router = useRouter()
+  const pathname = usePathname() || ""
+  const [currentOrgId, setCurrentOrgId] = useState<string>("")
+
+  useEffect(() => {
+    const segments = pathname.split("/")
+    const orgIndex = segments.indexOf("organizations")
+    
+    if (orgIndex !== -1 && segments.length > orgIndex + 1) {
+      const orgId = segments[orgIndex + 1]
+      if (orgId && organizations.some(org => org.id === orgId)) {
+        setCurrentOrgId(orgId)
+      }
+    }
+  }, [pathname, organizations])
+
+  const handleChange = (orgId: string) => {
+    const segments = pathname.split("/")
+    const orgIndex = segments.indexOf("organizations")
+    
+    if (orgIndex !== -1 && segments.length > orgIndex + 1) {
+      // Replace the old Org ID with the new one
+      segments[orgIndex + 1] = orgId
+      const newPath = segments.join("/") || "/"
+      router.push(newPath)
+    } else {
+      // Fallback: go to organization page
+      router.push(`/organizations/${orgId}`)
+    }
+  }
+
+  const currentOrg = organizations.find(org => org.id === currentOrgId)
+
+  if (!currentOrg) {
+    return null
+  }
+
+  return (
+    <Select value={currentOrgId} onValueChange={handleChange}>
+      <SelectTrigger className="h-8 w-auto min-w-[120px] max-w-[200px] border-none shadow-none bg-transparent hover:bg-accent px-2">
+        <div className="flex items-center gap-2">
+          <Building className="size-3.5 flex-shrink-0" style={{ color: currentOrg.color }} />
+          <SelectValue>
+            <span className="truncate">{currentOrg.name || "Unnamed Organization"}</span>
+          </SelectValue>
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {organizations.map(org => (
+            <SelectItem key={org.id} value={org.id}>
+              <div className="flex items-center gap-2">
+                <Building className="size-4" style={{ color: org.color }} />
+                <span>{org.name || "Unnamed Organization"}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
