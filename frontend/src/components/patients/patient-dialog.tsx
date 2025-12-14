@@ -28,7 +28,7 @@ import { addPatient, updatePatient } from "@/actions/patients";
 import { Patient } from "@/db/schema";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, CirclePlus } from "lucide-react";
+import { Camera, Plus } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 type Doctor = {
@@ -215,7 +215,7 @@ export function PatientDialog({
       {showTrigger && (
         <DialogTrigger asChild>
           <Button className="ml-auto">
-            <CirclePlus />
+            <Plus />
             Add Patient
           </Button>
         </DialogTrigger>

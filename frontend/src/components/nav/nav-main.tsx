@@ -108,7 +108,7 @@ export function NavMain({ organizations }: NavMainProps) {
                     }}
                   >
                     <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
-                    <span className="flex-1 text-left truncate font-medium">{org.name || "Unnamed Organization"}</span>
+                    <span className="flex-1 text-left truncate font-normal">{org.name || "Unnamed Organization"}</span>
                   </Link>
                   <CollapsibleTrigger asChild>
                     <button

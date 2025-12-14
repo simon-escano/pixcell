@@ -18,10 +18,10 @@ const OrganizationsPage = async () => {
 
     // If no organizations, show message
     if (organizations.length === 0) {
-        return (
-            <PasswordChangeWrapper mustChangePassword={profileData.mustChangePassword}>
-                <Base>
-                    <div className="h-full overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
+    return (
+        <PasswordChangeWrapper mustChangePassword={profileData.mustChangePassword}>
+            <Base>
+                <div className="h-full overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <Building className="size-12 text-muted-foreground mb-4" />
@@ -31,9 +31,9 @@ const OrganizationsPage = async () => {
                                 </p>
                             </CardContent>
                         </Card>
-                    </div>
-                </Base>
-            </PasswordChangeWrapper>
+                </div>
+            </Base>
+        </PasswordChangeWrapper>
         );
     }
 

@@ -1,7 +1,7 @@
 "use client";
 import { deleteReport } from "@/actions/reports";
 import { Report } from "@/db/schema";
-import { CirclePlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -135,7 +135,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
         }}
         customHeaderContent={
           <Button onClick={() => router.push(`/organizations/${organizationId}/reports/create`)}>
-            <CirclePlus/>
+            <Plus/>
             Create Report
           </Button>
         }

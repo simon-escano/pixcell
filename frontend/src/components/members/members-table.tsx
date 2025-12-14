@@ -10,7 +10,7 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
 import { UserDialog } from "./user-dialog";
-import { CirclePlus, Upload, XCircle } from "lucide-react";
+import { Plus, Upload, XCircle } from "lucide-react";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
@@ -175,17 +175,17 @@ export const MembersTable = ({ users, organizationId, isAdmin = false }: { users
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="ml-2" variant="default">
-          <CirclePlus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add User
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={handleAddManual}>
-          <CirclePlus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add Manually
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleImportClick}>
-          <Upload className="mr-2 h-4 w-4" />
+          <Upload className="h-4 w-4" />
           Import via CSV
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -3,7 +3,7 @@
 import { deleteUser, updateUser } from "@/actions/users";
 import { Profile, Role } from "@/db/schema";
 import { User } from "@supabase/supabase-js";
-import { Camera, CirclePlus } from "lucide-react";
+import { Camera, Plus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -173,7 +173,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[], o
 
   const addUserButton = (
     <Button className="ml-2" variant="default">
-       <CirclePlus />
+       <Plus />
       Add User
     </Button>
   );
