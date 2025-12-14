@@ -116,9 +116,9 @@ export function NavMain({ organizations }: NavMainProps) {
                       aria-label={isOpen ? "Collapse" : "Expand"}
                     >
                       {isOpen ? (
-                        <ChevronDown className="size-4 transition-transform" />
+                        <ChevronDown className="size-4 transition-transform text-sidebar-icon" />
                       ) : (
-                        <ChevronRight className="size-4 transition-transform" />
+                        <ChevronRight className="size-4 transition-transform text-sidebar-icon" />
                       )}
                     </button>
                   </CollapsibleTrigger>

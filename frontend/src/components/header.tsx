@@ -166,7 +166,7 @@ const Header = ({ organizations }: HeaderProps) => {
   };
 
   return (
-    <header className="flex items-center justify-between gap-2 px-4 py-2">
+    <header className="flex items-center justify-between gap-2 px-4 py-2 border-b border-sidebar-border">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
