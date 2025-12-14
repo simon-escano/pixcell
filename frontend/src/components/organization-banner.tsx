@@ -9,20 +9,12 @@ interface OrganizationBannerProps {
   name: string | null
   address: string | null
   imageUrl: string | null
-  samples: number
-  reports: number
-  patients: number
-  users: number
 }
 
 export function OrganizationBanner({
   name,
   address,
   imageUrl,
-  samples,
-  reports,
-  patients,
-  users,
 }: OrganizationBannerProps) {
   const [colors, setColors] = useState<ImageColors>({
     lightColor: "#4b5563",
@@ -74,36 +66,6 @@ export function OrganizationBanner({
           )}
         </div>
 
-        {/* Stats Grid - Embedded in Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-            <p className="text-xs font-medium text-white/70 mb-1">Samples</p>
-            <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-              {samples}
-            </p>
-          </div>
-
-          <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-            <p className="text-xs font-medium text-white/70 mb-1">Reports</p>
-            <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-              {reports}
-            </p>
-          </div>
-
-          <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-            <p className="text-xs font-medium text-white/70 mb-1">Patients</p>
-            <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-              {patients}
-            </p>
-          </div>
-
-          <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-            <p className="text-xs font-medium text-white/70 mb-1">Staff</p>
-            <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-              {users}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   )

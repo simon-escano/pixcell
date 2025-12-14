@@ -176,7 +176,7 @@ const OrganizationPage = async ({
         : 0
       return dateB - dateA
     })
-    .slice(0, 5)
+    .slice(0, 3)
 
   // Parallelize all sample meta and image fetching
   const recentSamplesWithMeta = await Promise.all(
@@ -215,7 +215,7 @@ const OrganizationPage = async ({
         : 0
       return dateB - dateA
     })
-    .slice(0, 5)
+    .slice(0, 3)
     .map((report) => ({
       id: report.id,
       title: report.title || null,
@@ -247,17 +247,13 @@ const OrganizationPage = async ({
             name={organization?.name || null}
             address={organization?.address || null}
             imageUrl={organization?.image_url || null}
-            samples={samples.length}
-            reports={reports.length}
-            patients={patients.length}
-            users={users.length}
           />
         </div>
 
         <div className="p-4 sm:p-6 md:p-8 lg:p-10">
           <div className="max-w-7xl mx-auto space-y-10">
-            {/* Patients & Staff - Side by Side Showcases */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 2x2 Grid: Patients, Medical Staff, Samples, Reports */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Patients */}
               <section>
                 <div className="flex items-center justify-between mb-5">
@@ -331,104 +327,132 @@ const OrganizationPage = async ({
                   </Link>
                 )}
               </section>
+
+              {/* Samples */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <Images className="size-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Samples</h2>
+                  </div>
+                  <Link
+                    href={`/organizations/${organizationId}/samples`}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    View all
+                    <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+                {recentSamples.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-8">
+                    <p className="text-sm text-muted-foreground text-center">No samples yet</p>
+                  </div>
+                ) : (
+                  <Link
+                    href={`/organizations/${organizationId}/samples`}
+                    className="group block p-6 rounded-lg border border-border hover:border-foreground/20 hover:bg-accent/30 transition-all duration-200 h-full flex flex-col"
+                  >
+                    <div className="overflow-x-auto mb-4 -mx-6 px-6 flex-1">
+                      <div className="flex gap-4 min-w-max">
+                        {recentSamples.map(({ metaSample, sampleImages }) => {
+                          if (!metaSample || !currentUserMeta) return null
+                          return (
+                            <div key={metaSample.id} className="flex-shrink-0 w-[200px]">
+                              <SampleCard
+                                currentUser={currentUserMeta}
+                                sample={metaSample}
+                                sampleImages={sampleImages}
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-auto">
+                      <p className="text-2xl font-semibold">{samples.length}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {samples.length === 1 ? "sample" : "samples"}
+                        {samples.length > 3 && (
+                          <span className="ml-1">({samples.length - 3} more)</span>
+                        )}
+                      </p>
+                    </div>
+                  </Link>
+                )}
+              </section>
+
+              {/* Reports */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <FileText className="size-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Reports</h2>
+                  </div>
+                  <Link
+                    href={`/organizations/${organizationId}/reports`}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    View all
+                    <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+                {recentReports.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-8">
+                    <p className="text-sm text-muted-foreground text-center">No reports yet</p>
+                  </div>
+                ) : (
+                  <div className="group block p-6 rounded-lg border border-border hover:border-foreground/20 hover:bg-accent/30 transition-all duration-200 h-full flex flex-col">
+                    <div className="space-y-2 mb-4 flex-1 overflow-y-auto">
+                      {recentReports.map((report, index) => (
+                        <Link
+                          key={report.id}
+                          href={`/organizations/${organizationId}/reports/${report.id}`}
+                          className="flex items-center gap-4 p-4 rounded-lg border border-transparent hover:border-border hover:bg-accent/50 transition-all duration-200"
+                        >
+                          <div className="flex-shrink-0 text-xs font-semibold text-muted-foreground w-6 h-6 flex items-center justify-center rounded-full bg-muted">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate group-hover:text-foreground transition-colors">
+                              {report.title || report.testType || "Untitled Report"}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              {report.testType && (
+                                <div className="flex items-center gap-1">
+                                  <Tag className="size-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">{report.testType}</span>
+                                </div>
+                              )}
+                              {report.createdAt && (
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="size-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(report.createdAt as string), "MMM d, yyyy")}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-auto">
+                      <p className="text-2xl font-semibold">{reports.length}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {reports.length === 1 ? "report" : "reports"}
+                        {reports.length > 3 && (
+                          <span className="ml-1">({reports.length - 3} more)</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </section>
             </div>
 
-            {/* Recent Samples - Card Grid */}
-            <section>
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <Images className="size-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Recent Samples</h2>
-                </div>
-                <Link
-                  href={`/organizations/${organizationId}/samples`}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-                >
-                  View all
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-              {recentSamples.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-8">
-                  <p className="text-sm text-muted-foreground text-center">No samples yet</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                  {recentSamples.map(({ metaSample, sampleImages }) => {
-                    if (!metaSample || !currentUserMeta) return null
-                    return (
-                      <SampleCard
-                        key={metaSample.id}
-                        currentUser={currentUserMeta}
-                        sample={metaSample}
-                        sampleImages={sampleImages}
-                      />
-                    )
-                  })}
-                </div>
-              )}
-            </section>
-
-            {/* Recent Reports - Detailed List */}
-            <section>
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <FileText className="size-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Recent Reports</h2>
-                </div>
-                <Link
-                  href={`/organizations/${organizationId}/reports`}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-                >
-                  View all
-                  <ArrowRight className="size-3" />
-                </Link>
-              </div>
-              {recentReports.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-8">
-                  <p className="text-sm text-muted-foreground text-center">No reports yet</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {recentReports.map((report, index) => (
-                    <Link
-                      key={report.id}
-                      href={`/organizations/${organizationId}/reports/${report.id}`}
-                      className="group flex items-center gap-4 p-4 rounded-lg border border-transparent hover:border-border hover:bg-accent/50 transition-all duration-200"
-                    >
-                      <div className="flex-shrink-0 text-xs font-semibold text-muted-foreground w-6 h-6 flex items-center justify-center rounded-full bg-muted">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate group-hover:text-foreground transition-colors">
-                          {report.title || report.testType || "Untitled Report"}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1">
-                          {report.testType && (
-                            <div className="flex items-center gap-1">
-                              <Tag className="size-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">{report.testType}</span>
-                            </div>
-                          )}
-                          {report.createdAt && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="size-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(report.createdAt as string), "MMM d, yyyy")}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
-
             {/* Dashboard Analytics Section */}
-            <section className="pt-8 border-t">
+            <section className="pt-8">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold">Analytics & Insights</h2>
                 <p className="text-sm text-muted-foreground">Organization metrics and statistics</p>
