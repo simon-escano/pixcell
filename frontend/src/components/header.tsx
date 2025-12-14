@@ -51,7 +51,7 @@ const getSegmentType = (segment: string, index: number, pathArray: string[]): st
     return null; // sampleImageId - keep as ID
   }
   if (prevSegment === "reports") return "report";
-  if (prevSegment === "users") return "user";
+  if (prevSegment === "members") return "user";
 
   return null;
 }
@@ -152,8 +152,8 @@ const Header = ({ organizations }: HeaderProps) => {
     if (segment === "reports") {
       return { name: "Reports", icon: FileText };
     }
-    if (segment === "users") {
-      return { name: "Users", icon: UsersRound };
+    if (segment === "members") {
+      return { name: "Members", icon: UsersRound };
     }
     if (segment === "settings") {
       return { name: "Settings", icon: Settings };
@@ -166,91 +166,89 @@ const Header = ({ organizations }: HeaderProps) => {
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2">
-      <div className="flex flex-1 items-center justify-between gap-2 px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              {isOrgRoute && organizations.length > 0 && (
-                <>
-                  <BreadcrumbItem>
-                    <BreadcrumbOrganizationDropdown organizations={organizations} />
+    <header className="flex items-center justify-between gap-2 px-4 py-2">
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            {isOrgRoute && organizations.length > 0 && (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbOrganizationDropdown organizations={organizations} />
+                </BreadcrumbItem>
+                {breadcrumbSegments.length > 0 && (
+                  <BreadcrumbSeparator className="hidden md:block" />
+                )}
+              </>
+            )}
+            {breadcrumbSegments.map((segment, index) => {
+              const actualIndex = isOrgRoute 
+                ? orgIndex + 2 + index 
+                : index;
+              const href = "/" + pathArray.slice(0, actualIndex + 1).join("/");
+              const isLast = index === breadcrumbSegments.length - 1;
+              const pageInfo = getPageInfo(segment);
+              const displayText = pageInfo?.name || truncate(formatSegment(segment, actualIndex));
+              const Icon = pageInfo?.icon;
+
+              return (
+                <React.Fragment key={index}>
+                  <BreadcrumbItem
+                    className={
+                      index < breadcrumbSegments.length - 1 ? "hidden md:block" : ""
+                    }
+                  >
+                    {isLast ? (
+                      <BreadcrumbPage className="flex items-center gap-2">
+                        {Icon && <Icon className="size-4 text-primary" />}
+                        <span>{displayText}</span>
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={href} className="flex items-center gap-2">
+                        {Icon && <Icon className="size-4 text-primary" />}
+                        <span>{displayText}</span>
+                      </BreadcrumbLink>
+                    )}
                   </BreadcrumbItem>
-                  {breadcrumbSegments.length > 0 && (
+                  {!isLast && (
                     <BreadcrumbSeparator className="hidden md:block" />
                   )}
-                </>
-              )}
-              {breadcrumbSegments.map((segment, index) => {
-                const actualIndex = isOrgRoute 
-                  ? orgIndex + 2 + index 
-                  : index;
-                const href = "/" + pathArray.slice(0, actualIndex + 1).join("/");
-                const isLast = index === breadcrumbSegments.length - 1;
-                const pageInfo = getPageInfo(segment);
-                const displayText = pageInfo?.name || truncate(formatSegment(segment, actualIndex));
-                const Icon = pageInfo?.icon;
-
-                return (
-                  <React.Fragment key={index}>
-                    <BreadcrumbItem
-                      className={
-                        index < breadcrumbSegments.length - 1 ? "hidden md:block" : ""
-                      }
-                    >
-                      {isLast ? (
-                        <BreadcrumbPage className="flex items-center gap-2">
-                          {Icon && <Icon className="size-4 text-primary" />}
-                          <span>{displayText}</span>
-                        </BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink href={href} className="flex items-center gap-2">
-                          {Icon && <Icon className="size-4 text-primary" />}
-                          <span>{displayText}</span>
-                        </BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!isLast && (
-                      <BreadcrumbSeparator className="hidden md:block" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <div className="flex items-center justify-between w-full">
-                Light
-                {theme === "light" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <div className="flex items-center justify-between w-full">
-                Dark
-                {theme === "dark" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <div className="flex items-center justify-between w-full">
-                System
-                {theme === "system" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                </React.Fragment>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setTheme("light")}>
+            <div className="flex items-center justify-between w-full">
+              Light
+              {theme === "light" && <Check className="h-4 w-4" />}
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("dark")}>
+            <div className="flex items-center justify-between w-full">
+              Dark
+              {theme === "dark" && <Check className="h-4 w-4" />}
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("system")}>
+            <div className="flex items-center justify-between w-full">
+              System
+              {theme === "system" && <Check className="h-4 w-4" />}
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 };

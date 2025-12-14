@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { CustomAlertDialog } from "../custom-alert-dialog";
 import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
-import UserButton from "../users/user-button";
+import UserButton from "../members/user-button";
 import StatusUpdate from "./status-update";
 import ClientDate from "../client-date";
 
@@ -111,7 +111,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
                     console.log('UserButton clicked for doctor');
                     console.log('generatedById:', row.generatedById);
                     e.stopPropagation();
-                    router.push(`/organizations/${organizationId}/users/${row.generatedById}`);
+                    router.push(`/organizations/${organizationId}/members/${row.generatedById}`);
                   }}
                 />
               );

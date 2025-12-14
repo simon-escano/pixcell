@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { UsersTable } from "@/components/users/users-table";
+import { MembersTable } from "@/components/members/members-table";
 import { getAllRoles, getAllUsersWithProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
@@ -33,7 +33,7 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
   return (
     <Base params={paramsObj}>
       <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <UsersTable users={users} organizationId={organizationId} isAdmin={isAdmin} />
+        <MembersTable users={users} organizationId={organizationId} isAdmin={isAdmin} />
       </div>
     </Base>
   );

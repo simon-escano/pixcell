@@ -47,7 +47,7 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
   );
 }
 
-export const UsersTable = ({ users, organizationId, isAdmin = false }: { users: CombinedUser[]; organizationId: string; isAdmin?: boolean }) => {
+export const MembersTable = ({ users, organizationId, isAdmin = false }: { users: CombinedUser[]; organizationId: string; isAdmin?: boolean }) => {
   const router = useRouter();
   const params = useParams();
   const orgId = organizationId || (params as any)?.organizationId || "";
@@ -131,7 +131,7 @@ export const UsersTable = ({ users, organizationId, isAdmin = false }: { users: 
       skipEmptyLines: true,
       complete: async (results: Papa.ParseResult<any>) => {
         try {
-          const response = await fetch("/api/users/batch", {
+          const response = await fetch("/api/members/batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -237,7 +237,7 @@ export const UsersTable = ({ users, organizationId, isAdmin = false }: { users: 
         ]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/organizations/${orgId}/users/${user.id}`)
+          router.push(`/organizations/${orgId}/members/${user.id}`)
         }}
         customHeaderContent={
           isAdmin ? (

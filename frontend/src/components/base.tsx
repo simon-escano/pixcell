@@ -15,16 +15,21 @@ const Base = async ({ children, params }: BaseProps) => {
   const profileData = await getProfileByUserId(user.id);
   const organizations = await getOrganizationsByProfileId(profileData?.id || "");
 
+  // Convert params to the expected Promise format
+  const sidebarParams = params?.organizationId 
+    ? Promise.resolve({ organizationId: params.organizationId })
+    : undefined;
+
   return (
     <SidebarProvider className="h-screen overflow-hidden">
-      <AppSidebar params={params} />
+      <AppSidebar params={sidebarParams} />
       <SidebarInset className="flex flex-col overflow-hidden">
         <Header organizations={organizations.map(org => ({
           id: org.id,
           name: org.name,
           imageUrl: org.imageUrl,
         }))} />
-        <div className="-mt-4 flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -3,7 +3,7 @@ import ProfilePageLayout from "@/components/profile/ProfilePageLayout";
 import React, { useEffect, useState, useCallback } from "react";
 
 const PatientReportsList = dynamic(() => import("@/components/patients/patient-reports-list").then(m => m.PatientReportsList), { ssr: false });
-const EditUserDialogTrigger = dynamic(() => import("@/components/users/user-dialog-client"), { ssr: false });
+const EditUserDialogTrigger = dynamic(() => import("@/components/members/user-dialog-client"), { ssr: false });
 const EditPatientDialogTrigger = dynamic(() => import("@/components/patients/edit-patient-dialog-trigger").then(m => m.EditPatientDialogTrigger), { ssr: false });
 const UploadSampleDrawerForPatient = dynamic(() => import("@/components/samples/upload-sample-drawer").then(m => m.UploadSampleDrawerForPatient), { ssr: false });
 const AssignDoctorToPatient = dynamic(() => import("./AssignDoctorToPatient"), { ssr: false });

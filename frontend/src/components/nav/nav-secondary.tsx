@@ -30,7 +30,7 @@ export function NavSecondary({ isAdmin, organizationId }: NavSecondaryProps) {
   const items = [
     ...(isAdmin ? [{
       title: "Manage users",
-      url: `/organizations/${organizationId}/users`,
+      url: `/organizations/${organizationId}/members`,
       icon: UsersRound,
     }] : []),
   ];

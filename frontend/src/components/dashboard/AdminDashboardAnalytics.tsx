@@ -267,7 +267,7 @@ export default function AdminDashboardAnalytics({
               User Distribution
             </CardTitle>
             <Button asChild size="sm" variant="outline" className="h-9 text-xs px-3 bg-transparent">
-              <Link href={orgId ? `/organizations/${orgId}/users` : `/users`}>
+              <Link href={orgId ? `/organizations/${orgId}/members` : `/members`}>
                 <Settings className="h-3.5 w-3.5 mr-1.5" />
                 Manage
               </Link>

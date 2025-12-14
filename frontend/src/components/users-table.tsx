@@ -187,7 +187,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[], o
         columnConfigs={[{ key: "imageId", maxWidth: 200 }]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/organizations/${orgId}/users/${user.id}`)
+          router.push(`/organizations/${orgId}/members/${user.id}`)
         }}
         customHeaderContent={addUserButton}
       />

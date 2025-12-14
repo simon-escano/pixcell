@@ -55,7 +55,7 @@ export function NavUser({
   };
 
   const handleProfile = async () => {
-    router.push(`/organizations/${orgId}/users/${user.id}`)
+    router.push(`/organizations/${orgId}/members/${user.id}`)
   };
 
   // Default values if profile is null

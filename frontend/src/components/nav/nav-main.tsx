@@ -78,7 +78,7 @@ export function NavMain({ organizations }: NavMainProps) {
     },
     {
       title: "Members",
-      url: (orgId: string) => `/organizations/${orgId}/users`,
+      url: (orgId: string) => `/organizations/${orgId}/members`,
       icon: UsersRound,
     },
   ];

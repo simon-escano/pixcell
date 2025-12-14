@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
 import { DataTable } from "../data-table";
 import { CustomAlertDialog } from "../custom-alert-dialog";
-import UserButton from "../users/user-button";
+import UserButton from "../members/user-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CirclePlus, Plus, Upload, XCircle, Trash2 } from "lucide-react";

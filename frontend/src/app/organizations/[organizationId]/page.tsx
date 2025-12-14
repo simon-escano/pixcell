@@ -244,7 +244,7 @@ const OrganizationPage = async ({
     <Base params={paramsObj}>
       <OrganizationPageWrapper>
         <div className="h-full overflow-y-auto">
-        <div className="flex flex-1 flex-col gap-4 p-4 md:p-10">
+        <div className="flex flex-1 flex-col gap-4">
           <OrganizationBanner
             name={organization?.name || null}
             address={organization?.address || null}
@@ -301,7 +301,7 @@ const OrganizationPage = async ({
                     <h2 className="text-lg font-semibold">Members</h2>
                   </div>
                   <Link
-                    href={`/organizations/${organizationId}/users`}
+                    href={`/organizations/${organizationId}/members`}
                     className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   >
                     View all
@@ -314,7 +314,7 @@ const OrganizationPage = async ({
                   </div>
                 ) : (
                   <Link
-                    href={`/organizations/${organizationId}/users`}
+                    href={`/organizations/${organizationId}/members`}
                     className="group block p-6 rounded-lg border border-border hover:border-foreground/20 hover:bg-accent/30 transition-all duration-200"
                   >
                     <div className="flex items-end justify-between mb-4">

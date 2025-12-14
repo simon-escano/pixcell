@@ -31,7 +31,7 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react"
-import UserButton from "../users/user-button";
+import UserButton from "../members/user-button";
 import UploadSampleDrawerForPatient from "../samples/upload-sample-drawer";
 
 export interface ProfilePageLayoutProps {
@@ -732,7 +732,7 @@ export default function ProfilePageLayout({
                                 doctor={doctor}
                                 index={index}
                                 onClick={() => {
-                                  router.push(`/organizations/${orgId}/users/${doctor.id}`)
+                                  router.push(`/organizations/${orgId}/members/${doctor.id}`)
                                 }}
                               />
                             ))}
