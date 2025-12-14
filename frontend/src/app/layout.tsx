@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: "PixCell",
   description:
     " A deep learning-powered app for analyzing and detecting patterns in microscopic images, with collaborative note-taking and research features.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

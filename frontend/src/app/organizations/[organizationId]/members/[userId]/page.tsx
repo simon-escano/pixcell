@@ -3,6 +3,7 @@ import { getProfileByUserId, getReportsByGeneratedBy, getRoleByUserIdAndOrganiza
 import UserProfileClient from "./UserProfileClient";
 import { getMetaProfileByUserId, getMetaSampleImagesBySampleId } from "@/app/organizations/[organizationId]/samples/queries";
 import { Metadata } from "next";
+import AccessDeniedPage from "@/components/access-denied-page";
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -33,13 +34,40 @@ export default async function UserPage({
   const paramsObj = await params;
   const userId = paramsObj.userId;
   const organizationId = paramsObj.organizationId;
+  
   const user = await getUserById(userId);
   const profile = await getProfileByUserId(userId);
+  
+  if (!user || !profile) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This user does not exist."
+          backUrl={`/organizations/${organizationId}/members`}
+          backLabel="Back to Members"
+        />
+      </Base>
+    );
+  }
+
+  // Check if user belongs to the organization
+  const roleData = await getRoleByUserIdAndOrganizationId(userId, organizationId);
+  if (!roleData) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This user does not belong to this organization."
+          backUrl={`/organizations/${organizationId}/members`}
+          backLabel="Back to Members"
+        />
+      </Base>
+    );
+  }
+
+  const role = roleData.name;
+  const roleId = roleData.id;
   const samples = await getSamplesByUserId(userId, organizationId);
   const reports = await getReportsByGeneratedBy(userId);
-  const roleData = await getRoleByUserIdAndOrganizationId(userId, organizationId);
-  const role = roleData?.name || "";
-  const roleId = roleData?.id || "";
   const metaUser = await getMetaProfileByUserId(userId, organizationId);
 
   // Fetch patients for this user

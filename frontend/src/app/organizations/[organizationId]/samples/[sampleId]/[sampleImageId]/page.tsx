@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import AccessDeniedToast from "./access-denied-toast";
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
 import { Metadata } from "next";
+import AccessDeniedPage from "@/components/access-denied-page";
+import { getSampleById } from "@/db/queries/select";
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -35,6 +37,31 @@ const SampleImagePage = async ({
 }) => {
   const paramsObj = await params;
   const { sampleId, sampleImageId } = paramsObj;
+  const organizationId = paramsObj.organizationId;
+  
+  // Check organization membership first using getSampleById which includes organizationId
+  const sampleData = await getSampleById(sampleId);
+  if (!sampleData) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedToast message="You have no access to this image or the image does not exist" />
+      </Base>
+    );
+  }
+
+  // Check if sample belongs to the organization
+  if (sampleData.organizationId !== organizationId) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This sample does not exist in this organization."
+          backUrl={`/organizations/${organizationId}/samples`}
+          backLabel="Back to Samples"
+        />
+      </Base>
+    );
+  }
+
   const sample = await getMetaSampleById(sampleId);
   
   // Check if sample exists
@@ -48,7 +75,6 @@ const SampleImagePage = async ({
   
   const sampleImages = await getMetaSampleImagesBySampleId(sample.id);
   const currentUser = await getUser();
-  const organizationId = paramsObj.organizationId;
   const metaUser = await getMetaProfileByUserId(currentUser.id, organizationId);
   const isDoctorAssociated = await isDoctorAssociatedWithPatient(currentUser.id, sample.patient?.id!);
 

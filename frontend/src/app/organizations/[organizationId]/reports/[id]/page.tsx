@@ -13,6 +13,7 @@ import AiGeneratedNoticeClient from "./ai-generated-notice-client"
 import ReportActions, { ReportActionButtons } from "./report-actions-client"
 import { ReportStatus } from "@/lib/status-config"
 import { Metadata } from "next"
+import AccessDeniedPage from "@/components/access-denied-page"
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -126,6 +127,19 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
 
   if (!report) {
     return <ReportNotFound organizationId={organizationId} />
+  }
+
+  // Check if report belongs to the organization
+  if (report.organizationId !== organizationId) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This report does not exist in this organization."
+          backUrl={`/organizations/${organizationId}/reports`}
+          backLabel="Back to Reports"
+        />
+      </Base>
+    )
   }
 
   const patient = report.patientId ? await getPatientById(report.patientId) : null

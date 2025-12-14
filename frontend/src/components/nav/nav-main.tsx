@@ -132,9 +132,9 @@ export function NavMain({ organizations }: NavMainProps) {
                         <SidebarMenuSubItem key={item.title}>
                           <SidebarMenuSubButton asChild isActive={isActive}>
                             <Link href={url}>
-                              <item.icon />
-                              <span>{item.title}</span>
-                            </Link>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       );

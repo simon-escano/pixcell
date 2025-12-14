@@ -178,6 +178,20 @@ export async function getPatientById(id: string) {
   return result[0];
 }
 
+export async function isPatientInOrganization(patientId: string, organizationId: string): Promise<boolean> {
+  const result = await db
+    .select({ id: organizationPatient.id })
+    .from(organizationPatient)
+    .where(
+      and(
+        eq(organizationPatient.patientId, patientId),
+        eq(organizationPatient.organizationId, organizationId)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+}
+
 export async function getSamplesByPatientId(id: string) {
   return await db
     .select({
@@ -264,6 +278,7 @@ export async function getSampleById(id: string) {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
+      organizationId: sample.organizationId,
       // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,

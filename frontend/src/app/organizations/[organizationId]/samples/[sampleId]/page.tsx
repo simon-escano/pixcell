@@ -8,6 +8,7 @@ import { isDoctorAssociatedWithPatient } from "@/db/queries/select";
 import AccessDeniedToast from "./[sampleImageId]/access-denied-toast";
 import Base from "@/components/base";
 import { Metadata } from "next";
+import AccessDeniedPage from "@/components/access-denied-page";
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -45,6 +46,19 @@ const SamplePage = async ({
     return (
       <Base params={paramsObj}>
         <AccessDeniedToast message="You have no access to this image or the image does not exist" />
+      </Base>
+    );
+  }
+
+  // Check if sample belongs to the organization
+  if (sample.organizationId !== organizationId) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This sample does not exist in this organization."
+          backUrl={`/organizations/${organizationId}/samples`}
+          backLabel="Back to Samples"
+        />
       </Base>
     );
   }

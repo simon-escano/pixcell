@@ -75,7 +75,7 @@ const ReportsTable = ({ reports, organizationId }: ReportsTableProps) => {
         searchableColumns={["id", "title", "patientName", "testType", "status", "generatedByName" , "createdAt"]}
         columnConfigs={[
           { key: "id", header: "Report ID",customRender: (value: string) => String(value).slice(0, 8).toUpperCase() },
-          { key: "title", maxWidth: 250 },
+          { key: "title", header: "Title", maxWidth: 250, customRender: (value: string) => value || "" },
           { key: "patientName", header:"Patient", maxWidth: 180, customRender: (_value, row) => {
             // Parse first and last name from patientName
             const [firstName = "", ...rest] = (row.patientName || "").split(" ");
