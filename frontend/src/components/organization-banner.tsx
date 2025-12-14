@@ -55,12 +55,12 @@ export function OrganizationBanner({
           <div className="flex flex-wrap items-center justify-between gap-4 flex-1">
             <div className="flex items-center gap-3">
               <OrganizationAvatar imageUrl={imageUrl} name={name} className="size-8 md:size-12" />
-              <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
                 {name || "Unnamed Organization"}
               </h1>
             </div>
             {address && (
-              <div className="flex items-center gap-2 text-foreground/80 ml-0 md:ml-0 text-sm md:text-base">
+              <div className="flex items-center gap-2 text-white/80 ml-0 md:ml-0 text-sm md:text-base">
                 <MapPin className="size-4 flex-shrink-0" />
                 <span>{address}</span>
               </div>
