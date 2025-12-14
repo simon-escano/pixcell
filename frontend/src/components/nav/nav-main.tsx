@@ -26,11 +26,6 @@ export function NavMain({ organizationId }: NavMainProps) {
 
   const items = [
     {
-      title: "Dashboard",
-      url: `/organizations/${organizationId}/dashboard`,
-      icon: LayoutDashboard,
-    },
-    {
       title: "Patients",
       url: `/organizations/${organizationId}/patients`,
       icon: ContactRound,

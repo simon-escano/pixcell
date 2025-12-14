@@ -1,5 +1,5 @@
 import Base from "@/components/base"
-import { getOrganizationById, getAllSamples, getAllReports, getAllUsersWithProfiles } from "@/db/queries/select"
+import { getOrganizationById, getAllSamples, getAllReports, getAllUsersWithProfiles, getPatientGenderStats, getAllPatientsForUser } from "@/db/queries/select"
 import type { Metadata } from "next"
 import { Building, MapPin, FileText, Images, Users, UserCircle, ArrowRight, Calendar, Tag } from "lucide-react"
 import { AvatarStack } from "@/components/avatar-stack"
@@ -12,6 +12,10 @@ import { generateGradientColors } from "@/lib/color-utils"
 import { getUser } from "@/lib/auth"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./samples/queries"
 import SampleCard from "@/components/samples/sample-card"
+import { getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select"
+import AdminDashboardAnalytics from "@/components/dashboard/AdminDashboardAnalytics"
+import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics"
+import { createClient } from "@supabase/supabase-js"
 
 function truncate(text: string, maxLength = 50): string {
   if (text.length <= maxLength) return text
@@ -53,6 +57,40 @@ async function getAllPatientsForOrganization(organizationId: string) {
   return getAllPatientsForOrganizationCached(organizationId);
 }
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role key on server only!
+)
+
+async function getSupabaseStorageUsage(bucket: string) {
+  let total = 0
+  let page = 0
+  let hasMore = true
+  while (hasMore) {
+    const { data, error } = await supabase.storage.from(bucket).list("", { limit: 1000, offset: page * 1000 })
+    if (error) throw error
+    if (!data || data.length === 0) break
+    for (const file of data) {
+      if (file.metadata && file.metadata.size) {
+        total += file.metadata.size
+      }
+    }
+    hasMore = data.length === 1000
+    page++
+  }
+  return total
+}
+
+const ROLE_COLORS = [
+  "#3b82f6", // blue-500
+  "#10b981", // green-500
+  "#f59e42", // orange-400
+  "#6366f1", // indigo-500
+  "#ef4444", // red-500
+  "#a855f7", // purple-500
+  "#fbbf24", // yellow-400
+]
+
 const OrganizationPage = async ({
   params,
 }: {
@@ -70,6 +108,53 @@ const OrganizationPage = async ({
     getAllUsersWithProfiles(organizationId),
     getAllPatientsForOrganization(organizationId),
   ])
+
+  // Get user profile and role for dashboard
+  const [profile, role] = await Promise.all([
+    getProfileByUserId(user.id),
+    getRoleByUserIdAndOrganizationId(user.id, organizationId),
+  ])
+
+  // Fetch dashboard data (only if needed)
+  const isAdmin = role?.name === "Administrator"
+  const dashboardData = isAdmin ? await Promise.all([
+    getAllPatientsForUser(profile.id, "Administrator", organizationId),
+    getPatientGenderStats(organizationId),
+    (async () => {
+      try {
+        const storageUsed = await getSupabaseStorageUsage("sample-images")
+        const storageUsedMB = (storageUsed / (1024 * 1024)).toFixed(2)
+        const storageCapacityMB = 5 * 1024 // Assume 5GB total storage
+        const storageFreeMB = storageCapacityMB - Number.parseFloat(storageUsedMB)
+        return { storageUsedMB, storageCapacityMB, storageFreeMB }
+      } catch (e) {
+        return { storageUsedMB: "0", storageCapacityMB: 5 * 1024, storageFreeMB: 5 * 1024 }
+      }
+    })(),
+  ]) : null
+
+  // Prepare admin dashboard props if admin
+  const adminDashboardProps = isAdmin && dashboardData ? (() => {
+    const [adminPatients, genderStats, storageInfo] = dashboardData
+    const roleMap: Record<string, number> = {}
+    users.forEach((u) => {
+      if (!u.roleName) return
+      roleMap[u.roleName] = (roleMap[u.roleName] || 0) + 1
+    })
+    const roleCounts = Object.entries(roleMap).map(([role, count], i) => ({
+      role,
+      count,
+      color: ROLE_COLORS[i % ROLE_COLORS.length],
+    }))
+
+    return {
+      storageUsedMB: storageInfo.storageUsedMB,
+      storageCapacityMB: storageInfo.storageCapacityMB,
+      storageFreeMB: storageInfo.storageFreeMB,
+      roleCounts,
+      genderStats,
+    }
+  })() : null
 
   // Get current user's meta profile in parallel with other operations
   const [currentUserMeta] = await Promise.all([
@@ -404,6 +489,19 @@ const OrganizationPage = async ({
                     </Link>
                   ))}
                 </div>
+              )}
+            </section>
+
+            {/* Dashboard Analytics Section */}
+            <section className="pt-8 border-t">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold">Analytics & Insights</h2>
+                <p className="text-sm text-muted-foreground">Organization metrics and statistics</p>
+              </div>
+              {isAdmin && adminDashboardProps ? (
+                <AdminDashboardAnalytics {...adminDashboardProps} />
+              ) : (
+                <DashboardAnalytics organizationId={organizationId} />
               )}
             </section>
           </div>

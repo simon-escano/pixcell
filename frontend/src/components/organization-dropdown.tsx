@@ -41,13 +41,18 @@ const OrganizationDropdown = ({ organizations }: OrganizationDropdownProps) => {
     
     // If we are currently inside a path that has the organization ID
     if (orgIndex !== -1 && updatedSegments.length > orgIndex + 1) {
+      // If we're on the dashboard route, redirect to organization page
+      if (updatedSegments[orgIndex + 2] === "dashboard") {
+        router.push(`/organizations/${orgId}`)
+        return
+      }
       // Replace the old Org ID with the new one
       updatedSegments[orgIndex + 1] = orgId
       const newPath = updatedSegments.join("/") || "/"
       router.push(newPath)
     } else {
-      // Fallback: If logic fails or we are on a root page, go to dashboard
-      router.push(`/organizations/${orgId}/dashboard`)
+      // Fallback: If logic fails or we are on a root page, go to organization page
+      router.push(`/organizations/${orgId}`)
     }
   }
 
