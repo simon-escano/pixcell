@@ -12,14 +12,15 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { ContactRound, FileText, Images, Building, ChevronRight, ChevronDown } from "lucide-react";
+import { ContactRound, FileText, Images, ChevronRight, ChevronDown } from "lucide-react";
+import { OrganizationAvatar } from "@/components/organization-avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface Organization {
   id: string;
   name: string | null;
-  color: string;
+  imageUrl: string | null;
 }
 
 interface NavMainProps {
@@ -28,12 +29,30 @@ interface NavMainProps {
 
 export function NavMain({ organizations }: NavMainProps) {
   const pathname = usePathname();
-  const [openStates, setOpenStates] = React.useState<Record<string, boolean>>(
-    organizations.reduce((acc, org) => {
+  const [openStates, setOpenStates] = React.useState<Record<string, boolean>>(() => {
+    if (!organizations || organizations.length === 0) {
+      return {};
+    }
+    return organizations.reduce((acc, org) => {
       acc[org.id] = true; // All open by default
       return acc;
-    }, {} as Record<string, boolean>)
-  );
+    }, {} as Record<string, boolean>);
+  });
+
+  // Update openStates when organizations change
+  React.useEffect(() => {
+    if (organizations && organizations.length > 0) {
+      setOpenStates((prev) => {
+        const newStates = { ...prev };
+        organizations.forEach((org) => {
+          if (!(org.id in newStates)) {
+            newStates[org.id] = true;
+          }
+        });
+        return newStates;
+      });
+    }
+  }, [organizations]);
 
   if (!organizations || organizations.length === 0) {
     return null;
@@ -74,7 +93,7 @@ export function NavMain({ organizations }: NavMainProps) {
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={org.name || "Unnamed Organization"}>
-                    <Building className="size-4" style={{ color: org.color }} />
+                    <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
                     <span className="flex-1 text-left truncate">{org.name || "Unnamed Organization"}</span>
                     {isOpen ? (
                       <ChevronDown className="size-4 transition-transform" />

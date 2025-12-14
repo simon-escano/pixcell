@@ -4,6 +4,7 @@ import { getOrganizationsByProfileId, getProfileByUserId } from '@/db/queries/se
 import { getUser } from '@/lib/auth';
 import Link from 'next/link';
 import { Building, MapPin, Calendar } from 'lucide-react';
+import { OrganizationAvatar } from '@/components/organization-avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 
@@ -35,16 +36,15 @@ const OrganizationsPage = async () => {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                             {organizations.map((org) => {
-                                const orgColor = org.color || "#7E7E82";
                                 return (
                                     <Link key={org.id} href={`/organizations/${org.id}`} className="group">
                                         <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
                                             <CardHeader className="pb-3">
                                                 <div className="flex items-start justify-between gap-2 mb-2 w-full overflow-hidden">
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                        <Building 
-                                                            className="size-5 shrink-0" 
-                                                            style={{ color: orgColor }}
+                                                        <OrganizationAvatar 
+                                                            imageUrl={org.imageUrl} 
+                                                            name={org.name}
                                                         />
                                                         <CardTitle className="text-lg font-semibold truncate">
                                                             {org.name || "Unnamed Organization"}

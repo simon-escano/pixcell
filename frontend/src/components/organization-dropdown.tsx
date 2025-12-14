@@ -8,7 +8,8 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
-import { Building, MoveRight } from "lucide-react"
+import { MoveRight } from "lucide-react"
+import { OrganizationAvatar } from "./organization-avatar"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -19,7 +20,7 @@ interface OrganizationDropdownProps {
     address: string | null
     createdAt: Date
     updatedAt: Date
-    color: string
+    imageUrl: string | null
   }[]
 }
 
@@ -74,7 +75,7 @@ const OrganizationDropdown = ({ organizations }: OrganizationDropdownProps) => {
             {organizations.map(org => (
               <SelectItem key={org.id} value={org.id}>
                 <div className="flex items-center gap-2">
-                  <Building className="size-4" style={{ color: org.color }} />
+                  <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
                   <span>{org.name || "Unnamed Organization"}</span>
                 </div>
               </SelectItem>

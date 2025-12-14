@@ -60,7 +60,7 @@ interface HeaderProps {
   organizations: {
     id: string;
     name: string | null;
-    color: string;
+    imageUrl: string | null;
   }[];
 }
 

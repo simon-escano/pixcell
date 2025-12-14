@@ -22,7 +22,7 @@ const Base = async ({ children, params }: BaseProps) => {
         <Header organizations={organizations.map(org => ({
           id: org.id,
           name: org.name,
-          color: org.color,
+          imageUrl: org.imageUrl,
         }))} />
         <div className="-mt-4 flex-1 overflow-y-auto">{children}</div>
       </SidebarInset>

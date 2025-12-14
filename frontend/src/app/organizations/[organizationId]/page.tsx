@@ -1,14 +1,14 @@
 import Base from "@/components/base"
 import { getOrganizationById, getAllSamples, getAllReports, getAllUsersWithProfiles, getPatientGenderStats, getAllPatientsForUser } from "@/db/queries/select"
 import type { Metadata } from "next"
-import { Building, MapPin, FileText, Images, Users, UserCircle, ArrowRight, Calendar, Tag } from "lucide-react"
+import { MapPin, FileText, Images, Users, UserCircle, ArrowRight, Calendar, Tag } from "lucide-react"
 import { AvatarStack } from "@/components/avatar-stack"
 import Link from "next/link"
 import { format } from "date-fns"
 import { db } from "@/db"
 import { organizationPatient, patient, image } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { generateGradientColors } from "@/lib/color-utils"
+import { OrganizationBanner } from "@/components/organization-banner"
 import { getUser } from "@/lib/auth"
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "./samples/queries"
 import SampleCard from "@/components/samples/sample-card"
@@ -239,84 +239,19 @@ const OrganizationPage = async ({
     image: d.imageUrl || "",
   }))
 
-  const orgColor = organization?.color || "#7E7E82"
-  const { lightColor, darkColor } = generateGradientColors(orgColor)
-
   return (
     <Base params={paramsObj}>
       <div className="h-full overflow-y-auto">
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-10">
-          <div
-            className="relative overflow-hidden p-4 sm:p-4 md:p-6 lg:p-8 p-4 rounded-xl shadow-xl"
-            style={{
-              background: `linear-gradient(135deg, ${lightColor} 0%, ${darkColor} 100%)`,
-            }}
-          >
-            {/* Background accent */}
-            <div
-              className="absolute top-0 right-0 w-96 h-96 opacity-10 rounded-full blur-3xl"
-              style={{ backgroundColor: orgColor }}
-            />
-            <div
-              className="absolute bottom-0 left-0 w-72 h-72 opacity-10 rounded-full blur-3xl"
-              style={{ backgroundColor: orgColor }}
-            />
-
-            <div className="relative z-10 max-w-7xl mx-auto">
-              {/* Organization Info */}
-              <div className="mb-4 md:mb-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
-                    <Building className="size-6 md:size-7 text-white" />
-                  </div>
-                  <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
-                    {organization?.name || "Unnamed Organization"}
-                  </h1>
-                </div>
-                {organization?.address && (
-                  <div className="flex items-center gap-2 text-white/80 ml-0 md:ml-0 text-sm md:text-base">
-                    <MapPin className="size-4 flex-shrink-0" />
-                    <span>{organization.address}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Stats Grid - Embedded in Banner */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-                  <p className="text-xs font-medium text-white/70 mb-1">Samples</p>
-                  <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-                    {samples.length}
-                    <Images className="size-5 opacity-60" />
-                  </p>
-                </div>
-
-                <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-                  <p className="text-xs font-medium text-white/70 mb-1">Reports</p>
-                  <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-                    {reports.length}
-                    <FileText className="size-5 opacity-60" />
-                  </p>
-                </div>
-
-                <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-                  <p className="text-xs font-medium text-white/70 mb-1">Patients</p>
-                  <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-                    {patients.length}
-                    <Users className="size-5 opacity-60" />
-                  </p>
-                </div>
-
-                <div className="py-1 px-2 md:py-2 md:px-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200">
-                  <p className="text-xs font-medium text-white/70 mb-1">Staff</p>
-                  <p className="text-xl md:text-2xl font-semibold text-white flex items-baseline gap-2">
-                    {users.length}
-                    <UserCircle className="size-5 opacity-60" />
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <OrganizationBanner
+            name={organization?.name || null}
+            address={organization?.address || null}
+            imageUrl={organization?.image_url || null}
+            samples={samples.length}
+            reports={reports.length}
+            patients={patients.length}
+            users={users.length}
+          />
         </div>
 
         <div className="p-4 sm:p-6 md:p-8 lg:p-10">

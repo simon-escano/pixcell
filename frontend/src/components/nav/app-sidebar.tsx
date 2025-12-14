@@ -89,7 +89,7 @@ export async function AppSidebar({
           organizations={organizations.map(org => ({
             id: org.id,
             name: org.name,
-            color: org.color,
+            imageUrl: org.imageUrl,
           }))}
         />
       </SidebarContent>

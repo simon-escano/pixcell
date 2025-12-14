@@ -3,13 +3,14 @@ import { cookies } from 'next/headers';
 import { cache } from 'react';
 
 // Cache the cookie promise per request
-const getCookieStore = cache(() => {
-  return cookies();
+const getCookieStore = cache(async () => {
+  return await cookies();
 });
 
 export async function createClient() {
-  // Pass the async cookies function directly - the library will handle awaiting it
+  // Await the cookies before passing to createServerComponentClient
+  const cookieStore = await getCookieStore();
   return createServerComponentClient({
-    cookies: getCookieStore,
+    cookies: () => cookieStore,
   });
 }

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
-import { Building } from "lucide-react"
+import { OrganizationAvatar } from "./organization-avatar"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -16,7 +16,7 @@ interface BreadcrumbOrganizationDropdownProps {
   organizations: {
     id: string
     name: string | null
-    color: string
+    imageUrl: string | null
   }[]
 }
 
@@ -62,7 +62,7 @@ export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrga
     <Select value={currentOrgId} onValueChange={handleChange}>
       <SelectTrigger className="w-auto min-w-[80px] max-w-[150px] border shadow-none bg-transparent hover:bg-accent overflow-hidden">
         <div className="flex items-center gap-2 overflow-hidden w-full">
-          <Building className="size-3.5 flex-shrink-0" style={{ color: currentOrg.color }} />
+          <OrganizationAvatar imageUrl={currentOrg.imageUrl} name={currentOrg.name} />
           <SelectValue className="w-full flex-1 overflow-hidden">
             <span className="truncate overflow-hidden">{currentOrg.name || "Unnamed Organization"}</span>
           </SelectValue>
@@ -73,7 +73,7 @@ export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrga
           {organizations.map(org => (
             <SelectItem key={org.id} value={org.id}>
               <div className="flex items-center gap-2">
-                <Building className="size-4" style={{ color: org.color }} />
+                <OrganizationAvatar imageUrl={org.imageUrl} name={org.name} />
                 <span>{org.name || "Unnamed Organization"}</span>
               </div>
             </SelectItem>
