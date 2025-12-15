@@ -1,29 +1,20 @@
 "use client";
 import { deleteReport } from "@/actions/reports";
-import { Report } from "@/db/schema";
+import { ReportStatus } from "@/lib/status-config";
 import { format } from "date-fns";
-import { Plus, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { CustomAlertDialog } from "../custom-alert-dialog";
 import UserButton from "../members/user-button";
+import SelectionBar from "../selection-bar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
-import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import StatusBadge from "./status-badge";
-import { ReportStatus } from "@/lib/status-config";
-import SelectionBar from "../selection-bar";
+import FilterDropdown, { SortFieldOption, DisplayPropertyOption } from "../filter-dropdown";
 
 interface ExtendedReport {
   id: string;
@@ -47,7 +38,9 @@ interface ReportsListProps {
   isAdmin?: boolean;
 }
 
-type SortOption = "date-desc" | "date-asc" | "title-asc" | "title-desc";
+type SortField = "date" | "title" | "type" | "status" | "patient" | "owner";
+type SortDirection = "asc" | "desc";
+type SortOption = `${SortField}-${SortDirection}`;
 
 const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListProps) => {
   const router = useRouter();
@@ -57,7 +50,8 @@ const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListPr
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ExtendedReport | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [sortField, setSortField] = useState<SortField>("date");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [visibleFields, setVisibleFields] = useState({
     status: true,
     title: true,
@@ -95,22 +89,36 @@ const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListPr
 
     // Sort
     filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "date-desc":
-          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-        case "date-asc":
-          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
-        case "title-asc":
-          return (a.title || "").localeCompare(b.title || "");
-        case "title-desc":
-          return (b.title || "").localeCompare(a.title || "");
+      let comparison = 0;
+      
+      switch (sortField) {
+        case "date":
+          comparison = new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+          break;
+        case "title":
+          comparison = (a.title || "").localeCompare(b.title || "");
+          break;
+        case "type":
+          comparison = (a.testType || "").localeCompare(b.testType || "");
+          break;
+        case "status":
+          comparison = (a.status || "").localeCompare(b.status || "");
+          break;
+        case "patient":
+          comparison = (a.patientName || "").localeCompare(b.patientName || "");
+          break;
+        case "owner":
+          comparison = (a.generatedByName || "").localeCompare(b.generatedByName || "");
+          break;
         default:
           return 0;
       }
+      
+      return sortDirection === "asc" ? comparison : -comparison;
     });
 
     return filtered;
-  }, [reports, searchQuery, sortBy]);
+  }, [reports, searchQuery, sortField, sortDirection]);
 
   const handleRowClick = (
     e: React.MouseEvent,
@@ -248,82 +256,53 @@ const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListPr
       <div>
         {/* Header with search, filter, and create button */}
       <div className="flex gap-2 justify-between px-6 py-2 border-b items-center">
-        <div className="flex-1 flex gap-2 items-center">
-          <Input
-            placeholder="Search reports..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-          />
+        <div className="flex-1 flex gap-2 items-center h-full">
+          <div className="relative flex-1 max-w-sm h-full">
+            <Search className="absolute left-0 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search reports..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-6 pr-3 h-full bg-transparent! border-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+            />
+          </div>
         </div>
         <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <SlidersHorizontal className="size-4" />
-                Filters
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setSortBy("date-desc")}>
-                Date (Newest)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("date-asc")}>
-                Date (Oldest)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("title-asc")}>
-                Title (A-Z)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("title-desc")}>
-                Title (Z-A)
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Show/Hide Fields</DropdownMenuLabel>
-              <div className="p-2">
-                <ToggleGroup
-                  type="multiple"
-                  value={Object.entries(visibleFields)
-                    .filter(([_, visible]) => visible)
-                    .map(([key]) => key)}
-                  onValueChange={(values) => {
-                    setVisibleFields({
-                      status: values.includes("status"),
-                      title: values.includes("title"),
-                      patient: values.includes("patient"),
-                      aiGenerated: values.includes("aiGenerated"),
-                      type: values.includes("type"),
-                      member: values.includes("member"),
-                      date: values.includes("date"),
-                    });
-                  }}
-                  className="flex flex-wrap gap-1"
-                >
-                  <ToggleGroupItem value="status" aria-label="Toggle status" size="sm">
-                    Status
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="title" aria-label="Toggle title" size="sm">
-                    Title
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="patient" aria-label="Toggle patient" size="sm">
-                    Patient
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="aiGenerated" aria-label="Toggle AI Generated" size="sm">
-                    AI Generated
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="type" aria-label="Toggle type" size="sm">
-                    Type
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="member" aria-label="Toggle member" size="sm">
-                    Member
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="date" aria-label="Toggle date" size="sm">
-                    Date
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <FilterDropdown
+            sortFields={[
+              { value: "date", label: "Date" },
+              { value: "title", label: "Title" },
+              { value: "type", label: "Type" },
+              { value: "status", label: "Status" },
+              { value: "patient", label: "Patient" },
+              { value: "owner", label: "Owner" },
+            ]}
+            sortField={sortField}
+            onSortFieldChange={(field) => setSortField(field as SortField)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            displayProperties={[
+              { value: "status", label: "Status" },
+              { value: "title", label: "Title" },
+              { value: "patient", label: "Patient" },
+              { value: "aiGenerated", label: "AI Generated" },
+              { value: "type", label: "Type" },
+              { value: "member", label: "Member" },
+              { value: "date", label: "Date" },
+            ]}
+            visibleFields={visibleFields}
+            onVisibleFieldsChange={(fields) => {
+              setVisibleFields({
+                status: fields.status ?? visibleFields.status,
+                title: fields.title ?? visibleFields.title,
+                patient: fields.patient ?? visibleFields.patient,
+                aiGenerated: fields.aiGenerated ?? visibleFields.aiGenerated,
+                type: fields.type ?? visibleFields.type,
+                member: fields.member ?? visibleFields.member,
+                date: fields.date ?? visibleFields.date,
+              });
+            }}
+          />
           <Button onClick={() => router.push(`/organizations/${organizationId}/reports/create`)}>
             <Plus />
             Create Report
