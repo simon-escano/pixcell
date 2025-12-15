@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, Check, ContactRound, FileText, Images, Settings, Send, UsersRound } from "lucide-react";
+import { Moon, Sun, Check, ContactRound, FileText, Images, Settings, Send, UsersRound, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BreadcrumbOrganizationDropdown } from "./breadcrumb-organization-dropdown";
+import { usePageSidebar } from "@/contexts/page-sidebar-context";
 
 const truncate = (text: string, limit = 13) =>
   text.length > limit ? text.slice(0, limit) + "…" : text
@@ -69,6 +70,19 @@ const Header = ({ organizations }: HeaderProps) => {
   const pathArray = pathname.split("/").filter(Boolean)
   const { theme, setTheme } = useTheme();
   const [segmentNames, setSegmentNames] = useState<Record<number, string>>({});
+  
+  // Get page sidebar state (if available)
+  let pageSidebarContext;
+  try {
+    pageSidebarContext = usePageSidebar();
+  } catch {
+    // Context not available, no page sidebar
+    pageSidebarContext = null;
+  }
+  
+  const hasPageSidebar = pageSidebarContext?.hasSidebar ?? false;
+  const isPageSidebarOpen = pageSidebarContext?.isSidebarOpen ?? false;
+  const togglePageSidebar = pageSidebarContext?.setIsSidebarOpen;
 
   // Check if we're in an organization route
   const orgIndex = pathArray.indexOf("organizations");
@@ -220,35 +234,53 @@ const Header = ({ organizations }: HeaderProps) => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              <span className="sr-only">Toggle theme</span>
+        <div className="flex items-center gap-2">
+          {/* Page Sidebar Toggle - only show when page has sidebar */}
+          {hasPageSidebar && togglePageSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => togglePageSidebar(!isPageSidebarOpen)}
+              title={isPageSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+            >
+              {isPageSidebarOpen ? (
+                <PanelRightClose className="h-[1.2rem] w-[1.2rem]" />
+              ) : (
+                <PanelRightOpen className="h-[1.2rem] w-[1.2rem]" />
+              )}
+              <span className="sr-only">Toggle page sidebar</span>
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <div className="flex items-center justify-between w-full">
-                Light
-                {theme === "light" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <div className="flex items-center justify-between w-full">
-                Dark
-                {theme === "dark" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <div className="flex items-center justify-between w-full">
-                System
-                {theme === "system" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <div className="flex items-center justify-between w-full">
+                  Light
+                  {theme === "light" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <div className="flex items-center justify-between w-full">
+                  Dark
+                  {theme === "dark" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <div className="flex items-center justify-between w-full">
+                  System
+                  {theme === "system" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
     </header>
   );
 };

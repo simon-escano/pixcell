@@ -20,20 +20,26 @@ import toast from "react-hot-toast";
 import { Input } from "../ui/input";
 import UploadSampleFile from "./upload-sample-file";
 import { PatientSearchCombobox } from "../patients/patient-search-combobox";
-import { MetaPatient, MetaSample } from "@/app/organizations/[organizationId]/samples/types";
+import { MetaPatient, MetaSample, MetaSampleImage } from "@/app/organizations/[organizationId]/samples/types";
 
 interface SampleDrawerProps {
   patients: MetaPatient[];
   sample?: MetaSample;
   patient?: MetaPatient;
   children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  existingSampleImages?: MetaSampleImage[];
 }
 
 export default function SampleDrawer({ 
   patients, 
   sample, 
   patient,
-  children
+  children,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  existingSampleImages = []
 }: SampleDrawerProps) {
   const router = useRouter();
   const params = useParams();
@@ -47,8 +53,13 @@ export default function SampleDrawer({
   const [sampleName, setSampleName] = React.useState<string>(
     sample?.sampleName || ""
   );
-  const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
+  const [internalDrawerOpen, setInternalDrawerOpen] = React.useState<boolean>(false);
   const [isUploading, setIsUploading] = React.useState<boolean>(false);
+  const [currentExistingImages, setCurrentExistingImages] = React.useState<MetaSampleImage[]>(existingSampleImages);
+  
+  // Use controlled state if provided, otherwise use internal state
+  const drawerOpen = controlledOpen !== undefined ? controlledOpen : internalDrawerOpen;
+  const setDrawerOpen = controlledOnOpenChange || setInternalDrawerOpen;
 
   // Initialize form when sample data is provided
   React.useEffect(() => {
@@ -58,10 +69,13 @@ export default function SampleDrawer({
     if (patient) {
       setSelectedPatient(patient.id);
     }
-  }, [sample, patient]);
+    if (existingSampleImages.length > 0) {
+      setCurrentExistingImages(existingSampleImages);
+    }
+  }, [sample, patient, existingSampleImages]);
 
   const handleSubmit = async () => {
-    if (!selectedPatient || files.length === 0 || !sampleName.trim()) {
+    if (!selectedPatient || (files.length === 0 && currentExistingImages.length === 0) || !sampleName.trim()) {
       toast.error(`Select a patient, enter sample name, and ${isEditMode ? 'have' : 'upload'} at least one sample.`);
       return;
     }
@@ -69,13 +83,29 @@ export default function SampleDrawer({
     setIsUploading(true);
     const actionText = isEditMode ? 'Saving' : 'Uploading';
     const uploadingToast = toast.loading(
-      `${actionText} ${files.length} sample${files.length !== 1 ? 's' : ''}...`
+      `${actionText}...`
     );
 
     try {
       if (isEditMode) {
-        await editSampleAction(sample.id, files);
-        toast.success(`${files.length} sample(s) saved successfully.`, {
+        // Get IDs of images that were deleted (in original but not in current)
+        const originalIds = new Set(existingSampleImages.map(img => img.id));
+        const currentIds = new Set(currentExistingImages.map(img => img.id));
+        const deletedIds = Array.from(originalIds).filter(id => !currentIds.has(id));
+        
+        // Import the action that handles both uploads and deletions
+        const { editSampleWithDeletionsAction } = await import("@/actions/samples");
+        await editSampleWithDeletionsAction(sample.id, files, deletedIds);
+        
+        const messages = [];
+        if (files.length > 0) {
+          messages.push(`${files.length} new image${files.length !== 1 ? 's' : ''} added`);
+        }
+        if (deletedIds.length > 0) {
+          messages.push(`${deletedIds.length} image${deletedIds.length !== 1 ? 's' : ''} deleted`);
+        }
+        
+        toast.success(messages.join(', ') || 'Sample updated successfully.', {
           id: uploadingToast,
         });
         setDrawerOpen(false);
@@ -132,12 +162,12 @@ export default function SampleDrawer({
   };
 
   const getDrawerTitle = () => {
-    return isEditMode ? "Add more sample images" : "Upload sample";
+    return isEditMode ? "Edit sample" : "Upload sample";
   };
 
   const getDrawerDescription = () => {
     return isEditMode 
-      ? "Upload more sample images for this sample"
+      ? "Edit sample name, patient, and manage images"
       : "Submit sample images to share or for analysis";
   };
 
@@ -154,9 +184,11 @@ export default function SampleDrawer({
           }
         }}
       >
-        <DrawerTrigger disabled={isUploading} asChild>
-          {children}
-        </DrawerTrigger>
+        {children && (
+          <DrawerTrigger disabled={isUploading} asChild>
+            {children}
+          </DrawerTrigger>
+        )}
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
@@ -188,7 +220,12 @@ export default function SampleDrawer({
                     )}
                   </div>
 
-                  <UploadSampleFile onFilesChange={setFiles} files={files} />
+                  <UploadSampleFile 
+                    onFilesChange={setFiles} 
+                    files={files}
+                    existingImages={currentExistingImages}
+                    onExistingImagesChange={setCurrentExistingImages}
+                  />
                 </div>
               </div>
               <DrawerFooter className="flex w-full flex-row pt-0">
@@ -200,7 +237,7 @@ export default function SampleDrawer({
                 <Button 
                   onClick={handleSubmit} 
                   className="flex-1" 
-                  disabled={isUploading || files.length === 0}
+                  disabled={isUploading || (files.length === 0 && currentExistingImages.length === 0)}
                 >
                   {isUploading ? (
                     <>

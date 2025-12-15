@@ -15,7 +15,7 @@ export default function AccessDeniedPage({ message, backUrl, backLabel }: Access
   const router = useRouter();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
+    <div className="min-h-screen flex items-center justify-centerp-4">
       <Card className="w-full max-w-xs mx-auto gap-0 shadow-xl border-2 border-destructive/20 bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">

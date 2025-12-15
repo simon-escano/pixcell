@@ -4,6 +4,7 @@ import { AppSidebar } from "./nav/app-sidebar";
 import Header from "./header";
 import { getUser } from "@/lib/auth";
 import { getProfileByUserId, getOrganizationsByProfileId } from "@/db/queries/select";
+import { PageSidebarProvider } from "@/contexts/page-sidebar-context";
 
 type BaseProps = Readonly<{
   children: React.ReactNode;
@@ -21,17 +22,19 @@ const Base = async ({ children, params }: BaseProps) => {
     : undefined;
 
   return (
-    <SidebarProvider className="h-screen overflow-hidden">
-      <AppSidebar params={sidebarParams} />
-      <SidebarInset className="flex flex-col overflow-hidden">
-        <Header organizations={organizations.map(org => ({
-          id: org.id,
-          name: org.name,
-          imageUrl: org.imageUrl,
-        }))} />
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+    <PageSidebarProvider>
+      <SidebarProvider className="h-screen overflow-hidden">
+        <AppSidebar params={sidebarParams} />
+        <SidebarInset className="flex flex-col overflow-hidden">
+          <Header organizations={organizations.map(org => ({
+            id: org.id,
+            name: org.name,
+            imageUrl: org.imageUrl,
+          }))} />
+          <div className="flex-1 overflow-y-auto">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
+    </PageSidebarProvider>
   );
 };
 

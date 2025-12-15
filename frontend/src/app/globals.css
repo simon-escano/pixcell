@@ -58,6 +58,11 @@
   --color-inset-hover: var(--inset-hover);
   --color-inset-active: var(--inset-active);
   --color-inset-border: var(--inset-border);
+  --color-ai-bg-start: var(--ai-bg-start);
+  --color-ai-bg-end: var(--ai-bg-end);
+  --color-ai-foreground: var(--ai-foreground);
+  --color-ai-border: var(--ai-border);
+  --color-ai-icon: var(--ai-icon);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -85,6 +90,11 @@
   --inset-hover: #F8F8F8;
   --inset-active: #F5F5F5;
   --inset-border: #DCDCDC;
+  --ai-bg-start: rgb(250 245 255);
+  --ai-bg-end: rgb(239 246 255);
+  --ai-foreground: rgb(126 34 206);
+  --ai-border: rgb(221 214 254);
+  --ai-icon: rgb(147 51 234);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: #6D28D9;
@@ -140,6 +150,11 @@
   --inset-hover: #151618;
   --inset-active: #1A1B1D;
   --inset-border: #23252A;
+  --ai-bg-start: rgb(19 7 50);
+  --ai-bg-end: rgb(23 37 84);
+  --ai-foreground: rgb(196 181 253);
+  --ai-border: rgb(88 28 135);
+  --ai-icon: rgb(167 139 250);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
   --primary: #6D28D9;

@@ -1,43 +1,36 @@
 "use client"
 
 import DetectionResultDialog from "@/components/DetectionResultDialog"
-import ProfileCard from "@/components/samples/profile-card"
+import UserButton from "@/components/members/user-button"
 import SampleDrawer from "@/components/samples/upload-sample-drawer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { usePageSidebar } from "@/contexts/page-sidebar-context"
+import { format } from "date-fns"
 import {
   Activity,
-  Bot,
-  Calendar,
-  Copy,
+  Edit,
   Ellipsis,
   Eye,
-  FileImage,
   ImageIcon,
-  Link,
-  PlusIcon,
-  Ruler,
-  Search,
+  Images,
+  Loader2,
+  MicroscopeIcon,
   Share2,
   Sparkles,
-  Users,
-  Zap,
+  Zap
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
-import SampleImageContainer from "./sample-image-container"
-import { handleCopySampleId, handleDeleteSample } from "@/components/samples/sample-card"
 import { MetaSample, MetaSampleImage } from "../../types"
+import SampleImageContainer from "./sample-image-container"
 
 interface SamplePageWrapperProps {
   sample: MetaSample | undefined
@@ -82,6 +75,9 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
   // Share dialog state
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
   const [currentUrl, setCurrentUrl] = useState("")
+  
+  // Edit drawer state
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false)
 
   // Get current URL when component mounts
   useEffect(() => {
@@ -372,11 +368,20 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
   }
 
   const currentModel = getModelInfo(selectedModel)
+  
+  // Sidebar collapse state from context
+  const { isSidebarOpen, setIsSidebarOpen, setHasSidebar } = usePageSidebar()
+  
+  // Set hasSidebar to true when component mounts
+  useEffect(() => {
+    setHasSidebar(true)
+    return () => setHasSidebar(false)
+  }, [setHasSidebar])
 
   return (
-    <div className="flex h-full w-full gap-6 p-6 bg-gradient-to-br from-background to-muted/20">
+    <div className="flex h-full w-full relative">
       {/* Main Image Container */}
-      <div className="flex-1 overflow-hidden rounded-xl border-2 border-border shadow-xl bg-card">
+      <div className="flex-1 overflow-hidden">
         <SampleImageContainer 
           sampleImage={selectedSampleImage!} 
           canEdit={canEdit}
@@ -385,166 +390,110 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       </div>
 
       {/* Enhanced Sidebar */}
-      <div className="flex h-full flex-col w-[350px] space-y-4 min-h-0">
+      <div className={`flex border-l h-full flex-col w-[350px] min-h-0 transition-all duration-300 ${isSidebarOpen ? '' : 'hidden'}`}>
         {/* Sample Info Card */}
-        <Card className="bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg p-2">
-          <CardHeader className="pb-1 px-2 overflow-hidden">
-            <div className="flex items-center justify-between w-full overflow-hidden">
-              <CardTitle className="text-lg font-semibold justify-start text-foreground flex flex-1 overflow-hidden items-center gap-1">
-                <FileImage className="w-5 h-5 text-primary" />
-                <p className="truncate flex-1">{sample.sampleName}</p>
-              </CardTitle>
-              <div className="flex items-center gap-1">
-                {/* Share Button */}
-                <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
-                      <Share2 className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Link className="w-5 h-5 text-primary" />
-                        Share Sample
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Share this sample with others by copying the link below:
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <div className="grid flex-1 gap-2">
-                          <Input id="link" value={currentUrl} readOnly className="bg-muted/50 border-border" />
-                        </div>
-                        <Button onClick={handleCopyUrl} size="sm" className="px-3">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                        <Eye className="w-4 h-4" />
-                        <span>Anyone with this link can view this sample</span>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+        <div className="flex flex-col p-6 gap-3 border-b">
+          <div className="flex justify-between gap-2 items-center">
+            <div className="flex gap-2.5 items-center">
+              <ImageIcon className="size-4 text-inset-icon"></ImageIcon>
+              <p className="text-base font-medium">{sample.sampleName}</p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Ellipsis className="size-4 text-inset-icon" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsShareDialogOpen(true)}>
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </DropdownMenuItem>
+                {canEdit && (
+                  <DropdownMenuItem onClick={() => setIsEditDrawerOpen(true)}>
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs text-muted-foreground">Patient</p>
+              <UserButton 
+                imageUrl={sample.patient?.imageUrl || ""}
+                firstName={sample.patient?.fullName.split(" ")[0] || ""}
+                lastName={sample.patient?.fullName.split(" ")[1] || ""}
+                redirectUrl={`/organizations/${orgId}/members/${sample.patient?.id}`}
+                roleName={"Patient"}
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs text-muted-foreground">Owner</p>
+              <UserButton 
+                imageUrl={sample.createdBy?.imageUrl || ""}
+                firstName={sample.createdBy?.fullName.split(" ")[0] || ""}
+                lastName={sample.createdBy?.fullName.split(" ")[1] || ""}
+                redirectUrl={`/organizations/${orgId}/members/${sample.createdBy?.id}`}
+                roleName={"Created By"}
+              />
+            </div>
+          </div>
+        </div>
 
-                {/* Existing Dropdown Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-muted">
-                      <Ellipsis className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleCopySampleId(sample)}>Copy Sample ID</DropdownMenuItem>
-                    {canEdit && (
-                      <DropdownMenuItem
-                        className="text-destructive hover:text-destructive/80"
-                        onClick={() => handleDeleteSample(sample, router, orgId)}
-                      >
-                        Delete Sample
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2 px-2 pb-2 pt-1">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-0.5">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Created By</p>
-                <ProfileCard profile={sample.createdBy!} />
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Patient</p>
-                <ProfileCard profile={sample.patient!} />
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-1 border-t border-border">
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                <ImageIcon className="w-3 h-3 mr-1" />
-                {sampleImages.length} Images
-              </Badge>
-              <Badge variant="outline" className="text-muted-foreground">
-                ID: {sample.id.slice(0, 8)}...
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Images Table Card */}
-        <Card className="flex flex-col flex-1 min-h-0 bg-card/80 backdrop-blur-sm border-2 border-border shadow-lg overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-primary" />
-              Sample Images
-              <Badge variant="secondary">{sampleImages.length}</Badge>
-              {canEdit && (
-                <div className="ml-auto">
-                  <SampleDrawer patients={[sample.patient!]} sample={sample} patient={sample.patient}>
-                    <div className="bg-primary hover:bg-primary/70 text-primary-foreground flex w-8 h-8 cursor-pointer items-center justify-center rounded-lg transition-all shadow-md">
-                      <PlusIcon className="w-4 h-4" />
-                    </div>
-                  </SampleDrawer>
-                </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col min-h-0 p-0">
-            <ScrollArea className="flex-1 min-h-0">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow>
-                    <TableHead className="w-16"></TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">Preview</TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">
-                      <Ruler className="w-3 h-3 inline mr-1" />
-                      Size
-                    </TableHead>
-                    <TableHead className="text-xs font-medium text-muted-foreground">
-                      <Calendar className="w-3 h-3 inline mr-1" />
-                      Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sampleImages.map((sampleImage) => (
+        {/* Images Table */}
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <ScrollArea className="flex-1 min-h-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="h-auto pl-4 py-2 text-xs text-muted-foreground">Preview</TableHead>
+                  <TableHead className="h-auto py-2 text-xs text-muted-foreground">Size</TableHead>
+                  <TableHead className="h-auto pr-4 py-2 text-xs text-muted-foreground">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sampleImages.map((sampleImage) => {
+                  // Extract file extension from imageUrl or use metadata.type
+                  const getFileExtension = () => {
+                    if (sampleImage.imageUrl) {
+                      const match = sampleImage.imageUrl.match(/\.([a-zA-Z0-9]+)(\?|$)/);
+                      if (match) return match[1].toUpperCase();
+                    }
+                    return sampleImage.metadata.type || 'IMG';
+                  };
+                  
+                  return (
                     <ContextMenu key={sampleImage.id}>
                       <ContextMenuTrigger asChild>
                         <TableRow
-                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${
-                            sampleImage.id == selectedSampleImage.id ? "bg-primary/10 border-l-4 border-primary" : ""
+                          className={`h-[50px] cursor-pointer hover:bg-muted/50 transition-colors ${
+                            sampleImage.id == selectedSampleImage.id ? "bg-inset-active" : ""
                           }`}
                           onClick={() => {
                             router.push(`/organizations/${orgId}/samples/${sampleId}/${sampleImage.id}`)
                           }}
                         >
-                          <TableCell className="p-2">
-                            <div className="relative">
+                          <TableCell className="pl-4 py-2">
+                            <div className="relative flex items-center gap-2">
                               <img
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-border shadow-sm"
+                                className="w-10 h-10 rounded-lg object-cover border border-border"
                                 src={sampleImage.imageUrl! || "/placeholder.svg"}
                                 alt="Sample"
                               />
-                              {sampleImage.id == selectedSampleImage.id && (
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                                  <Eye className="w-2 h-2 text-primary-foreground" />
-                                </div>
-                              )}
+                              <Badge 
+                                className="text-[10px] px-1.5 py-0.5 gap-1.5 rounded-sm bg-card border border-card-border"
+                              >
+                                {getFileExtension()}
+                              </Badge>
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {sampleImage.metadata.type}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                          <TableCell className="text-sm">
                             {sampleImage.metadata.width} × {sampleImage.metadata.height}
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {new Date(sampleImage.capturedAt).toLocaleDateString()}
+                          <TableCell className="text-sm pr-4">
+                            {format(new Date(sampleImage.capturedAt), "MMM d")}
                           </TableCell>
                         </TableRow>
                       </ContextMenuTrigger>
@@ -570,114 +519,112 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                         }
                       </ContextMenuContent>
                     </ContextMenu>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
 
         {/* Enhanced AI Actions Card */}
-        <Card className="bg-gradient-to-br from-secondary/10 to-primary/5 border-2 border-secondary/20 shadow-lg p-2">
-          <CardHeader className="pb-1 px-2">
-            <CardTitle className="text-base font-semibold text-secondary-foreground flex items-center gap-1">
-              <Bot className="w-5 h-5" />
-              AI Analysis
-              <Sparkles className="w-4 h-4 text-secondary ml-auto" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 px-2 pb-2 pt-1">
-            {/* Model Selection */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Detection Model</label>
+        <div className="p-3.5">
+          <div className="flex flex-col p-3 rounded-md bg-card border border-ai-border gap-3 shadow-lg" style={{ boxShadow: '0 0 20px rgba(147, 51, 234, 0.15)' }}>
+            <div className="flex justify-between gap-2 items-center">
+              <div className="flex gap-2.5 items-center">
+                <Sparkles className="size-4 text-ai-icon" />
+                <p className="text-base font-medium text-ai-foreground">AI Analysis</p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <p className="text-[10px] text-muted-foreground">AI View</p>
+                <Switch 
+                  
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">{currentModel.description}</p>
+            <div className="flex gap-2">
               <Select disabled={isDetecting || isBatchDetecting} onValueChange={setSelectedModel} value={selectedModel}>
-                <SelectTrigger className="bg-card border-secondary/20 focus:border-secondary">
+                <SelectTrigger className="flex-1 border shadow-none bg-transparent hover:bg-accent overflow-hidden rounded-sm">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${currentModel.color}`} />
                     <SelectValue placeholder="Choose model" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="parasite_detection_yolov8">
                     <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-destructive" />
+                      <MicroscopeIcon className="w-4 h-4 text-destructive" />
                       Parasite Detection
                     </div>
                   </SelectItem>
                   <SelectItem value="anemia_detection_yolov8">
                     <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-orange-500" />
+                      <MicroscopeIcon className="w-4 h-4 text-orange-500" />
                       Anemia Detection
                     </div>
                   </SelectItem>
                   <SelectItem value="malaria_detection_yolov8">
                     <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-secondary" />
+                      <MicroscopeIcon className="w-4 h-4 text-secondary" />
                       Malaria Detection
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">{currentModel.description}</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    disabled={isDetecting || isBatchDetecting}
+                    className="px-2.5 bg-linear-to-br bg-ai-bg-start to-ai-bg-end transition-all duration-200 hover:shadow-lg hover:scale-[1.02] text-ai-foreground border-ai-border"
+                    onMouseEnter={(e) => {
+                      if (!isDetecting && !isBatchDetecting) {
+                        e.currentTarget.style.boxShadow = '0 0 20px rgba(147, 51, 234, 0.3)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                  >
+                    {isDetecting || isBatchDetecting ? (
+                      <Loader2 className="w-4 h-4 text-ai-icon animate-spin" />
+                    ) : (
+                      <Sparkles className="size-4 text-ai-icon" />
+                    )} Analyze
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    onClick={handleDetect}
+                    disabled={isDetecting || isBatchDetecting}
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    This Image
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleBatchDetect}
+                    disabled={isDetecting || isBatchDetecting}
+                  >
+                    <Images className="w-4 h-4" />
+                    All Images
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+          </div>
+        </div>
 
-            <Separator />
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button
-                onClick={handleDetect}
-                disabled={isDetecting || isBatchDetecting}
-                className="w-full text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
-                size="lg"
-              >
-                {isDetecting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Analyze Current Image
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={handleBatchDetect}
-                disabled={isDetecting || isBatchDetecting}
-                variant="outline"
-                className="w-full border-2 border-secondary/20 hover:bg-secondary/10 text-secondary-foreground font-medium bg-transparent"
-                size="lg"
-              >
-                {isBatchDetecting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin mr-2" />
-                    Analyzing All...
-                  </>
-                ) : (
-                  <>
-                    <Users className="w-4 h-4 mr-2" />
-                    Analyze All Images ({sampleImages.length})
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Status Indicator */}
-            {(isDetecting || isBatchDetecting) && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-sm font-medium">
-                    {isDetecting ? "Processing single image..." : "Processing batch analysis..."}
-                  </span>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Edit Drawer */}
+        {canEdit && (
+          <SampleDrawer 
+            patients={sample.patient ? [sample.patient] : []} 
+            sample={sample} 
+            patient={sample.patient}
+            open={isEditDrawerOpen}
+            onOpenChange={setIsEditDrawerOpen}
+            existingSampleImages={sampleImages}
+          >
+            <div style={{ display: 'none' }} />
+          </SampleDrawer>
+        )}
 
         {/* Results Modals */}
         <DetectionResultDialog

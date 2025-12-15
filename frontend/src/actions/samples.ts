@@ -197,6 +197,37 @@ export async function editSampleAction(sampleId: string, files: File[]) {
   };
 }
 
+export async function editSampleWithDeletionsAction(sampleId: string, files: File[], deletedImageIds: string[]) {
+  const user = await getUser();
+  const profile = await getProfileByUserId(user.id);
+  
+  // Delete images first
+  if (deletedImageIds.length > 0) {
+    const deletePromises = deletedImageIds.map(imageId => deleteSampleImage(imageId));
+    await Promise.all(deletePromises);
+  }
+  
+  // Then upload new files
+  if (files.length > 0) {
+    const uploadPromises = files.map(file => 
+      uploadFileAndInsertRecords(file, sampleId, profile.id)
+    );
+    await Promise.all(uploadPromises);
+  }
+
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.samples);
+  revalidateTag(`sample-${sampleId}`);
+  revalidatePath('/organizations');
+
+  return { 
+    success: true, 
+    sampleId: sampleId,
+    filesUploaded: files.length,
+    imagesDeleted: deletedImageIds.length
+  };
+}
+
 export async function deleteSample(sampleId: string) {
   try {
     // Get all sample_image data with their associated image URLs
