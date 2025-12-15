@@ -106,7 +106,7 @@ export default function ImprovedReportViewPage() {
         {/* Centered PixCell Logo and Text */}
         <div className="flex gap-4 items-center justify-center mt-8 mb-8">
           <PixCellLogo className="size-12 mb-2" />
-          <h1 className="text-4xl font-medium text-foreground tracking-tight">PixCell</h1>
+          <h1 className="text-base font-normal text-foreground tracking-tight">PixCell</h1>
         </div>
         {/* Header */}
         <div className="text-center">
@@ -114,7 +114,7 @@ export default function ImprovedReportViewPage() {
             <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center">
               <FileText className="size-6 text-primary" />
             </div>
-            <h1 className="text-3xl text-foreground">View Medical Report</h1>
+            <h1 className="text-base font-normal text-foreground">View Medical Report</h1>
           </div>
           <p className="text-muted-foreground mt-2">Enter your report code to access your medical report securely</p>
         </div>
@@ -202,7 +202,7 @@ export default function ImprovedReportViewPage() {
         {/* Security Information */}
         <Card className="bg-card text-card-foreground">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-sm font-normal flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
               Security & Privacy
             </CardTitle>

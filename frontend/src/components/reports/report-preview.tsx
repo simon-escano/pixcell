@@ -229,7 +229,7 @@ export default function ReportPreview({
             <div className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-semibold text-gray-800">
+                  <h1 className="text-base font-normal text-gray-800">
                     {formData.title || "Medical Report"}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">

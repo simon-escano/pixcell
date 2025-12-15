@@ -158,7 +158,7 @@ export default function ImprovedReportActions({
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Report Code</p>
-                <p className="font-semibold text-xl text-foreground">{reportCode}</p>
+                <p className="font-normal text-base text-foreground">{reportCode}</p>
               </div>
             </div>
 
@@ -185,10 +185,10 @@ export default function ImprovedReportActions({
       {/* Report Information Card */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Report Information
-          </CardTitle>
+            <CardTitle className="text-sm font-normal flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Report Information
+            </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Report Info */}

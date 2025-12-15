@@ -88,7 +88,7 @@ export default function ReportViewClient(props: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-12 p-6 border rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Enter Report Code</h2>
+      <h2 className="text-base font-normal mb-4">Enter Report Code</h2>
       <input
         className="border px-3 py-2 rounded w-full mb-2"
         value={inputCode}

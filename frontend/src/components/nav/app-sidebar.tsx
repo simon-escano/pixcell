@@ -68,7 +68,7 @@ export async function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center justify-between gap-2 p-0.5">
-              <Link href="/" className="flex flex-1 items-center">
+              <Link href="/" className="flex flex-1 items-center hover:bg-sidebar-accent transition-colors rounded-md p-1.5">
                 <PixCellLogo withText className="w-[82px]"/>
               </Link>
               {organizationIdFromUrl && (

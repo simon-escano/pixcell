@@ -17,7 +17,7 @@ export default function SettingsPage() {
       <div className="container max-w-screen-lg mx-auto p-6 md:p-10">
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
+            <h2 className="text-2xl font-normal tracking-tight">Settings</h2>
             <p className="text-muted-foreground">
               Manage your account settings and preferences.
             </p>

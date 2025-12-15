@@ -286,7 +286,7 @@ const OrganizationPage = async ({
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-semibold">{patients.length}</p>
+                      <p className="text-base font-normal">{patients.length}</p>
                       <p className="text-sm text-muted-foreground">{patients.length === 1 ? "patient" : "patients"}</p>
                     </div>
                   </Link>
@@ -298,7 +298,7 @@ const OrganizationPage = async ({
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
                     <UsersRound className="size-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Members</h2>
+                    <h2 className="text-sm font-normal">Members</h2>
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/members`}
@@ -323,7 +323,7 @@ const OrganizationPage = async ({
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-semibold">{doctors.length}</p>
+                      <p className="text-base font-normal">{doctors.length}</p>
                       <p className="text-sm text-muted-foreground">{doctors.length === 1 ? "member" : "members"}</p>
                     </div>
                   </Link>
@@ -335,7 +335,7 @@ const OrganizationPage = async ({
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
                     <Images className="size-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Samples</h2>
+                    <h2 className="text-sm font-normal">Samples</h2>
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/samples`}
@@ -371,7 +371,7 @@ const OrganizationPage = async ({
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2 mt-auto">
-                      <p className="text-2xl font-semibold">{samples.length}</p>
+                      <p className="text-base font-normal">{samples.length}</p>
                       <p className="text-sm text-muted-foreground">
                         {samples.length === 1 ? "sample" : "samples"}
                         {samples.length > 3 && (
@@ -388,7 +388,7 @@ const OrganizationPage = async ({
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
                     <FileText className="size-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Reports</h2>
+                    <h2 className="text-sm font-normal">Reports</h2>
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/reports`}
@@ -440,7 +440,7 @@ const OrganizationPage = async ({
                       ))}
                     </div>
                     <div className="flex items-baseline gap-2 mt-auto">
-                      <p className="text-2xl font-semibold">{reports.length}</p>
+                      <p className="text-base font-normal">{reports.length}</p>
                       <p className="text-sm text-muted-foreground">
                         {reports.length === 1 ? "report" : "reports"}
                         {reports.length > 3 && (
@@ -456,7 +456,7 @@ const OrganizationPage = async ({
             {/* Dashboard Analytics Section */}
             <section className="pt-8">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold">Analytics & Insights</h2>
+                <h2 className="text-sm font-normal">Analytics & Insights</h2>
                 <p className="text-sm text-muted-foreground">Organization metrics and statistics</p>
               </div>
               {isAdmin && adminDashboardProps ? (

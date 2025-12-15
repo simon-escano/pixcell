@@ -31,7 +31,7 @@ export default function AccessDeniedToast({ message }: AccessDeniedToastProps) {
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
-          <CardTitle className="text-xl font-semibold text-destructive">
+          <CardTitle className="text-base font-normal text-destructive">
             Access Denied
           </CardTitle>
         </CardHeader>

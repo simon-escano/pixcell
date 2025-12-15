@@ -13,7 +13,7 @@ export default function PublicHeader({ code }: { code: string }) {
           <div className="flex items-center gap-3">
             <PixCellLogo className="size-10" />
             <div>
-              <h1 className="text-xl font-semibold text-[var(--foreground)]">PixCell Medical</h1>
+              <h1 className="text-base font-normal text-[var(--foreground)]">PixCell Medical</h1>
               <p className="text-sm text-[var(--muted-foreground)]">Secure Medical Report Access</p>
             </div>
           </div>
