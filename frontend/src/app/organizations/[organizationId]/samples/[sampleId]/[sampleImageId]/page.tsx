@@ -7,7 +7,7 @@ import AccessDeniedToast from "./access-denied-toast";
 import { getMetaProfileByUserId, getMetaSampleById, getMetaSampleImagesBySampleId } from "../../queries";
 import { Metadata } from "next";
 import AccessDeniedPage from "@/components/access-denied-page";
-import { getSampleById } from "@/db/queries/select";
+import { getSampleById, getSampleImageAiByOriginalId } from "@/db/queries/select";
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -94,6 +94,15 @@ const SampleImagePage = async ({
 
   const canEdit = metaUser?.role === "Administrator" || isDoctorAssociated || sample.createdBy?.id === currentUser.id;
 
+  // Fetch AI images for all sample images
+  const aiImagesRecord: Record<string, string | null> = {};
+  await Promise.all(
+    sampleImages.map(async (img) => {
+      const aiImage = await getSampleImageAiByOriginalId(img.id);
+      aiImagesRecord[img.id] = aiImage?.imageUrl || null;
+    })
+  );
+
   return (
     <Base params={paramsObj}>
       <SamplePageWrapper
@@ -101,6 +110,7 @@ const SampleImagePage = async ({
         sampleImages={sampleImages}
         selectedSampleImageId={sampleImageId}
         canEdit={canEdit}
+        aiImagesRecord={aiImagesRecord}
       />
     </Base>
   );

@@ -378,27 +378,27 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
                 {/* Sample Information */}
                 {selectedSample && (
                   <>
-                    <Text style={styles.sectionTitle}>Sample Information</Text>
-                    <View style={styles.sectionContent}>
-                      <View style={styles.infoRow}>
-                        <Text style={styles.label}>Sample Name:</Text>
-                        <Text style={styles.value}>{selectedSample.sampleName || `Sample ${selectedSample.id.slice(0, 8)}`}</Text>
-                      </View>
-                      <View style={styles.infoRow}>
-                        <Text style={styles.label}>Sample ID:</Text>
-                        <Text style={styles.value}>{selectedSample.id.slice(0, 8).toUpperCase()}</Text>
-                      </View>
-                      <View style={styles.infoRow}>
-                        <Text style={styles.label}>Created By:</Text>
-                        <Text style={styles.value}>{(selectedSample.createdByName || selectedSample.createdBy)}</Text>
-                      </View>
-                      {selectedSample.capturedAt && (
-                        <View style={styles.infoRow}>
-                          <Text style={styles.label}>Captured:</Text>
-                          <Text style={styles.value}>{formatDate(new Date(selectedSample.capturedAt))}</Text>
-                        </View>
-                      )}
+                <Text style={styles.sectionTitle}>Sample Information</Text>
+                <View style={styles.sectionContent}>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Sample Name:</Text>
+                    <Text style={styles.value}>{selectedSample.sampleName || `Sample ${selectedSample.id.slice(0, 8)}`}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Sample ID:</Text>
+                    <Text style={styles.value}>{selectedSample.id.slice(0, 8).toUpperCase()}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.label}>Created By:</Text>
+                    <Text style={styles.value}>{(selectedSample.createdByName || selectedSample.createdBy)}</Text>
+                  </View>
+                  {selectedSample.capturedAt && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.label}>Captured:</Text>
+                      <Text style={styles.value}>{formatDate(new Date(selectedSample.capturedAt))}</Text>
                     </View>
+                  )}
+                </View>
                   </>
                 )}
               </View>

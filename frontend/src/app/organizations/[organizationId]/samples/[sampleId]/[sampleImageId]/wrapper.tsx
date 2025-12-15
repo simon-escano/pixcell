@@ -44,6 +44,7 @@ interface SamplePageWrapperProps {
   sampleImages: MetaSampleImage[]
   selectedSampleImageId: string
   canEdit?: boolean;
+  aiImagesRecord?: Record<string, string | null>;
 }
 
 async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, router: any, orgId: string) {
@@ -62,13 +63,21 @@ async function handleDeleteSampleImage(sampleImageId: string, sampleId: string, 
   }
 }
 
-const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdit }: SamplePageWrapperProps) => {
+const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdit, aiImagesRecord = {} }: SamplePageWrapperProps) => {
   const selectedSampleImage = sampleImages.find((img) => img.id === selectedSampleImageId) || sampleImages[0]
   const router = useRouter()
   const params = useParams()
   sample = sample!
   const sampleId = params?.sampleId as string
   const orgId = params?.organizationId as string
+  
+  // Local state for AI images (can be updated immediately after saving)
+  const [localAiImagesRecord, setLocalAiImagesRecord] = useState<Record<string, string | null>>(aiImagesRecord)
+  
+  // Update local state when prop changes (e.g., after page refresh)
+  useEffect(() => {
+    setLocalAiImagesRecord(aiImagesRecord)
+  }, [aiImagesRecord])
 
   // Share dialog state
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
@@ -190,6 +199,37 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
         // Set processed image from base64 if available
         if (resultData.processed_image_base64) {
           setProcessedImageUrl(`data:image/jpeg;base64,${resultData.processed_image_base64}`)
+          
+          // Save AI-generated image to database
+          if (selectedSampleImage) {
+            try {
+              const formData = new FormData();
+              formData.append('originalSampleImageId', selectedSampleImage.id);
+              formData.append('imageBase64', `data:image/jpeg;base64,${resultData.processed_image_base64}`);
+              
+              const saveResponse = await fetch('/api/samples/save-ai-image', {
+                method: 'POST',
+                body: formData,
+              });
+              
+              if (!saveResponse.ok) {
+                console.error(`Failed to save AI image for sample image ${selectedSampleImage.id}`);
+              } else {
+                const saveResult = await saveResponse.json();
+                // Update local state immediately to show AI view
+                if (saveResult.aiImage?.imageUrl) {
+                  setLocalAiImagesRecord(prev => ({
+                    ...prev,
+                    [selectedSampleImage.id]: saveResult.aiImage.imageUrl
+                  }));
+                }
+                // Also refresh to ensure consistency
+                router.refresh();
+              }
+            } catch (error) {
+              console.error(`Error saving AI image for sample image ${selectedSampleImage.id}:`, error);
+            }
+          }
         }
 
         toast.dismiss()
@@ -278,6 +318,45 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
           setBatchAiAnalysis(null)
         }
 
+        // Save AI-generated images to database
+        if (resultData.results && Array.isArray(resultData.results)) {
+          const updatedAiImages: Record<string, string | null> = { ...localAiImagesRecord };
+          
+          const savePromises = resultData.results.map(async (result: any, index: number) => {
+            if (result.processed_image_base64 && sampleImages[index]) {
+              try {
+                const formData = new FormData();
+                formData.append('originalSampleImageId', sampleImages[index].id);
+                formData.append('imageBase64', `data:image/jpeg;base64,${result.processed_image_base64}`);
+                
+                const saveResponse = await fetch('/api/samples/save-ai-image', {
+                  method: 'POST',
+                  body: formData,
+                });
+                
+                if (!saveResponse.ok) {
+                  console.error(`Failed to save AI image for sample image ${sampleImages[index].id}`);
+                } else {
+                  const saveResult = await saveResponse.json();
+                  if (saveResult.aiImage?.imageUrl) {
+                    updatedAiImages[sampleImages[index].id] = saveResult.aiImage.imageUrl;
+                  }
+                }
+              } catch (error) {
+                console.error(`Error saving AI image for sample image ${sampleImages[index].id}:`, error);
+              }
+            }
+          });
+          
+          await Promise.all(savePromises);
+          
+          // Update local state immediately to show AI images
+          setLocalAiImagesRecord(updatedAiImages);
+          
+          // Also refresh to ensure consistency
+          router.refresh();
+        }
+
         toast.dismiss()
         toast.success("Batch detection and analysis complete!")
         setIsBatchResultModalOpen(true)
@@ -298,7 +377,11 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
     <div className="flex h-full w-full gap-6 p-6 bg-gradient-to-br from-background to-muted/20">
       {/* Main Image Container */}
       <div className="flex-1 overflow-hidden rounded-xl border-2 border-border shadow-xl bg-card">
-        <SampleImageContainer sampleImage={selectedSampleImage!} canEdit={canEdit} />
+        <SampleImageContainer 
+          sampleImage={selectedSampleImage!} 
+          canEdit={canEdit}
+          aiImageUrl={localAiImagesRecord[selectedSampleImage!.id] || null}
+        />
       </div>
 
       {/* Enhanced Sidebar */}

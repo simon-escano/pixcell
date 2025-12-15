@@ -78,6 +78,15 @@ export const sampleImage = pgTable("sample_image",{
   isAiGenerated: boolean("is_ai_generated").default(false),
 });
 
+export const sampleImageAi = pgTable("sample_image_ai", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  originalSampleImageId: uuid("original_sample_image_id").references(() => sampleImage.id, {
+    onUpdate: "cascade",
+    onDelete: "cascade",
+  }),
+  imageUrl: text("image_url"),
+});
 
 
 
@@ -180,6 +189,7 @@ export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
 export type SampleImage = typeof sampleImage.$inferSelect;
+export type SampleImageAi = typeof sampleImageAi.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Report = typeof report.$inferSelect;
 export type Session = typeof session.$inferSelect;

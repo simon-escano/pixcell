@@ -1,4 +1,4 @@
-import { doctorPatient, feedback, image, organization, organizationStaff, organizationPatient, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
+import { doctorPatient, feedback, image, organization, organizationStaff, organizationPatient, patient, profile, report, role, sample, sampleImage, sampleImageAi, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
@@ -921,4 +921,15 @@ export async function getPatientsFromOrganizationForUser(
     seen.add(p.id)
     return true
   })
+}
+
+// Get AI-generated image for a sample image
+export async function getSampleImageAiByOriginalId(originalSampleImageId: string) {
+  const result = await db
+    .select()
+    .from(sampleImageAi)
+    .where(eq(sampleImageAi.originalSampleImageId, originalSampleImageId))
+    .orderBy(desc(sampleImageAi.createdAt))
+    .limit(1);
+  return result[0] || null;
 }

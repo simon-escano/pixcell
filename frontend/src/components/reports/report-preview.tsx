@@ -140,7 +140,7 @@ export default function ReportPreview({
               className="size-14 object-cover rounded"
             />
           ) : (
-            <PixCellLogo className="size-14"/>
+          <PixCellLogo className="size-14"/>
           )}
         </div>
         <div className="text-sm text-gray-700 ml-4">
