@@ -17,8 +17,8 @@ const StatusBadge = ({status}: StatusBadgeProps) => {
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <Badge variant="outline" className={`${config.color} border flex items-center gap-1`}>
-          <config.icon className={`${config.color} size-3`} />
+        <Badge variant="outline" className={`${config.color} border flex items-center pl-1.5 pr-2 gap-1.5`}>
+          <config.icon className={`${config.color} size-3.5`} />
           {config.label}
         </Badge>
       </HoverCardTrigger>

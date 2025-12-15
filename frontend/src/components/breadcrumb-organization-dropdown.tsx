@@ -65,10 +65,10 @@ export function BreadcrumbOrganizationDropdown({ organizations }: BreadcrumbOrga
   return (
     <Select value={currentOrgId} onValueChange={handleChange}>
       <SelectTrigger className="w-auto min-w-[80px] max-w-[150px] border shadow-none bg-transparent hover:bg-accent overflow-hidden">
-        <div className="flex items-center gap-2 overflow-hidden w-full">
-          <OrganizationAvatar imageUrl={currentOrg.imageUrl} name={currentOrg.name} />
-          <SelectValue className="w-full flex-1 overflow-hidden">
-            <span className="truncate overflow-hidden">{currentOrg.name || "Unnamed Organization"}</span>
+        <div className="flex items-center gap-1.5 min-w-0 w-full overflow-hidden">
+          <OrganizationAvatar imageUrl={currentOrg.imageUrl} name={currentOrg.name} className="flex-shrink-0" />
+          <SelectValue className="min-w-0 flex-1! truncate! overflow-hidden! flex! w-full!">
+            <span className="overflow-hidden flex-1 truncate block">{currentOrg.name || "Unnamed Organization"}</span>
           </SelectValue>
         </div>
       </SelectTrigger>

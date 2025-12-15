@@ -261,11 +261,11 @@ const OrganizationPage = async ({
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
                     <ContactRound className="size-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Patients</h2>
+                    <h2 className="text-sm">Patients</h2>
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/patients`}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   >
                     View all
                     <ArrowRight className="size-3" />
@@ -302,7 +302,7 @@ const OrganizationPage = async ({
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/members`}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   >
                     View all
                     <ArrowRight className="size-3" />
@@ -339,7 +339,7 @@ const OrganizationPage = async ({
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/samples`}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   >
                     View all
                     <ArrowRight className="size-3" />
@@ -392,7 +392,7 @@ const OrganizationPage = async ({
                   </div>
                   <Link
                     href={`/organizations/${organizationId}/reports`}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   >
                     View all
                     <ArrowRight className="size-3" />

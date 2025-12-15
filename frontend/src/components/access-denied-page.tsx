@@ -16,28 +16,27 @@ export default function AccessDeniedPage({ message, backUrl, backLabel }: Access
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
-      <Card className="w-full max-w-sm mx-auto gap-0 shadow-xl border-2 border-destructive/20 bg-card/95 backdrop-blur-sm">
+      <Card className="w-full max-w-xs mx-auto gap-0 shadow-xl border-2 border-destructive/20 bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-destructive" />
+            <AlertTriangle className="w-8 h-8 text-destructive!" />
           </div>
           <CardTitle className="text-base font-normal text-destructive">
             Access Denied
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
+        <CardContent className="text-center items-center space-y-4">
+          <p className="text-muted-foreground text-sm">
             {message}
           </p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 items-center">
             <Button 
               onClick={() => {
                 router.push(backUrl);
               }}
-              className="w-full"
               variant="destructive"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4" />
               {backLabel}
             </Button>
           </div>

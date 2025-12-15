@@ -649,6 +649,7 @@ const getAllReportsCached = cache(async (organizationId: string) => {
       generatedByRole: role.name,
       title: report.title,
       testType: report.testType,
+      status: report.status,
     })
     .from(report)
     // 1. Add the filter here, based on the new report.organizationId column

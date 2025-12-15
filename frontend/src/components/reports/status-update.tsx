@@ -36,30 +36,26 @@ export default function StatusUpdate({ reportId, currentStatus, disabled, onUpda
   const currentConfig = getStatusConfig(status)
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Select 
-          value={status} 
-          onValueChange={handleStatusChange} 
-          disabled={disabled}
-        >
-          <SelectTrigger 
-            className={`px-1.5 rounded-lg`}
-            onClick={e => e.stopPropagation()} // Prevent row click propagation
-          >
-            <StatusBadge status={status}/>
-          </SelectTrigger>
-          <SelectContent>
-            {ALL_STATUSES.map((statusValue) => {
-              return (
-                <SelectItem key={statusValue} value={statusValue}>
-                  <StatusBadge status={statusValue}/>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <Select 
+      value={status} 
+      onValueChange={handleStatusChange} 
+      disabled={disabled}
+    >
+      <SelectTrigger 
+        className={`px-1.5 rounded-lg`}
+        onClick={e => e.stopPropagation()} // Prevent row click propagation
+      >
+        <StatusBadge status={status}/>
+      </SelectTrigger>
+      <SelectContent>
+        {ALL_STATUSES.map((statusValue) => {
+          return (
+            <SelectItem key={statusValue} value={statusValue}>
+              <StatusBadge status={statusValue}/>
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
   );
 } 

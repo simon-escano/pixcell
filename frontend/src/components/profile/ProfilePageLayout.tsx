@@ -1,38 +1,35 @@
 "use client"
 
-import type { ReactNode } from "react"
-import { useState } from "react"
-import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  FileText,
-  TestTube,
-  User,
-  Calendar,
   Activity,
-  TrendingUp,
-  ChevronRight,
-  Sparkles,
-  Users,
-  BarChart3,
-  Search,
-  Plus,
-  Clock,
-  Download,
-  ArrowUpDown,
-  CheckCircle,
   AlertCircle,
-  XCircle,
+  ArrowUpDown,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  FileText,
+  Plus,
+  Search,
+  Sparkles,
+  TestTube,
+  TrendingUp,
+  User,
+  Users,
+  XCircle
 } from "lucide-react"
-import UserButton from "../members/user-button";
-import UploadSampleDrawerForPatient from "../samples/upload-sample-drawer";
+import { useParams, useRouter } from "next/navigation"
+import type { ReactNode } from "react"
+import { useState } from "react"
 
 export interface ProfilePageLayoutProps {
   entity: any // user or patient

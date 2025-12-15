@@ -29,7 +29,7 @@ const Base = async ({ children, params }: BaseProps) => {
           name: org.name,
           imageUrl: org.imageUrl,
         }))} />
-        <div className="flex-1 overflow-y-auto [&_a:not([class*='bg-']):hover]:bg-inset-hover [&_a:not([class*='bg-']):active]:bg-inset-active [&_button:not([class*='bg-']):not([class*='Button']):hover]:bg-inset-hover [&_button:not([class*='bg-']):not([class*='Button']):active]:bg-inset-active">{children}</div>
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

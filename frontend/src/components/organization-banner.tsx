@@ -55,7 +55,7 @@ export function OrganizationBanner({
           <div className="flex flex-wrap items-center justify-between gap-4 flex-1">
             <div className="flex items-center gap-3">
               <OrganizationAvatar imageUrl={imageUrl} name={name} className="size-8 md:size-12" />
-              <h1 className="text-base font-normal text-white tracking-tight">
+              <h1 className="text-2xl font-medium text-white tracking-tight">
                 {name || "Unnamed Organization"}
               </h1>
             </div>

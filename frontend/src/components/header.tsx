@@ -202,12 +202,12 @@ const Header = ({ organizations }: HeaderProps) => {
                       {isLast ? (
                       <BreadcrumbPage className="flex items-center gap-2">
                         {Icon && <Icon className="size-4 text-primary" />}
-                        <span>{displayText}</span>
+                        <span className="text-foreground">{displayText}</span>
                         </BreadcrumbPage>
                       ) : (
                       <BreadcrumbLink href={href} className="flex items-center gap-2">
                         {Icon && <Icon className="size-4 text-primary" />}
-                        <span>{displayText}</span>
+                        <span className="text-foreground">{displayText}</span>
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>
