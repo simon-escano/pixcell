@@ -4,7 +4,7 @@ import StatusBadge from "@/components/reports/status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { getPatientById, getProfileByUserId, getReportById, getRoleByUserIdAndOrganizationId, getSampleById } from "@/db/queries/select"
+import { getPatientById, getProfileByUserId, getReportById, getRoleByUserIdAndOrganizationId, getSampleById, getOrganizationById } from "@/db/queries/select"
 import { format } from "date-fns"
 import { ArrowLeft, Sparkles, XCircle } from "lucide-react"
 import Link from "next/link"
@@ -172,6 +172,9 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
   const doctorRole = role && role.id && role.name ? role : { id: "unknown", name: "Doctor" }
   const doctorLicense = doctor && "licenseNo" in doctor && (doctor as any).licenseNo ? (doctor as any).licenseNo : "N/A"
 
+  // Fetch organization data
+  const org = await getOrganizationById(organizationId)
+
   return (
     <Base params={paramsObj}>
       <div className="min-h-screen bg-background">
@@ -225,6 +228,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
                     doctorName={doctorName}
                     doctorRole={doctorRole}
                     doctorLicense={doctorLicense}
+                    organization={org}
                   />
                 </Suspense>
               </div>

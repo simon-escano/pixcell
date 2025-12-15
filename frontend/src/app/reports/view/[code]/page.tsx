@@ -221,6 +221,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
                     doctorName={reportData.doctorName}
                     doctorRole={reportData.doctorRole}
                     doctorLicense={reportData.doctorLicense}
+                    organization={reportData.organization}
                   />
                 </Suspense>
               </div>

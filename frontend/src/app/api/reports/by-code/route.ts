@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReportByCode, getPatientById, getSampleById, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
+import { getReportByCode, getPatientById, getSampleById, getProfileByUserId, getRoleByUserIdAndOrganizationId, getOrganizationById } from "@/db/queries/select";
 
 export async function GET(req: NextRequest) {
   try {
@@ -37,6 +37,10 @@ export async function GET(req: NextRequest) {
     const doctorName = doctor ? `${doctor.firstName} ${doctor.lastName}` : "N/A";
     const doctorRole = role && role.id && role.name ? role : { id: 'unknown', name: 'Doctor' };
     const doctorLicense = (doctor && 'licenseNo' in doctor && (doctor as any).licenseNo) ? (doctor as any).licenseNo : "N/A";
+    
+    // Fetch organization data
+    const organization = report.organizationId ? await getOrganizationById(report.organizationId) : null;
+    
     return NextResponse.json({
       formData,
       reportContent,
@@ -45,6 +49,7 @@ export async function GET(req: NextRequest) {
       doctorName,
       doctorRole,
       doctorLicense,
+      organization,
     });
   } catch (error) {
     console.error("Error fetching report by code:", error);

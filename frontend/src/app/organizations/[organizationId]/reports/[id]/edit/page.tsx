@@ -1,6 +1,6 @@
 import Base from "@/components/base";
 import EditReportForm from "@/components/reports/edit-report-form";
-import { getAllPatientsForUser, getAllProfiles, getReportById } from "@/db/queries/select";
+import { getAllPatientsForUser, getAllProfiles, getReportById, getOrganizationById } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { getMetaProfileByUserId } from "../../../samples/queries";
@@ -75,6 +75,9 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
   const selectedPatientId = report.patientId || "";
   const selectedSampleId = report.sampleId || "";
 
+  // Fetch organization data
+  const organization = await getOrganizationById(organizationId);
+
   // We'll use a client component for the form to handle state and submission
   // Pass initial values and an onSubmit handler that calls updateReport
   return (
@@ -91,6 +94,7 @@ export default async function EditReportPage({ params }: { params: Promise<{ id:
             reportId={reportId}
             initialPatientId={selectedPatientId}
             initialSampleId={selectedSampleId}
+            organization={organization}
           />
         </div>
       </div>

@@ -12,6 +12,7 @@ export default function EditReportForm({
   reportId,
   initialPatientId,
   initialSampleId,
+  organization,
 }: any) {
   return (
     <ImprovedReportForm
@@ -26,6 +27,7 @@ export default function EditReportForm({
       reportId={reportId}
       initialPatientId={initialPatientId}
       initialSampleId={initialSampleId}
+      organization={organization}
     />
   );
 } 
