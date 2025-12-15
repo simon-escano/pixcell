@@ -15,22 +15,26 @@ import "tldraw/tldraw.css";
 import { Avatars } from "./Avatars";
 import { useStorageStore } from "./useStorageStore";
 import { MetaSampleImage } from "../../../../types";
-import { Button } from "@/components/ui/button";
-import { Eye, Sparkles } from "lucide-react";
 
 interface StorageTldrawProps {
   sampleImage: MetaSampleImage;
   canEdit?: boolean;
   aiImageUrl?: string | null;
+  showAiImage?: boolean;
+  onShowAiImageChange?: (show: boolean) => void;
 }
 
 export function StorageTldraw({
   sampleImage,
   canEdit,
   aiImageUrl,
+  showAiImage: controlledShowAiImage,
+  onShowAiImageChange,
 }: StorageTldrawProps) {
-  // Default to AI view if AI image exists
-  const [showAiImage, setShowAiImage] = useState(!!aiImageUrl);
+  // Use controlled state if provided, otherwise use internal state
+  const [internalShowAiImage, setInternalShowAiImage] = useState(!!aiImageUrl);
+  const showAiImage = controlledShowAiImage !== undefined ? controlledShowAiImage : internalShowAiImage;
+  const setShowAiImage = onShowAiImageChange || setInternalShowAiImage;
   const hasAiImage = !!aiImageUrl;
   const editorRef = useRef<Editor | null>(null);
   const id = useSelf((me) => me.id);
@@ -48,61 +52,62 @@ export function StorageTldraw({
   
   // Update to AI view when AI image becomes available
   useEffect(() => {
-    if (aiImageUrl) {
+    if (aiImageUrl && controlledShowAiImage === undefined) {
+      // Only auto-set if not controlled
       setShowAiImage(true);
-      // If AI image becomes available and editor is mounted, create the AI shape
-      if (editorRef.current) {
-        const editor = editorRef.current;
-        const aiShape = editor.getShape(aiShapeId);
-        if (!aiShape && aiImageUrl) {
-          const originalShape = editor.getShape(shapeId);
-          if (originalShape) {
-            const imageWidth = sampleImage.metadata.width;
-            const imageHeight = sampleImage.metadata.height;
-            const x = originalShape.x;
-            const y = originalShape.y;
-            
-            const wasReadonly = editor.getInstanceState().isReadonly;
-            if (wasReadonly) {
-              editor.updateInstanceState({ isReadonly: false });
-            }
-            
-            editor.createAssets([
-              {
-                id: aiAssetId,
-                type: "image",
-                typeName: "asset",
-                props: {
-                  name: "sampleImageAi",
-                  src: aiImageUrl,
-                  w: imageWidth,
-                  h: imageHeight,
-                  mimeType: "image/jpeg",
-                  isAnimated: false,
-                },
-                meta: {},
-              },
-            ]).createShape({
-              id: aiShapeId,
+    }
+    // If AI image becomes available and editor is mounted, create the AI shape
+    if (aiImageUrl && editorRef.current) {
+      const editor = editorRef.current;
+      const aiShape = editor.getShape(aiShapeId);
+      if (!aiShape && aiImageUrl) {
+        const originalShape = editor.getShape(shapeId);
+        if (originalShape) {
+          const imageWidth = sampleImage.metadata.width;
+          const imageHeight = sampleImage.metadata.height;
+          const x = originalShape.x;
+          const y = originalShape.y;
+          
+          const wasReadonly = editor.getInstanceState().isReadonly;
+          if (wasReadonly) {
+            editor.updateInstanceState({ isReadonly: false });
+          }
+          
+          editor.createAssets([
+            {
+              id: aiAssetId,
               type: "image",
-              isLocked: true,
-              x,
-              y,
+              typeName: "asset",
               props: {
-                assetId: aiAssetId,
+                name: "sampleImageAi",
+                src: aiImageUrl,
                 w: imageWidth,
                 h: imageHeight,
+                mimeType: "image/jpeg",
+                isAnimated: false,
               },
-            });
-            
-            if (wasReadonly) {
-              editor.updateInstanceState({ isReadonly: true });
-            }
+              meta: {},
+            },
+          ]).createShape({
+            id: aiShapeId,
+            type: "image",
+            isLocked: true,
+            x,
+            y,
+            props: {
+              assetId: aiAssetId,
+              w: imageWidth,
+              h: imageHeight,
+            },
+          });
+          
+          if (wasReadonly) {
+            editor.updateInstanceState({ isReadonly: true });
           }
         }
       }
     }
-  }, [aiImageUrl, aiShapeId, aiAssetId, shapeId, sampleImage.metadata.width, sampleImage.metadata.height]);
+  }, [aiImageUrl, aiShapeId, aiAssetId, shapeId, sampleImage.metadata.width, sampleImage.metadata.height, controlledShowAiImage, setShowAiImage]);
 
   const insertSampleImages = (editor: Editor) => {
     const imageWidth = sampleImage.metadata.width;
@@ -234,29 +239,6 @@ export function StorageTldraw({
 
   return (
     <div className="h-full w-full relative">
-      {/* AI Eye Toggle Button */}
-      {hasAiImage && (
-        <div className="absolute top-4 right-4 z-50">
-          <Button
-            variant={showAiImage ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowAiImage(!showAiImage)}
-            className="flex items-center gap-2"
-          >
-            {showAiImage ? (
-              <>
-                <Eye className="h-4 w-4" />
-                Original
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                AI View
-              </>
-            )}
-          </Button>
-        </div>
-      )}
       <Tldraw
         className="z-49"
         options={{ maxPages: 1 }}

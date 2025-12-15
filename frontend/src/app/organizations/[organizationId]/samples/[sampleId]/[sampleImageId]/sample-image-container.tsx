@@ -6,12 +6,16 @@ interface SampleImageContainerProps {
   sampleImage: MetaSampleImage;
   canEdit?: boolean;
   aiImageUrl?: string | null;
+  showAiImage?: boolean;
+  onShowAiImageChange?: (show: boolean) => void;
 }
 
 const SampleImageContainer = ({
   sampleImage,
   canEdit,
   aiImageUrl,
+  showAiImage,
+  onShowAiImageChange,
 }: SampleImageContainerProps) => {
 
   return (
@@ -22,6 +26,8 @@ const SampleImageContainer = ({
           sampleImage={sampleImage} 
           canEdit={canEdit}
           aiImageUrl={aiImageUrl}
+          showAiImage={showAiImage}
+          onShowAiImageChange={onShowAiImageChange}
         />
       </Room>
     </div>

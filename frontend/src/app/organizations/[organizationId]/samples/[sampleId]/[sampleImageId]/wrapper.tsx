@@ -377,6 +377,20 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
     setHasSidebar(true)
     return () => setHasSidebar(false)
   }, [setHasSidebar])
+  
+  // AI view toggle state
+  const currentAiImageUrl = localAiImagesRecord[selectedSampleImage!.id] || null
+  const hasAiImage = !!currentAiImageUrl
+  const [showAiImage, setShowAiImage] = useState(!!currentAiImageUrl)
+  
+  // Update to AI view when AI image becomes available or when selected sample image changes
+  useEffect(() => {
+    if (currentAiImageUrl) {
+      setShowAiImage(true)
+    } else {
+      setShowAiImage(false)
+    }
+  }, [currentAiImageUrl, selectedSampleImage.id])
 
   return (
     <div className="flex h-full w-full relative">
@@ -385,7 +399,9 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
         <SampleImageContainer 
           sampleImage={selectedSampleImage!} 
           canEdit={canEdit}
-          aiImageUrl={localAiImagesRecord[selectedSampleImage!.id] || null}
+          aiImageUrl={currentAiImageUrl}
+          showAiImage={showAiImage}
+          onShowAiImageChange={setShowAiImage}
         />
       </div>
 
@@ -537,7 +553,9 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
               <div className="flex gap-2 items-center">
                 <p className="text-[10px] text-muted-foreground">AI View</p>
                 <Switch 
-                  
+                  checked={showAiImage}
+                  onCheckedChange={setShowAiImage}
+                  disabled={!hasAiImage}
                 />
               </div>
             </div>
