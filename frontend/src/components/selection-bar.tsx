@@ -2,7 +2,7 @@
 
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Pencil } from "lucide-react";
 import React from "react";
 
 interface SelectionBarProps {
@@ -10,6 +10,8 @@ interface SelectionBarProps {
   onClearSelection: () => void;
   onDelete: () => void;
   deleteLabel?: string;
+  onEdit?: () => void;
+  editLabel?: string;
   className?: string;
 }
 
@@ -18,6 +20,8 @@ const SelectionBar = ({
   onClearSelection,
   onDelete,
   deleteLabel = "Delete",
+  onEdit,
+  editLabel = "Edit",
   className,
 }: SelectionBarProps) => {
   if (selectedCount === 0) return null;
@@ -40,7 +44,16 @@ const SelectionBar = ({
           <X className="size-3 text-card-icon hover:text-card-foreground transition-colors" />
         </button>
       </div>
-      <div className="w-px h-5.5 bg-card-border"></div>
+      <Separator orientation="vertical" className="h-5 border border-card-border" />
+      {onEdit && selectedCount === 1 && (
+        <>
+          <Button variant="outline" size="sm" onClick={onEdit}>
+            <Pencil className="size-4" />
+            {editLabel}
+          </Button>
+          <Separator orientation="vertical" className="h-5 border border-card-border" />
+        </>
+      )}
       <Button variant="destructive" size="sm" onClick={onDelete}>
         <Trash2 className="size-4" />
         {deleteLabel}

@@ -2,7 +2,7 @@
 import { deleteReport } from "@/actions/reports";
 import { ReportStatus } from "@/lib/status-config";
 import { format } from "date-fns";
-import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -12,9 +12,9 @@ import SelectionBar from "../selection-bar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { Input } from "../ui/input";
 import StatusBadge from "./status-badge";
 import FilterDropdown, { SortFieldOption, DisplayPropertyOption } from "../filter-dropdown";
+import SearchInput from "../search-input";
 
 interface ExtendedReport {
   id: string;
@@ -257,15 +257,11 @@ const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListPr
         {/* Header with search, filter, and create button */}
       <div className="flex gap-2 justify-between px-6 py-2 border-b items-center">
         <div className="flex-1 flex gap-2 items-center h-full">
-          <div className="relative flex-1 max-w-sm h-full">
-            <Search className="absolute left-0 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Search reports..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-6 pr-3 h-full bg-transparent! border-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-            />
-          </div>
+          <SearchInput
+            placeholder="Search reports..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+          />
         </div>
         <div className="flex gap-2">
           <FilterDropdown
@@ -332,7 +328,7 @@ const ReportsList = ({ reports, organizationId, isAdmin = false }: ReportsListPr
               >
                 <div className="flex items-center gap-2">
                   {isAdmin && (
-                    <div className="px-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                    <div className={`px-4 transition-opacity pointer-events-none group-hover:pointer-events-auto ${selectedIds.includes(report.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                       <Checkbox
                         checked={selectedIds.includes(report.id)}
                         onClick={(e) => handleCheckboxClick(e, report.id, index)}

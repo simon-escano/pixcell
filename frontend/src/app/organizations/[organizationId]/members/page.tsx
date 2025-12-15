@@ -1,6 +1,6 @@
 import Base from "@/components/base";
-import { MembersTable } from "@/components/members/members-table";
-import { getAllRoles, getAllUsersWithProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
+import MembersList from "@/components/members/members-list";
+import { getAllUsersWithProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
 export default async function OtherUsersPage({ params }: { params: Promise<{ organizationId: string }> }) {
@@ -14,7 +14,6 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
   const isAdmin = role?.name === "Administrator";
 
   const usersData = await getAllUsersWithProfiles(organizationId);
-  const rolesData = await getAllRoles();
 
   // Transform the data to match CombinedUser type by providing default values for nullable fields
   const users = usersData.map((user) => ({
@@ -32,8 +31,8 @@ export default async function OtherUsersPage({ params }: { params: Promise<{ org
 
   return (
     <Base params={paramsObj}>
-      <div className="h-full overflow-y-auto p-4 sm:p-8">
-        <MembersTable users={users} organizationId={organizationId} isAdmin={isAdmin} />
+      <div className="h-full overflow-y-auto relative">
+        <MembersList users={users} organizationId={organizationId} isAdmin={isAdmin} />
       </div>
     </Base>
   );
