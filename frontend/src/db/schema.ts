@@ -75,7 +75,6 @@ export const sampleImage = pgTable("sample_image",{
   metadata: json("metadata").notNull(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  isAiGenerated: boolean("is_ai_generated").default(false),
 });
 
 export const sampleImageAi = pgTable("sample_image_ai", {
