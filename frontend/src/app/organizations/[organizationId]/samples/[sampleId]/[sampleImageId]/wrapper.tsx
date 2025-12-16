@@ -409,7 +409,7 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
       </div>
 
       {/* Enhanced Sidebar */}
-      <div className={`flex border-l h-full flex-col w-[350px] min-h-0 transition-all duration-300 ${isSidebarOpen ? '' : 'hidden'}`}>
+      <div className={`flex border-l h-full flex-col w-[300px] min-h-0 transition-all duration-300 ${isSidebarOpen ? '' : 'hidden'}`}>
         {/* Sample Info Card */}
         <div className="flex flex-col p-6 gap-3 border-b">
           <div className="flex justify-between gap-2 items-center">
@@ -497,7 +497,7 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                           <TableCell className="pl-4 py-2">
                             <div className="relative flex items-center gap-2">
                               <img
-                                className="w-10 h-10 rounded-lg object-cover border border-border"
+                                className="w-10 h-10 rounded-sm object-cover border border-border"
                                 src={sampleImage.imageUrl! || "/placeholder.svg"}
                                 alt="Sample"
                               />
