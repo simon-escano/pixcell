@@ -4,6 +4,7 @@ import { sampleImageAi } from '@/db/schema';
 import { createClient } from '@supabase/supabase-js';
 import { revalidateTag, revalidatePath } from 'next/cache';
 import { CACHE_TAGS } from '@/lib/cache';
+import { eq } from 'drizzle-orm';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -38,15 +39,55 @@ export async function POST(req: NextRequest) {
     
     const imageUrl = `${supabaseUrl}/storage/v1/object/public/sample-images/${data.path}`;
 
-    // Insert into sampleImageAi table
-    const [aiImageRecord] = await db
-      .insert(sampleImageAi)
-      .values({
-        id: crypto.randomUUID(),
-        originalSampleImageId,
-        imageUrl,
-      })
-      .returning();
+    // Check if a record already exists for this originalSampleImageId
+    const existingRecord = await db
+      .select()
+      .from(sampleImageAi)
+      .where(eq(sampleImageAi.originalSampleImageId, originalSampleImageId))
+      .limit(1);
+
+    let aiImageRecord;
+
+    if (existingRecord.length > 0) {
+      // Delete old image from storage if it exists
+      const oldImageUrl = existingRecord[0].imageUrl;
+      if (oldImageUrl) {
+        const oldBucketPath = oldImageUrl.split('/storage/v1/object/public/sample-images/')[1];
+        if (oldBucketPath) {
+          await supabase.storage
+            .from('sample-images')
+            .remove([oldBucketPath])
+            .catch((error) => {
+              console.error('Failed to delete old AI image from storage:', error);
+              // Continue even if deletion fails
+            });
+        }
+      }
+
+      // Update existing record
+      const [updatedRecord] = await db
+        .update(sampleImageAi)
+        .set({
+          imageUrl,
+          createdAt: new Date(), // Update timestamp
+        })
+        .where(eq(sampleImageAi.originalSampleImageId, originalSampleImageId))
+        .returning();
+
+      aiImageRecord = updatedRecord;
+    } else {
+      // Insert new record
+      const [newRecord] = await db
+        .insert(sampleImageAi)
+        .values({
+          id: crypto.randomUUID(),
+          originalSampleImageId,
+          imageUrl,
+        })
+        .returning();
+
+      aiImageRecord = newRecord;
+    }
 
     // Revalidate cache
     revalidateTag(CACHE_TAGS.samples);

@@ -209,7 +209,9 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
               });
               
               if (!saveResponse.ok) {
-                console.error(`Failed to save AI image for sample image ${selectedSampleImage.id}`);
+                const errorData = await saveResponse.json().catch(() => ({ error: 'Unknown error' }));
+                console.error(`Failed to save AI image for sample image ${selectedSampleImage.id}:`, errorData.error || saveResponse.statusText);
+                toast.error(`Failed to save AI image: ${errorData.error || saveResponse.statusText}`);
               } else {
                 const saveResult = await saveResponse.json();
                 // Update local state immediately to show AI view
@@ -331,7 +333,8 @@ const SamplePageWrapper = ({ sample, sampleImages, selectedSampleImageId, canEdi
                 });
                 
                 if (!saveResponse.ok) {
-                  console.error(`Failed to save AI image for sample image ${sampleImages[index].id}`);
+                  const errorData = await saveResponse.json().catch(() => ({ error: 'Unknown error' }));
+                  console.error(`Failed to save AI image for sample image ${sampleImages[index].id}:`, errorData.error || saveResponse.statusText);
                 } else {
                   const saveResult = await saveResponse.json();
                   if (saveResult.aiImage?.imageUrl) {

@@ -56,39 +56,46 @@ export function StorageTldraw({
       // Only auto-set if not controlled
       setShowAiImage(true);
     }
-    // If AI image becomes available and editor is mounted, create the AI shape
+    // If AI image becomes available and editor is mounted, create or update the AI shape
     if (aiImageUrl && editorRef.current) {
       const editor = editorRef.current;
       const aiShape = editor.getShape(aiShapeId);
-      if (!aiShape && aiImageUrl) {
-        const originalShape = editor.getShape(shapeId);
-        if (originalShape) {
-          const imageWidth = sampleImage.metadata.width;
-          const imageHeight = sampleImage.metadata.height;
-          const x = originalShape.x;
-          const y = originalShape.y;
-          
-          const wasReadonly = editor.getInstanceState().isReadonly;
-          if (wasReadonly) {
-            editor.updateInstanceState({ isReadonly: false });
+      const aiAsset = editor.getAsset(aiAssetId);
+      const originalShape = editor.getShape(shapeId);
+      
+      if (originalShape) {
+        const imageWidth = sampleImage.metadata.width;
+        const imageHeight = sampleImage.metadata.height;
+        const x = originalShape.x;
+        const y = originalShape.y;
+        
+        const wasReadonly = editor.getInstanceState().isReadonly;
+        if (wasReadonly) {
+          editor.updateInstanceState({ isReadonly: false });
+        }
+        
+        if (!aiShape) {
+          // Create AI shape if it doesn't exist
+          if (!aiAsset) {
+            editor.createAssets([
+              {
+                id: aiAssetId,
+                type: "image",
+                typeName: "asset",
+                props: {
+                  name: "sampleImageAi",
+                  src: aiImageUrl,
+                  w: imageWidth,
+                  h: imageHeight,
+                  mimeType: "image/jpeg",
+                  isAnimated: false,
+                },
+                meta: {},
+              },
+            ]);
           }
           
-          editor.createAssets([
-            {
-              id: aiAssetId,
-              type: "image",
-              typeName: "asset",
-              props: {
-                name: "sampleImageAi",
-                src: aiImageUrl,
-                w: imageWidth,
-                h: imageHeight,
-                mimeType: "image/jpeg",
-                isAnimated: false,
-              },
-              meta: {},
-            },
-          ]).createShape({
+          editor.createShape({
             id: aiShapeId,
             type: "image",
             isLocked: true,
@@ -100,10 +107,21 @@ export function StorageTldraw({
               h: imageHeight,
             },
           });
-          
-          if (wasReadonly) {
-            editor.updateInstanceState({ isReadonly: true });
-          }
+        } else if (aiAsset && aiAsset.props.src !== aiImageUrl) {
+          // Update existing AI asset if the URL has changed
+          editor.updateAssets([
+            {
+              ...aiAsset,
+              props: {
+                ...aiAsset.props,
+                src: aiImageUrl,
+              },
+            },
+          ]);
+        }
+        
+        if (wasReadonly) {
+          editor.updateInstanceState({ isReadonly: true });
         }
       }
     }
