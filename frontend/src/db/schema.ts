@@ -32,10 +32,8 @@ export const profile = pgTable("profile", {
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   userId: uuid('user_id').references(() => user.id).notNull(),
-  roleId: uuid("role_id").notNull().references(() => role.id),
   imageId: uuid("image_id").references(() => image.id),
   licenseNo: text("license_no"),
-
   mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
@@ -114,17 +112,6 @@ export const report = pgTable("report", {
   organizationId: uuid("organization_id").notNull().references(() => organization.id),
 });
 
-export const session = pgTable("session", {
-  sessionId: uuid("id").primaryKey().defaultRandom(),
-  profileId: uuid("profile_id").notNull().references(() => profile.id),
-  loginTime: timestamp("login_time", { withTimezone: true }),
-  logoutTime: timestamp("logout_time", { withTimezone: true }),
-  isActive: boolean("is_active").notNull().default(true),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-});
-
-
 export const feedback = pgTable("feedback", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => user.id),
@@ -191,7 +178,6 @@ export type SampleImage = typeof sampleImage.$inferSelect;
 export type SampleImageAi = typeof sampleImageAi.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Report = typeof report.$inferSelect;
-export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 export type Organization = typeof organization.$inferSelect;
