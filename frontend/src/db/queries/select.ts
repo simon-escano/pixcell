@@ -313,7 +313,6 @@ const getProfileByUserIdCached = withCache(
         firstName: profile.firstName,
         lastName: profile.lastName,
         userId: profile.userId,
-        roleId: profile.roleId,
         imageId: profile.imageId,
         imageUrl: image.imageUrl,
         licenseNo: profile.licenseNo,
