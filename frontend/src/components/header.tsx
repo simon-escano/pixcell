@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, Check } from "lucide-react";
+import { Moon, Sun, Check, ContactRound, FileText, Images, Settings, Send, UsersRound, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { BreadcrumbOrganizationDropdown } from "./breadcrumb-organization-dropdown";
+import { usePageSidebar } from "@/contexts/page-sidebar-context";
 
 const truncate = (text: string, limit = 13) =>
   text.length > limit ? text.slice(0, limit) + "…" : text
@@ -50,16 +52,41 @@ const getSegmentType = (segment: string, index: number, pathArray: string[]): st
     return null; // sampleImageId - keep as ID
   }
   if (prevSegment === "reports") return "report";
-  if (prevSegment === "users") return "user";
+  if (prevSegment === "members") return "user";
 
   return null;
 }
 
-const Header = () => {
+interface HeaderProps {
+  organizations: {
+    id: string;
+    name: string | null;
+    imageUrl: string | null;
+  }[];
+}
+
+const Header = ({ organizations }: HeaderProps) => {
   const pathname = usePathname() || "";
   const pathArray = pathname.split("/").filter(Boolean)
   const { theme, setTheme } = useTheme();
   const [segmentNames, setSegmentNames] = useState<Record<number, string>>({});
+  
+  // Get page sidebar state (if available)
+  let pageSidebarContext;
+  try {
+    pageSidebarContext = usePageSidebar();
+  } catch {
+    // Context not available, no page sidebar
+    pageSidebarContext = null;
+  }
+  
+  const hasPageSidebar = pageSidebarContext?.hasSidebar ?? false;
+  const isPageSidebarOpen = pageSidebarContext?.isSidebarOpen ?? false;
+  const togglePageSidebar = pageSidebarContext?.setIsSidebarOpen;
+
+  // Check if we're in an organization route
+  const orgIndex = pathArray.indexOf("organizations");
+  const isOrgRoute = orgIndex !== -1;
 
   // Fetch names for ID segments
   useEffect(() => {
@@ -114,32 +141,87 @@ const Header = () => {
       : segment;
   };
 
+  // For organization routes, simplify the breadcrumb: [org dropdown] > current page
+  // Skip "organizations" and the organization ID segments
+  const getBreadcrumbSegments = () => {
+    if (isOrgRoute && orgIndex !== -1) {
+      // Start from after the organization ID
+      const segmentsAfterOrg = pathArray.slice(orgIndex + 2);
+      return segmentsAfterOrg;
+    }
+    return pathArray;
+  };
+
+  const breadcrumbSegments = getBreadcrumbSegments();
+
+  // Map page segments to their icons and display names
+  const getPageInfo = (segment: string): { name: string; icon: React.ComponentType<{ className?: string }> | null } | null => {
+    // Only show icon for main page segments
+    if (segment === "patients") {
+      return { name: "Patients", icon: ContactRound };
+    }
+    if (segment === "samples") {
+      return { name: "Samples", icon: Images };
+    }
+    if (segment === "reports") {
+      return { name: "Reports", icon: FileText };
+    }
+    if (segment === "members") {
+      return { name: "Members", icon: UsersRound };
+    }
+    if (segment === "settings") {
+      return { name: "Settings", icon: Settings };
+    }
+    if (segment === "feedback") {
+      return { name: "Feedback", icon: Send };
+    }
+    
+    return null;
+  };
+
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2">
-      <div className="flex flex-1 items-center justify-between gap-2 px-4">
+    <header className="flex items-center justify-between gap-2 px-4 py-2 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              {pathArray.map((segment, index) => {
-                const href = "/" + pathArray.slice(0, index + 1).join("/");
-                const isLast = index === pathArray.length - 1;
+            {isOrgRoute && organizations.length > 0 && (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbOrganizationDropdown organizations={organizations} />
+                </BreadcrumbItem>
+                {breadcrumbSegments.length > 0 && (
+                  <BreadcrumbSeparator className="hidden md:block" />
+                )}
+              </>
+            )}
+            {breadcrumbSegments.map((segment, index) => {
+              const actualIndex = isOrgRoute 
+                ? orgIndex + 2 + index 
+                : index;
+              const href = "/" + pathArray.slice(0, actualIndex + 1).join("/");
+              const isLast = index === breadcrumbSegments.length - 1;
+              const pageInfo = getPageInfo(segment);
+              const displayText = pageInfo?.name || truncate(formatSegment(segment, actualIndex));
+              const Icon = pageInfo?.icon;
 
                 return (
                   <React.Fragment key={index}>
                     <BreadcrumbItem
                       className={
-                        index < pathArray.length - 1 ? "hidden md:block" : ""
+                      index < breadcrumbSegments.length - 1 ? "hidden md:block" : ""
                       }
                     >
                       {isLast ? (
-                        <BreadcrumbPage>
-                          {truncate(formatSegment(segment, index))}
+                      <BreadcrumbPage className="flex items-center gap-2">
+                        {Icon && <Icon className="size-4 text-primary" />}
+                        <span className="text-foreground">{displayText}</span>
                         </BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink href={href}>
-                          {truncate(formatSegment(segment, index))}
+                      <BreadcrumbLink href={href} className="flex items-center gap-2">
+                        {Icon && <Icon className="size-4 text-primary" />}
+                        <span className="text-foreground">{displayText}</span>
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>
@@ -152,36 +234,53 @@ const Header = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              <span className="sr-only">Toggle theme</span>
+        <div className="flex items-center gap-2">
+          {/* Page Sidebar Toggle - only show when page has sidebar */}
+          {hasPageSidebar && togglePageSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => togglePageSidebar(!isPageSidebarOpen)}
+              title={isPageSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+            >
+              {isPageSidebarOpen ? (
+                <PanelRightClose className="h-[1.2rem] w-[1.2rem]" />
+              ) : (
+                <PanelRightOpen className="h-[1.2rem] w-[1.2rem]" />
+              )}
+              <span className="sr-only">Toggle page sidebar</span>
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <div className="flex items-center justify-between w-full">
-                Light
-                {theme === "light" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <div className="flex items-center justify-between w-full">
-                Dark
-                {theme === "dark" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <div className="flex items-center justify-between w-full">
-                System
-                {theme === "system" && <Check className="h-4 w-4" />}
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <div className="flex items-center justify-between w-full">
+                  Light
+                  {theme === "light" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <div className="flex items-center justify-between w-full">
+                  Dark
+                  {theme === "dark" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <div className="flex items-center justify-between w-full">
+                  System
+                  {theme === "system" && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
     </header>
   );
 };

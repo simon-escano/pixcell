@@ -4,7 +4,7 @@ import { ClientSideSuspense, RoomProvider } from "@liveblocks/react/suspense";
 import { useSearchParams } from "next/navigation";
 import { ReactNode, useMemo } from "react";
 import { LiveMap } from "@liveblocks/core";
-import { Loading } from "./components/Loading";
+import { LiveblocksLoading } from "./components/Loading";
 
 interface RoomProps {
   roomId: string;
@@ -18,7 +18,7 @@ export function Room({ roomId, children }: RoomProps) {
       initialPresence={{ presence: undefined }}
       initialStorage={{ records: new LiveMap() }}
     >
-      <ClientSideSuspense fallback={<Loading />}>{children}</ClientSideSuspense>
+      <ClientSideSuspense fallback={<LiveblocksLoading />}>{children}</ClientSideSuspense>
     </RoomProvider>
   );
 }

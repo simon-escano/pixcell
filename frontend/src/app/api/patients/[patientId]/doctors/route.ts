@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { doctorPatient, profile, image, role } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAllDoctors } from "@/db/queries/select";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 // GET: List all assigned doctors for a patient
 export async function GET(
@@ -11,15 +13,19 @@ export async function GET(
 ) {
   const { patientId } = context.params;
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
-  // Get all doctor assignments for this patient
-  const assignments = await db
-    .select({ doctorId: doctorPatient.doctorId })
-    .from(doctorPatient)
-    .where(eq(doctorPatient.patientId, patientId));
+  
+  // Parallelize: get assignments and all doctors simultaneously
+  const [assignments, allDoctors] = await Promise.all([
+    db
+      .select({ doctorId: doctorPatient.doctorId })
+      .from(doctorPatient)
+      .where(eq(doctorPatient.patientId, patientId)),
+    getAllDoctors()
+  ]);
+  
   const assignedDoctorIds = assignments.map((a) => a.doctorId);
-  // Get doctor details
-  const allDoctors = await getAllDoctors();
   const assignedDoctors = allDoctors.filter((doc: any) => assignedDoctorIds.includes(doc.id));
+  
   return NextResponse.json(assignedDoctors.map((doc: any) => ({ id: doc.id, firstName: doc.firstName, lastName: doc.lastName })));
 }
 
@@ -34,6 +40,11 @@ export async function POST(
   if (!doctorId) return NextResponse.json({ error: "Missing doctorId" }, { status: 400 });
   // Insert assignment if not exists
   await db.insert(doctorPatient).values({ doctorId, patientId });
+  
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.patients);
+  revalidateTag(`patient-${patientId}`);
+  
   return NextResponse.json({ success: true });
 }
 
@@ -48,5 +59,10 @@ export async function DELETE(
   const doctorId = searchParams.get("doctorId");
   if (!doctorId) return NextResponse.json({ error: "Missing doctorId" }, { status: 400 });
   await db.delete(doctorPatient).where(and(eq(doctorPatient.patientId, patientId), eq(doctorPatient.doctorId, doctorId)));
+  
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.patients);
+  revalidateTag(`patient-${patientId}`);
+  
   return NextResponse.json({ success: true });
 } 

@@ -3,29 +3,48 @@ import React, { useState } from "react"
 import { ImageUp, X, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CameraModal from "@/components/samples/camera-client"
+import { MetaSampleImage } from "@/app/organizations/[organizationId]/samples/types"
 
 interface FilePreview {
   file: File
   preview: string
 }
 
+interface ExistingImage {
+  id: string
+  imageUrl: string | null
+  isExisting: true
+}
+
+type FileOrExisting = File | ExistingImage
+
 const UploadSampleFile = ({
   onFilesChange,
   files,
+  existingImages,
+  onExistingImagesChange,
 }: {
   onFilesChange: (files: File[]) => void
   files: File[]
+  existingImages?: MetaSampleImage[]
+  onExistingImagesChange?: (images: MetaSampleImage[]) => void
 }) => {
   const [previews, setPreviews] = useState<FilePreview[]>([])
   const [cameraOpen, setCameraOpen] = useState(false)
+  const [currentExistingImages, setCurrentExistingImages] = useState<MetaSampleImage[]>(existingImages || [])
+
+  // Sync existing images when prop changes
+  React.useEffect(() => {
+    if (existingImages) {
+      setCurrentExistingImages(existingImages);
+    }
+  }, [existingImages]);
 
   // Generate previews for all files (uploaded or from camera)
   React.useEffect(() => {
     const generatePreviews = async () => {
       const newPreviews: (FilePreview | null)[] = await Promise.all(
         files.map(async (file) => {
-          // Skip preview for existing sample images (edit mode)
-          if ((file as any).isExisting) return null;
           // If preview already exists, reuse it
           const existing = previews.find((p) => p.file === file);
           if (existing) return existing;
@@ -69,6 +88,16 @@ const UploadSampleFile = ({
     setPreviews(newPreviews)
   }
 
+  const removeExistingImage = (imageIdToRemove: string) => {
+    const newExistingImages = currentExistingImages.filter((img) => img.id !== imageIdToRemove)
+    setCurrentExistingImages(newExistingImages)
+    if (onExistingImagesChange) {
+      onExistingImagesChange(newExistingImages)
+    }
+  }
+
+  const totalItems = files.length + currentExistingImages.length
+
   const triggerFileInput = () => {
     document.getElementById("file-upload")?.click()
   }
@@ -76,7 +105,7 @@ const UploadSampleFile = ({
   return (
     <div className="flex flex-col">
       <div className="border-border h-50 relative overflow-hidden rounded-b-lg border-2 border-t-0 border-dashed">
-        {previews.length === 0 ? (
+        {totalItems === 0 ? (
           // Empty state - show upload area
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2">
             <label htmlFor="file-upload" className="flex cursor-pointer items-center gap-2">
@@ -98,12 +127,35 @@ const UploadSampleFile = ({
           // Preview grid with split add button
           <div className="flex flex-col p-2 h-full">
             <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto">
-              {previews.map((item, index) => {
-                console.log(item.preview)
-                return (
-                <div key={index} className="relative group">
+              {/* Existing images */}
+              {currentExistingImages.map((image) => (
+                <div key={image.id} className="relative group">
                   <div className="w-full h-20 relative rounded-lg overflow-hidden border">
-                    {/* Use regular img tag for data URLs instead of Next.js Image */}
+                    <img
+                      src={image.imageUrl || "/placeholder.svg"}
+                      alt={`Existing image ${image.id}`}
+                      className="object-cover h-full w-full"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg?height=80&width=80"
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-destructive/90 hover:bg-destructive shadow-lg"
+                      onClick={() => removeExistingImage(image.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {/* New file previews */}
+              {previews.map((item, index) => {
+                return (
+                <div key={`file-${index}`} className="relative group">
+                  <div className="w-full h-20 relative rounded-lg overflow-hidden border">
                     <img
                       src={item.preview || "/placeholder.svg"}
                       alt={`Preview ${index + 1}`}
@@ -148,7 +200,7 @@ const UploadSampleFile = ({
               </div>
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
-              {files.length} file{files.length !== 1 ? "s" : ""} selected
+              {totalItems} image{totalItems !== 1 ? "s" : ""} {files.length > 0 ? `(${files.length} new)` : ''}
             </div>
           </div>
         )}

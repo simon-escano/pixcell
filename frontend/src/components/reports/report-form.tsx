@@ -79,6 +79,13 @@ export interface ReportFormData {
   customTestType?: string
 }
 
+interface Organization {
+  id: string
+  name: string | null
+  address: string | null
+  image_url: string | null
+}
+
 interface ReportFormProps {
   mode: "create" | "edit"
   onSubmit: (data: any) => Promise<any>
@@ -91,6 +98,7 @@ interface ReportFormProps {
   reportId?: string
   initialPatientId?: string
   initialSampleId?: string
+  organization?: Organization | null
 }
 
 // Enhanced Editable Table Display Component
@@ -290,6 +298,7 @@ export default function ImprovedReportForm({
   reportId,
   initialPatientId,
   initialSampleId,
+  organization,
 }: ReportFormProps) {
   const router = useRouter()
   const params = useParams()
@@ -912,6 +921,7 @@ export default function ImprovedReportForm({
                 doctorName={doctorName}
                 doctorRole={doctorRole}
                 doctorLicense={doctorLicense}
+                organization={organization}
               />
             </div>
           )}

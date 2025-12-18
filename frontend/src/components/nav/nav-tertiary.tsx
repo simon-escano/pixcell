@@ -36,7 +36,7 @@ export function NavTertiary({ ...props }) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-px">
           {items.map((item) => {
             const isActive = pathname === item.url || pathname?.startsWith(item.url + "/");
             return (

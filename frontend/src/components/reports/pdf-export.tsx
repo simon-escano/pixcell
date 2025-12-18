@@ -37,6 +37,13 @@ interface Role {
   name: string;
 }
 
+interface Organization {
+  id: string;
+  name: string | null;
+  address: string | null;
+  image_url: string | null;
+}
+
 interface PDFExportProps {
   formData: {
     title: string;
@@ -51,6 +58,8 @@ interface PDFExportProps {
   doctorName: string;
   doctorRole: Role;
   doctorLicense: string;
+  organization?: Organization | null;
+  baseUrl?: string;
 }
 
 // PDF Styles
@@ -236,7 +245,9 @@ const formatDateTime = (date: Date) => {
   });
 };
 
-const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps) => {
+const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense, organization, baseUrl = 'http://localhost:3000' }: PDFExportProps) => {
+  const pixcellLogoUrl = `${baseUrl}/pixcell-logo.png`;
+  
   // --- Pagination logic ---
   // Each paragraph = 1 block, each table = 3 blocks, 9 blocks per page
   const BLOCKS_PER_PAGE = 2;
@@ -278,21 +289,27 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
           <View style={styles.header} fixed>
             <View style={styles.headerContent}>
               <View style={styles.logoSection}>
-
-                <View style={{ width: 50, height: 50, padding:5 }} >
-                  <Image src={'/pixcell-logo.png'}  ></Image>
+                {/* Show both PixCell logo and organization logo */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 50, height: 50, padding: 5 }}>
+                    <Image src={pixcellLogoUrl} style={{ width: 40, height: 40 }} />
+                  </View>
+                  {organization?.image_url && (
+                    <View style={{ width: 50, height: 50, padding: 5 }}>
+                      <Image src={organization.image_url} style={{ width: 40, height: 40 }} />
+                    </View>
+                  )}
                 </View>
                 
                 <View style={styles.companyInfo}>
-                  <Text style={styles.companyName}>PixCell</Text>
-                  <Text>123 Medical Center Dr.</Text>
+                  <Text style={styles.companyName}>{organization?.name || "PixCell"}</Text>
+                  {organization?.address && <Text>{organization.address}</Text>}
+                  {!organization?.address && <Text>123 Medical Center Dr.</Text>}
                   <View style={styles.contactInfo}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      
                       <Text>+1 (555) 123-4567</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      
                       <Text>admin@pixcell.com</Text>
                     </View>
                   </View>
@@ -329,9 +346,38 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
                 </View>
               </View>
             )}
-            {/* Sample Information only on first page */}
-            {pageIdx === 0 && selectedSample && (
+            {/* Patient and Sample Information only on first page */}
+            {pageIdx === 0 && (
               <View style={{ marginTop: 8, marginBottom: 8 }}>
+                {/* Patient Information */}
+                {selectedPatient && (
+                  <>
+                    <Text style={styles.sectionTitle}>Patient Information</Text>
+                    <View style={styles.sectionContent}>
+                      <View style={styles.infoRow}>
+                        <Text style={styles.label}>Patient Name:</Text>
+                        <Text style={styles.value}>
+                          {selectedPatient.fullName || `${selectedPatient.firstName || ''} ${selectedPatient.lastName || ''}`.trim() || "N/A"}
+                        </Text>
+                      </View>
+                      {selectedPatient.email && (
+                        <View style={styles.infoRow}>
+                          <Text style={styles.label}>Email:</Text>
+                          <Text style={styles.value}>{selectedPatient.email}</Text>
+                        </View>
+                      )}
+                      {selectedPatient.contactNumber && (
+                        <View style={styles.infoRow}>
+                          <Text style={styles.label}>Contact:</Text>
+                          <Text style={styles.value}>{selectedPatient.contactNumber}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </>
+                )}
+                {/* Sample Information */}
+                {selectedSample && (
+                  <>
                 <Text style={styles.sectionTitle}>Sample Information</Text>
                 <View style={styles.sectionContent}>
                   <View style={styles.infoRow}>
@@ -353,6 +399,8 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
                     </View>
                   )}
                 </View>
+                  </>
+                )}
               </View>
             )}
           </View>
@@ -414,9 +462,12 @@ const ReportPDF = ({ formData, reportContent, selectedPatient, selectedSample, d
 
 export { ReportPDF };
 
-export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense }: PDFExportProps, content?: string) => {
+export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSample, doctorName, doctorRole, doctorLicense, organization, baseUrl }: PDFExportProps, content?: string) => {
   const handleExportPDF = async () => {
     try {
+      // Get base URL for images
+      const currentBaseUrl = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+      
       const blob = await pdf(
         <ReportPDF 
           formData={formData}
@@ -426,6 +477,8 @@ export const PDFExport = ({ formData, reportContent, selectedPatient, selectedSa
           doctorName={doctorName}
           doctorRole={doctorRole}
           doctorLicense={doctorLicense}
+          organization={organization}
+          baseUrl={currentBaseUrl}
         />
       ).toBlob();
       const url = URL.createObjectURL(blob);

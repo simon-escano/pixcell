@@ -1,38 +1,35 @@
 "use client"
 
-import type { ReactNode } from "react"
-import { useState } from "react"
-import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  FileText,
-  TestTube,
-  User,
-  Calendar,
   Activity,
-  TrendingUp,
-  ChevronRight,
-  Sparkles,
-  Users,
-  BarChart3,
-  Search,
-  Plus,
-  Clock,
-  Download,
-  ArrowUpDown,
-  CheckCircle,
   AlertCircle,
-  XCircle,
+  ArrowUpDown,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  FileText,
+  Plus,
+  Search,
+  Sparkles,
+  TestTube,
+  TrendingUp,
+  User,
+  Users,
+  XCircle
 } from "lucide-react"
-import UserButton from "../users/user-button";
-import UploadSampleDrawerForPatient from "../samples/upload-sample-drawer";
+import { useParams, useRouter } from "next/navigation"
+import type { ReactNode } from "react"
+import { useState } from "react"
 
 export interface ProfilePageLayoutProps {
   entity: any // user or patient
@@ -73,7 +70,7 @@ const EmptyState = ({
     <div className={`w-20 h-20 ${gradient} rounded-full flex items-center justify-center mb-6 shadow-lg`}>
       <Icon className="h-10 w-10 text-white" />
     </div>
-    <h3 className="text-xl font-semibold text-foreground mb-3">{title}</h3>
+    <h3 className="text-base font-normal text-foreground mb-3">{title}</h3>
     <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">{description}</p>
     {actionLabel && onAction && (
       <Button
@@ -102,7 +99,7 @@ const SampleItem = ({ sample, index, onClick }: { sample: any; index: number; on
       <div className="flex items-center gap-4">
         <div className="w-2 h-12 bg-gradient-to-b from-primary to-primary/70 rounded-full shadow-sm"></div>
         <div className="flex-1">
-          <div className="font-semibold text-foreground text-base flex items-center gap-2 mb-1">
+          <div className="font-normal text-foreground text-sm flex items-center gap-2 mb-1">
             {sample.sampleName || `Sample #${String(index + 1).padStart(3, "0")}`}
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -168,7 +165,7 @@ const ReportItem = ({ report, index, onClick }: { report: any; index: number; on
       <div className="flex items-center gap-4">
         <div className="p-2 bg-chart-2/20 rounded-lg">{getReportIcon(report.type)}</div>
         <div className="flex-1">
-          <div className="font-semibold text-foreground text-base flex items-center gap-2 mb-1">
+          <div className="font-normal text-foreground text-sm flex items-center gap-2 mb-1">
             {report.title || `Report #${String(index + 1).padStart(3, "0")}`}
             <Badge variant="secondary" className="bg-chart-2/10 text-chart-2 text-xs">
               {report.type || "Analysis"}
@@ -214,7 +211,7 @@ const PatientItem = ({ patient, index, onClick }: { patient: any; index: number;
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <div className="font-semibold text-foreground text-base mb-1">
+        <div className="font-normal text-foreground text-sm mb-1">
           {patient.firstName} {patient.lastName}
         </div>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -250,7 +247,7 @@ const DoctorItem = ({ doctor, index, onClick }: { doctor: any; index: number; on
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <div className="font-semibold text-foreground text-base mb-1">
+        <div className="font-normal text-foreground text-sm mb-1">
           {doctor.firstName} {doctor.lastName}
         </div>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -382,13 +379,13 @@ export default function ProfilePageLayout({
                   <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16 ring-4 ring-primary-foreground/30 shadow-lg">
                       <AvatarImage src={entity.imageUrl || ""} alt={`${entity.firstName} ${entity.lastName}`} />
-                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xl font-semibold backdrop-blur-sm">
+                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-base font-normal backdrop-blur-sm">
                         {entity.firstName[0]}
                         {entity.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h1 className="text-xl font-semibold text-primary-foreground leading-tight">
+                      <h1 className="text-base font-normal text-primary-foreground leading-tight">
                         {entity.firstName} {entity.lastName}
                       </h1>
                       {entity.email && <p className="text-primary-foreground/80 text-sm mt-1">{entity.email}</p>}
@@ -426,7 +423,7 @@ export default function ProfilePageLayout({
                         <TestTube className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-semibold text-foreground">{samples.length}</div>
+                        <div className="text-base font-normal text-foreground">{samples.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Samples</div>
                       </div>
                     </div>
@@ -443,7 +440,7 @@ export default function ProfilePageLayout({
                         <FileText className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-semibold text-foreground">{reportCount ?? reports.length}</div>
+                        <div className="text-base font-normal text-foreground">{reportCount ?? reports.length}</div>
                         <div className="text-xs text-muted-foreground font-medium">Reports</div>
                       </div>
                     </div>
@@ -462,7 +459,7 @@ export default function ProfilePageLayout({
                         <Users className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-xl font-semibold text-foreground">{patientsCount}</div>
+                        <div className="text-base font-normal text-foreground">{patientsCount}</div>
                         <div className="text-xs text-muted-foreground font-medium">Patients</div>
                       </div>
                     </div>
@@ -732,7 +729,7 @@ export default function ProfilePageLayout({
                                 doctor={doctor}
                                 index={index}
                                 onClick={() => {
-                                  router.push(`/organizations/${orgId}/users/${doctor.id}`)
+                                  router.push(`/organizations/${orgId}/members/${doctor.id}`)
                                 }}
                               />
                             ))}

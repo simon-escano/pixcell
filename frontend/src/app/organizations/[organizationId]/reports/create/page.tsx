@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
+import { getAllPatientsForUser, getAllProfiles, getProfileByUserId, getRoleByUserIdAndOrganizationId, getOrganizationById } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import CreateReportForm from "@/components/reports/create-report-form";
 
@@ -17,6 +17,9 @@ export default async function CreateReportPage({
   const user = await getUser();
   const profile = await getProfileByUserId(user.id);
   const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
+  
+  // Fetch organization data
+  const organization = await getOrganizationById(organizationId);
   
   // Get patients based on user role
   const patientsRaw = await getAllPatientsForUser(profile.id, role?.name || "", organizationId, true);
@@ -45,6 +48,7 @@ export default async function CreateReportPage({
             currentUserId={user.id}
             profiles={profiles}
             role={role}
+            organization={organization}
           />
         </div>
       </div>

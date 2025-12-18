@@ -32,10 +32,8 @@ export const profile = pgTable("profile", {
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   userId: uuid('user_id').references(() => user.id).notNull(),
-  roleId: uuid("role_id").notNull().references(() => role.id),
   imageId: uuid("image_id").references(() => image.id),
   licenseNo: text("license_no"),
-
   mustChangePassword: boolean("must_change_password").notNull().default(false)
 });
 
@@ -75,9 +73,17 @@ export const sampleImage = pgTable("sample_image",{
   metadata: json("metadata").notNull(),
   capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow(),
   imageId: uuid("image_id").references(() => image.id).unique(),
-  isAiGenerated: boolean("is_ai_generated").default(false),
 });
 
+export const sampleImageAi = pgTable("sample_image_ai", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  originalSampleImageId: uuid("original_sample_image_id").references(() => sampleImage.id, {
+    onUpdate: "cascade",
+    onDelete: "cascade",
+  }),
+  imageUrl: text("image_url"),
+});
 
 
 
@@ -105,17 +111,6 @@ export const report = pgTable("report", {
   code: text('code'),
   organizationId: uuid("organization_id").notNull().references(() => organization.id),
 });
-
-export const session = pgTable("session", {
-  sessionId: uuid("id").primaryKey().defaultRandom(),
-  profileId: uuid("profile_id").notNull().references(() => profile.id),
-  loginTime: timestamp("login_time", { withTimezone: true }),
-  logoutTime: timestamp("logout_time", { withTimezone: true }),
-  isActive: boolean("is_active").notNull().default(true),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-});
-
 
 export const feedback = pgTable("feedback", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -154,7 +149,7 @@ export const organization = pgTable("organization", {
   address: varchar('address',{ length: 512 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  color: text("color").notNull().default("#7E7E82"),
+  image_url: text("image_url"),
 });
 
 export const organizationStaff = pgTable("organization_staff", {
@@ -180,9 +175,9 @@ export type Profile = typeof profile.$inferSelect;
 export type Patient = typeof patient.$inferSelect;
 export type Sample = typeof sample.$inferSelect;
 export type SampleImage = typeof sampleImage.$inferSelect;
+export type SampleImageAi = typeof sampleImageAi.$inferSelect;
 export type AiAnalysis = typeof aiAnalysis.$inferSelect;
 export type Report = typeof report.$inferSelect;
-export type Session = typeof session.$inferSelect;
 export type Image = typeof image.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
 export type Organization = typeof organization.$inferSelect;

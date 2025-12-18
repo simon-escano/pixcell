@@ -5,6 +5,8 @@ import { feedback } from "@/db/schema";
 import { getSupabaseAuth } from "@/lib/auth";
 import { getErrorMessage } from "@/utils";
 import { getFeedbackByUser as getFeedbackByUserQuery } from "@/db/queries/select";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 export async function submitFeedback(formData: FormData) {
   try {
@@ -61,6 +63,10 @@ export async function submitFeedback(formData: FormData) {
       recommendation: recommendation ? parseInt(recommendation as string) : null,
       additionalComments: additionalComments?.trim() || null,
     });
+
+    // Revalidate feedback cache
+    revalidateTag(CACHE_TAGS.feedback);
+    revalidateTag(`user-${session.data.session.user.id}`);
 
     return { success: true, error: null };
   } catch (error) {

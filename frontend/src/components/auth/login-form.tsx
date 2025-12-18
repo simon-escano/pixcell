@@ -102,7 +102,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back to PixCell!</CardTitle>
+          <CardTitle className="text-base font-normal">Welcome back to PixCell!</CardTitle>
           <CardDescription>
             Dive back into your collaborative workspace for microscopic
             diagnostics.

@@ -247,7 +247,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
           {/* Clean Header */}
           <div className="bg-primary text-primary-foreground p-6 rounded-t-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-semibold flex items-center gap-3">
+              <DialogTitle className="text-base font-normal flex items-center gap-3">
                 <div className="p-2 bg-primary-foreground/20 rounded-md">
                   <Eye className="w-6 h-6" />
                 </div>
@@ -298,7 +298,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                         {/* Clean Summary Card */}
                         <Card>
                           <CardHeader className="border-b">
-                            <CardTitle className="text-xl flex items-center gap-3">
+                            <CardTitle className="text-base font-normal flex items-center gap-3">
                               <div className="p-2 bg-primary/10 rounded-md">
                                 <BarChart3 className="w-5 h-5 text-primary" />
                               </div>
@@ -308,17 +308,17 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                           <CardContent className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-semibold mb-1 text-foreground">{images.length}</div>
+                                <div className="text-base font-normal mb-1 text-foreground">{images.length}</div>
                                 <div className="text-muted-foreground text-sm font-medium">Images Processed</div>
                               </div>
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-semibold mb-1 text-foreground">
+                                <div className="text-base font-normal mb-1 text-foreground">
                                   {detectionResults.total_detections}
                                 </div>
                                 <div className="text-muted-foreground text-sm font-medium">Total Detections</div>
                               </div>
                               <div className="bg-card border rounded-lg p-6 text-center">
-                                <div className="text-3xl font-semibold mb-1 text-foreground">
+                                <div className="text-base font-normal mb-1 text-foreground">
                                   {detectionResults.detections ? Object.keys(detectionResults.detections).length : 0}
                                 </div>
                                 <div className="text-muted-foreground text-sm font-medium">Object Types</div>
@@ -327,7 +327,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
 
                             {detectionResults.detections && (
                               <div className="space-y-4">
-                                <h4 className="font-semibold text-lg flex items-center gap-2">
+                                <h4 className="font-normal text-sm flex items-center gap-2">
                                   <Target className="w-5 h-5 text-primary" />
                                   Detected Objects Across All Images
                                 </h4>
@@ -505,7 +505,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       {aiAnalysis ? (
                         <Card>
                           <CardHeader className="border-b">
-                            <CardTitle className="text-xl flex items-center gap-3">
+                            <CardTitle className="text-base font-normal flex items-center gap-3">
                               <div className="p-2 bg-primary/10 rounded-md">
                                 <Brain className="w-5 h-5 text-primary" />
                               </div>
@@ -535,7 +535,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       ) : (
                         <Card>
                           <CardHeader className="border-b">
-                            <CardTitle className="text-xl flex items-center gap-3">
+                            <CardTitle className="text-base font-normal flex items-center gap-3">
                               <div className="p-2 bg-primary/10 rounded-md">
                                 <Brain className="w-5 h-5 text-primary" />
                               </div>
@@ -565,7 +565,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                   {processedImageUrl && (
                     <Card className="border-dashed border-primary/30">
                       <CardHeader className="pb-4 flex flex-row items-center justify-between">
-                        <CardTitle className="text-lg flex items-center gap-3">
+                        <CardTitle className="text-sm font-normal flex items-center gap-3">
                           <div className="p-2 bg-primary/10 rounded-md">
                             <ImageIcon className="w-5 h-5 text-primary" />
                           </div>
@@ -613,7 +613,7 @@ const DetectionResultDialog: React.FC<DetectionResultDialogProps> = ({
                       </CardHeader>
                       <CardContent className="p-6">
                         <div className="flex items-center gap-4 mb-8">
-                          <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold text-lg flex items-center gap-2">
+                          <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-normal text-sm flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5" />
                             {detectionResults.total_detections} Total Detections
                           </div>

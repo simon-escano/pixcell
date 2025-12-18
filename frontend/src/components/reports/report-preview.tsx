@@ -37,6 +37,13 @@ interface Sample {
   createdByName?: string;
 }
 
+interface Organization {
+  id: string;
+  name: string | null;
+  address: string | null;
+  image_url: string | null;
+}
+
 interface ReportPreviewProps {
   formData: {
     title: string;
@@ -51,6 +58,7 @@ interface ReportPreviewProps {
   doctorName: string;
   doctorRole: Role;
   doctorLicense: string;
+  organization?: Organization | null;
 }
 
 const getTestTypeDisplayName = (testType: string, customTestType?: string) => {
@@ -74,6 +82,7 @@ export default function ReportPreview({
   doctorName,
   doctorRole,
   doctorLicense,
+  organization,
 }: ReportPreviewProps) {
   // --- Pagination logic ---
   // Constants for A4 at 72dpi: 794x1123px
@@ -124,11 +133,19 @@ export default function ReportPreview({
     <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-gray-300">
       <div className="flex items-center">
         <div className="flex items-center gap-3 self-center font-medium">
+          {organization?.image_url ? (
+            <img 
+              src={organization.image_url} 
+              alt={organization.name || "Organization"} 
+              className="size-14 object-cover rounded"
+            />
+          ) : (
           <PixCellLogo className="size-14"/>
+          )}
         </div>
         <div className="text-sm text-gray-700 ml-4">
-          <p className="font-semibold text-lg text-gray-800">PixCell</p>
-          <p>123 Medical Center Dr.</p>
+          <p className="font-semibold text-lg text-gray-800">{organization?.name || "PixCell"}</p>
+          <p>{organization?.address || "123 Medical Center Dr."}</p>
           <p className="flex items-center space-x-1">
             <img src="/icons/phone.svg" alt="Phone" className="h-3 w-3 text-gray-500" />
             <span>+1 (555) 123-4567</span>
@@ -188,11 +205,13 @@ export default function ReportPreview({
             doctorName={doctorName}
             doctorRole={doctorRole}
             doctorLicense={doctorLicense}
+            organization={organization}
           />
           <Button
             size="sm"
             variant="outline"
             onClick={async () => {
+              const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
               const blob = await pdf(
                 <ReportPDF
                   formData={formData}
@@ -202,6 +221,8 @@ export default function ReportPreview({
                   doctorName={doctorName}
                   doctorRole={doctorRole}
                   doctorLicense={doctorLicense}
+                  organization={organization}
+                  baseUrl={baseUrl}
                 />
               ).toBlob();
               const url = URL.createObjectURL(blob);
@@ -217,7 +238,7 @@ export default function ReportPreview({
       </div>
       {/* A4 Preview */}
       <Card style={{ aspectRatio: `${PAGE_WIDTH}/${PAGE_HEIGHT}` }}
-        className="w-full bg-white shadow-2xl rounded-none p-0 overflow-hidden flex flex-col"
+        className="w-full bg-white shadow-2xl rounded-none p-0 overflow-hidden flex flex-col hover:bg-white"
       >
         <div
           className="h-full flex flex-col p-[2vw] text-[0.8vw]"
@@ -229,7 +250,7 @@ export default function ReportPreview({
             <div className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-semibold text-gray-800">
+                  <h1 className="text-base font-normal text-gray-800">
                     {formData.title || "Medical Report"}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">

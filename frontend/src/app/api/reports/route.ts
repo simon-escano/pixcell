@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { db } from "@/db";
 import { report } from "@/db/schema";
 import { getAllReports } from "@/db/queries/select";
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { CACHE_TAGS } from '@/lib/cache';
 
 
 // POST /api/reports - create a new report
@@ -24,6 +26,12 @@ export async function POST(req: NextRequest) {
       status: status || "Draft",
       createdAt: new Date(),
     });
+
+    // Revalidate cache
+    revalidateTag(CACHE_TAGS.reports);
+    revalidatePath('/organizations');
+    revalidatePath('/reports');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });

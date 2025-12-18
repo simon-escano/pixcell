@@ -1,5 +1,5 @@
 import Base from "@/components/base";
-import ReportsTable from "@/components/reports/reports-table";
+import ReportsList from "@/components/reports/reports-list";
 import { getAllReports, getProfileByUserId, getReportsByGeneratedBy, getRoleByUserIdAndOrganizationId } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 
@@ -42,17 +42,15 @@ export default async function ReportsPage({
     generatedByRole: report.generatedByRole || '',
     generatedById: report.generatedById || '',
     status: report.status,
-    
-    // add any other fields needed by the table here
+    isAiGenerated: report.isAiGenerated || false,
   }));
 
-  console.log("reports", reports);
+  const isAdmin = role && role.name === "Administrator";
 
   return (
     <Base params={paramsObj}>
-      <div className="h-full overflow-y-auto p-4 sm:p-8">
-        {/* We cast to 'any' because we intentionally provide a minimal report object for the table */}
-        <ReportsTable reports={normalizedReports as any} organizationId={organizationId} />
+      <div className="h-full overflow-y-auto relative">
+        <ReportsList reports={normalizedReports as any} organizationId={organizationId} isAdmin={isAdmin} />
       </div>
     </Base>
   );

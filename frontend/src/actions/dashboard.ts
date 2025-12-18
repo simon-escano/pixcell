@@ -1,5 +1,6 @@
 "use server"
 import { getUser } from "@/lib/auth";
+import { cache } from "react";
 
 import { db } from "@/db";
 import {
@@ -79,74 +80,89 @@ async function getSampleMonthlyChange() {
   return ((current - last) / last) * 100;
 }
 
+// Cache the dashboard stats function for request-level deduplication
+const getDashboardStatsCached = cache(async (organizationId: string, userId: string, profileId: string, roleName: string) => {
+  // Parallelize all independent data fetching operations
+  const [
+    patients,
+    samples,
+    reportsLast30Days,
+    patientsWithLastReport,
+    recentUploads,
+    genderStats,
+    monthlyStats,
+    patientsChange,
+    samplesChange,
+    reportsChange
+  ] = await Promise.all([
+    getAllPatientsForUser(profileId, roleName, organizationId),
+    getSamplesByUserId(userId, organizationId),
+    getReportsLast30DaysByUser(userId),
+    getPatientsWithLastReportByUser(userId),
+    getRecentUploadsByUser(userId),
+    getPatientGenderStatsByUser(userId),
+    getMonthlyStats(),
+    getMonthlyChange(patient, patient.createdAt),
+    getSampleMonthlyChange(),
+    getMonthlyChange(report, report.createdAt)
+  ]);
+  
+  // Calculate total reports across all patients in parallel
+  const reportCounts = await Promise.all(
+    patients.map(patient => getReportCountByPatientId(patient.id))
+  );
+  const totalReports = reportCounts.reduce((a, b) => a + b, 0);
+
+  // Calculate percentage changes for existing metrics
+  const appointmentsChange = monthlyStats.lastMonth.totalAppointments 
+    ? ((monthlyStats.currentMonth.totalAppointments - monthlyStats.lastMonth.totalAppointments) / monthlyStats.lastMonth.totalAppointments) * 100
+    : 0;
+  
+  const newPatientsChange = monthlyStats.lastMonth.newPatients
+    ? ((monthlyStats.currentMonth.newPatients - monthlyStats.lastMonth.newPatients) / monthlyStats.lastMonth.newPatients) * 100
+    : 0;
+
+  return {
+    totalPatients: patients.length,
+    totalSamples: samples.length,
+    totalReports,
+    activeUsers: 0, // TODO: Implement active users tracking
+    reportsLast30Days,
+    reportsPerPatient: patients.length ? totalReports / patients.length : 0,
+    patientsWithLastReport,
+    recentUploads,
+    genderStats,
+    monthlyStats: {
+      ...monthlyStats.currentMonth,
+      appointmentsChange,
+      newPatientsChange
+    },
+    // Add percentage changes for all metrics
+    patientsChange: patientsChange || 0,
+    samplesChange: samplesChange || 0,
+    reportsChange: reportsChange || 0
+  };
+});
+
 export async function getDashboardStats(organizationId: string) {
   try {
     const user = await getUser();
-    const profile = await getProfileByUserId(user.id);
-    const role = await getRoleByUserIdAndOrganizationId(user.id, organizationId);
+    
+    // Parallelize profile and role fetching (they're independent)
+    const [profile, role] = await Promise.all([
+      getProfileByUserId(user.id),
+      getRoleByUserIdAndOrganizationId(user.id, organizationId)
+    ]);
 
     console.log(profile)
     console.log(role)
-    const [
-      patients,
-      samples,
-      reportsLast30Days,
-      patientsWithLastReport,
-      recentUploads,
-      genderStats,
-      monthlyStats
-    ] = await Promise.all([
-      getAllPatientsForUser(profile.id, role?.name || "", organizationId),
-      getSamplesByUserId(user.id, organizationId),
-      getReportsLast30DaysByUser(user.id),
-      getPatientsWithLastReportByUser(user.id),
-      getRecentUploadsByUser(user.id),
-      getPatientGenderStatsByUser(user.id),
-      getMonthlyStats()
-    ]);
-    
-    // Calculate total reports across all patients
-    const reportCounts = await Promise.all(
-      patients.map(patient => getReportCountByPatientId(patient.id))
-    )
-    const totalReports = reportCounts.reduce((a, b) => a + b, 0)
 
-    // Calculate percentage changes for all metrics
-    const [patientsChange, samplesChange, reportsChange] = await Promise.all([
-      getMonthlyChange(patient, patient.createdAt),
-      getSampleMonthlyChange(),
-      getMonthlyChange(report, report.createdAt)
-    ]);
-
-    // Calculate percentage changes for existing metrics
-    const appointmentsChange = monthlyStats.lastMonth.totalAppointments 
-      ? ((monthlyStats.currentMonth.totalAppointments - monthlyStats.lastMonth.totalAppointments) / monthlyStats.lastMonth.totalAppointments) * 100
-      : 0;
-    
-    const newPatientsChange = monthlyStats.lastMonth.newPatients
-      ? ((monthlyStats.currentMonth.newPatients - monthlyStats.lastMonth.newPatients) / monthlyStats.lastMonth.newPatients) * 100
-      : 0;
-
-    return {
-      totalPatients: patients.length,
-      totalSamples: samples.length,
-      totalReports,
-      activeUsers: 0, // TODO: Implement active users tracking
-      reportsLast30Days,
-      reportsPerPatient: patients.length ? totalReports / patients.length : 0,
-      patientsWithLastReport,
-      recentUploads,
-      genderStats,
-      monthlyStats: {
-        ...monthlyStats.currentMonth,
-        appointmentsChange,
-        newPatientsChange
-      },
-      // Add percentage changes for all metrics
-      patientsChange: patientsChange || 0,
-      samplesChange: samplesChange || 0,
-      reportsChange: reportsChange || 0
-    }
+    return await getDashboardStatsCached(
+      organizationId,
+      user.id,
+      profile.id,
+      role?.name || ""
+    );
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
     throw error

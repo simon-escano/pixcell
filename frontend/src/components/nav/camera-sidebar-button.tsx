@@ -15,7 +15,7 @@ export default function CameraSidebarButton() {
         className="w-full justify-start rounded-lg shadow-sm flex items-center gap-2"
         onClick={() => setOpen(true)}
       >
-        <Camera className="size-4" />
+        <Camera className="size-4 text-sidebar-icon" />
         Open Camera
       </Button>
       <CameraModal open={open} onClose={() => setOpen(false)} onCapture={() => setOpen(false)} />

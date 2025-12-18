@@ -4,7 +4,7 @@ import StatusBadge from "@/components/reports/status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { getPatientById, getProfileByUserId, getReportById, getRoleByUserIdAndOrganizationId, getSampleById } from "@/db/queries/select"
+import { getPatientById, getProfileByUserId, getReportById, getRoleByUserIdAndOrganizationId, getSampleById, getOrganizationById } from "@/db/queries/select"
 import { format } from "date-fns"
 import { ArrowLeft, Sparkles, XCircle } from "lucide-react"
 import Link from "next/link"
@@ -13,6 +13,7 @@ import AiGeneratedNoticeClient from "./ai-generated-notice-client"
 import ReportActions, { ReportActionButtons } from "./report-actions-client"
 import { ReportStatus } from "@/lib/status-config"
 import { Metadata } from "next"
+import AccessDeniedPage from "@/components/access-denied-page"
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -128,6 +129,19 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
     return <ReportNotFound organizationId={organizationId} />
   }
 
+  // Check if report belongs to the organization
+  if (report.organizationId !== organizationId) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This report does not exist in this organization."
+          backUrl={`/organizations/${organizationId}/reports`}
+          backLabel="Back to Reports"
+        />
+      </Base>
+    )
+  }
+
   const patient = report.patientId ? await getPatientById(report.patientId) : null
   const sample = report.sampleId ? await getSampleById(report.sampleId) : null
 
@@ -157,6 +171,9 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
   const doctorName = doctor ? `${doctor.firstName} ${doctor.lastName}` : "N/A"
   const doctorRole = role && role.id && role.name ? role : { id: "unknown", name: "Doctor" }
   const doctorLicense = doctor && "licenseNo" in doctor && (doctor as any).licenseNo ? (doctor as any).licenseNo : "N/A"
+
+  // Fetch organization data
+  const org = await getOrganizationById(organizationId)
 
   return (
     <Base params={paramsObj}>
@@ -211,6 +228,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
                     doctorName={doctorName}
                     doctorRole={doctorRole}
                     doctorLicense={doctorLicense}
+                    organization={org}
                   />
                 </Suspense>
               </div>

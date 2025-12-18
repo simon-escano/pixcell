@@ -1,8 +1,9 @@
 import Base from "@/components/base";
-import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId } from "@/db/queries/select";
+import { getPatientById, getReportCountByPatientId, getSamplesByPatientId, getReportsByPatientId, isPatientInOrganization } from "@/db/queries/select";
 import PatientProfileClient from "./PatientProfileClient";
 import { getMetaPatientById, getMetaSampleImagesBySampleId } from "../../samples/queries";
 import { Metadata } from "next";
+import AccessDeniedPage from "@/components/access-denied-page";
 
 function truncate(text: string, maxLength: number = 50): string {
   if (text.length <= maxLength) return text;
@@ -32,7 +33,35 @@ export default async function PatientPage({
 }) {
   const paramsObj = await params;
   const patientId = paramsObj.patientId;
+  const organizationId = paramsObj.organizationId;
+  
   const patientData = await getPatientById(patientId);
+  if (!patientData) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This patient does not exist."
+          backUrl={`/organizations/${organizationId}/patients`}
+          backLabel="Back to Patients"
+        />
+      </Base>
+    );
+  }
+
+  // Check if patient belongs to the organization
+  const belongsToOrg = await isPatientInOrganization(patientId, organizationId);
+  if (!belongsToOrg) {
+    return (
+      <Base params={paramsObj}>
+        <AccessDeniedPage 
+          message="This patient does not exist in this organization."
+          backUrl={`/organizations/${organizationId}/patients`}
+          backLabel="Back to Patients"
+        />
+      </Base>
+    );
+  }
+
   const samplesRaw = await getSamplesByPatientId(patientId);
   // Deduplicate samples by id
   const samples = Object.values(

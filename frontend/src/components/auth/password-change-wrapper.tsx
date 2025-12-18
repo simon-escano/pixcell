@@ -37,7 +37,7 @@ export function PasswordChangeWrapper({
         />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Password Change Required</h2>
+            <h2 className="text-base font-normal mb-2">Password Change Required</h2>
             <p className="text-muted-foreground">
               Please change your password to continue.
             </p>

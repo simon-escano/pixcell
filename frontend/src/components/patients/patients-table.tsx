@@ -8,10 +8,10 @@ import toast from "react-hot-toast";
 import { PatientDialog } from "./patient-dialog";
 import { DataTable } from "../data-table";
 import { CustomAlertDialog } from "../custom-alert-dialog";
-import UserButton from "../users/user-button";
+import UserButton from "../members/user-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CirclePlus, Plus, Upload, XCircle, Trash2 } from "lucide-react";
+import { Plus, Upload, XCircle, Trash2 } from "lucide-react";
 import ClientDate from "../client-date";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
@@ -145,17 +145,17 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="ml-2" variant="default">
-          <CirclePlus/>
+          <Plus/>
           Add Patient
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={handleAddManual}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add Manually
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleImportClick}>
-          <Upload className="mr-2 h-4 w-4" />
+          <Upload className="h-4 w-4" />
           Import via CSV
         </DropdownMenuItem>
       </DropdownMenuContent>

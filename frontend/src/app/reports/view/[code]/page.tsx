@@ -146,7 +146,7 @@ function ReportHeader({ reportData, code }: { reportData: any; code: string }) {
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground mb-2">
+            <h1 className="text-2xl font-normal text-foreground mb-2">
               {reportData.formData.title || "Medical Report"}
             </h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -221,6 +221,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
                     doctorName={reportData.doctorName}
                     doctorRole={reportData.doctorRole}
                     doctorLicense={reportData.doctorLicense}
+                    organization={reportData.organization}
                   />
                 </Suspense>
               </div>

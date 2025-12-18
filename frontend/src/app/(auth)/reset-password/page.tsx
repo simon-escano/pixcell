@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
         </Link>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Reset Your Password</CardTitle>
+            <CardTitle className="text-base font-normal">Reset Your Password</CardTitle>
             <CardDescription>
               {email ? (
                 <span className="text-muted-foreground">

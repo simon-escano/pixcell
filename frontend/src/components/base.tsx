@@ -2,21 +2,39 @@ import React from "react";
 import { SidebarInset, SidebarProvider } from "./ui/sidebar";
 import { AppSidebar } from "./nav/app-sidebar";
 import Header from "./header";
+import { getUser } from "@/lib/auth";
+import { getProfileByUserId, getOrganizationsByProfileId } from "@/db/queries/select";
+import { PageSidebarProvider } from "@/contexts/page-sidebar-context";
 
 type BaseProps = Readonly<{
   children: React.ReactNode;
   params?: { organizationId?: string } | null;
 }>;
 
-const Base = ({ children, params }: BaseProps) => {
+const Base = async ({ children, params }: BaseProps) => {
+  const user = await getUser();
+  const profileData = await getProfileByUserId(user.id);
+  const organizations = await getOrganizationsByProfileId(profileData?.id || "");
+
+  // Convert params to the expected Promise format
+  const sidebarParams = params?.organizationId 
+    ? Promise.resolve({ organizationId: params.organizationId })
+    : undefined;
+
   return (
-    <SidebarProvider className="h-screen overflow-hidden">
-      <AppSidebar params={params} />
-      <SidebarInset className="flex flex-col overflow-hidden">
-        <Header />
-        <div className="-mt-4 flex-1 overflow-y-auto">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+    <PageSidebarProvider>
+      <SidebarProvider className="h-screen overflow-hidden">
+        <AppSidebar params={sidebarParams} />
+        <SidebarInset className="flex flex-col overflow-hidden">
+          <Header organizations={organizations.map(org => ({
+            id: org.id,
+            name: org.name,
+            imageUrl: org.imageUrl,
+          }))} />
+          <div className="flex-1 overflow-y-auto">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
+    </PageSidebarProvider>
   );
 };
 

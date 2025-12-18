@@ -10,7 +10,7 @@ import { CustomAlertDialog } from "../custom-alert-dialog";
 import { DataTable } from "../data-table";
 import { Button } from "../ui/button";
 import { UserDialog } from "./user-dialog";
-import { CirclePlus, Upload, XCircle } from "lucide-react";
+import { Plus, Upload, XCircle } from "lucide-react";
 // @ts-ignore: If types are missing for papaparse
 import Papa from "papaparse";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
@@ -47,7 +47,7 @@ function ImportErrorToast({ title, failed }: { title: string; failed: any[] }) {
   );
 }
 
-export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; organizationId: string }) => {
+export const MembersTable = ({ users, organizationId, isAdmin = false }: { users: CombinedUser[]; organizationId: string; isAdmin?: boolean }) => {
   const router = useRouter();
   const params = useParams();
   const orgId = organizationId || (params as any)?.organizationId || "";
@@ -131,7 +131,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
       skipEmptyLines: true,
       complete: async (results: Papa.ParseResult<any>) => {
         try {
-          const response = await fetch("/api/users/batch", {
+          const response = await fetch("/api/members/batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -175,17 +175,17 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="ml-2" variant="default">
-          <CirclePlus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add User
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={handleAddManual}>
-          <CirclePlus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add Manually
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleImportClick}>
-          <Upload className="mr-2 h-4 w-4" />
+          <Upload className="h-4 w-4" />
           Import via CSV
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -200,14 +200,14 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
         toast.success("User ID copied to clipboard");
       },
     },
-    {
+    ...(isAdmin ? [{
       label: "Edit User",
       onClick: (user: CombinedUser) => {
         setSelectedUser(user);
         setEditOpen(true);
       },
-    },
-    {
+    }] : []),
+    ...(isAdmin ? [{
       label: "Delete User",
       onClick: (user: CombinedUser) => {
         setSelectedUser(user);
@@ -216,7 +216,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
       customRender: () => (
         <button className="text-red-500 hover:text-red-700">Delete User</button>
       ),
-    },
+    }] : []),
   ];
 
   return (
@@ -237,25 +237,27 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[]; o
         ]}
         actionItems={actionItems}
         onRowClick={(user: CombinedUser) => {
-          router.push(`/organizations/${orgId}/users/${user.id}`)
+          router.push(`/organizations/${orgId}/members/${user.id}`)
         }}
         customHeaderContent={
-          <div className="flex items-center gap-2">
-            {addUserDropdown}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+          isAdmin ? (
+            <div className="flex items-center gap-2">
+              {addUserDropdown}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
+          ) : null
         }
         selectedRowIds={selectedIds}
         onSelectedRowIdsChange={setSelectedIds}
         getRowId={row => row.id}
       />
-      {selectedIds.length > 0 && (
+      {isAdmin && selectedIds.length > 0 && (
         <div className="flex justify-start mt-4">
           <Button
             variant="destructive"

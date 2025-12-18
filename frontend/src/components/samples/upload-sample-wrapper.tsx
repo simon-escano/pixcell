@@ -26,10 +26,9 @@ export default async function UploadSampleWrapper({organizationId, patientsRaw}:
 
   return <SampleDrawer patients={patients}>
     <Button 
-      className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full justify-start rounded-lg shadow-sm"
+      className="p-1.5! bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground rounded-md shadow-sm h-auto"
     >
       <ImageUp />
-      Upload sample
     </Button>
   </SampleDrawer>;
 }

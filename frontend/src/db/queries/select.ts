@@ -1,8 +1,9 @@
-import { doctorPatient, feedback, image, organization, organizationStaff, organizationPatient, patient, profile, report, role, sample, sampleImage, user } from "@/db/schema";
+import { doctorPatient, feedback, image, organization, organizationStaff, organizationPatient, patient, profile, report, role, sample, sampleImage, sampleImageAi, user } from "@/db/schema";
 import { desc, eq, sql, and } from "drizzle-orm";
 import { db } from '..';
 import { alias } from "drizzle-orm/pg-core";
-
+import { withCache, CACHE_TAGS, CACHE_REVALIDATE_TIMES, withRequestCache } from "@/lib/cache";
+import { cache } from "react";
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -46,7 +47,8 @@ export async function getAllUsersWithProfiles2() {
     .then(results => results.map(r => ({ ...r, roleId: null as string | null, roleName: null as string | null })));
 }
 
-export async function getAllUsersWithProfiles(organizationId: string) {
+// Cache at request level for deduplication
+const getAllUsersWithProfilesCached = cache(async (organizationId: string) => {
   return await db
     .select({
       id: user.id,
@@ -67,6 +69,10 @@ export async function getAllUsersWithProfiles(organizationId: string) {
     .leftJoin(image, eq(profile.imageId, image.id))
     .where(eq(organizationStaff.organizationId, organizationId))
     .orderBy(desc(organizationStaff.updatedAt));
+});
+
+export async function getAllUsersWithProfiles(organizationId: string) {
+  return getAllUsersWithProfilesCached(organizationId);
 }
 
 export async function getAllProfiles() {
@@ -172,6 +178,20 @@ export async function getPatientById(id: string) {
   return result[0];
 }
 
+export async function isPatientInOrganization(patientId: string, organizationId: string): Promise<boolean> {
+  const result = await db
+    .select({ id: organizationPatient.id })
+    .from(organizationPatient)
+    .where(
+      and(
+        eq(organizationPatient.patientId, patientId),
+        eq(organizationPatient.organizationId, organizationId)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+}
+
 export async function getSamplesByPatientId(id: string) {
   return await db
     .select({
@@ -258,6 +278,7 @@ export async function getSampleById(id: string) {
       patientId: sample.patientId,
       sampleName: sample.sampleName,
       createdBy: sample.createdBy,
+      organizationId: sample.organizationId,
       // From sampleImage table
       uploadedBy: sampleImage.uploadedBy,
       metadata: sampleImage.metadata,
@@ -272,29 +293,46 @@ export async function getSampleById(id: string) {
   return result[0];
 }
 
-export async function getAllSamples(organizationId: string) {
+// Cache at request level for deduplication
+const getAllSamplesCached = cache(async (organizationId: string) => {
   return await db
     .select()
     .from(sample)
     .where(eq(sample.organizationId, organizationId));
+});
+
+export async function getAllSamples(organizationId: string) {
+  return getAllSamplesCached(organizationId);
 }
 
+const getProfileByUserIdCached = withCache(
+  async (userId: string) => {
+    const result = await db
+      .select({
+        id: profile.id,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        userId: profile.userId,
+        roleId: profile.roleId,
+        imageId: profile.imageId,
+        imageUrl: image.imageUrl,
+        licenseNo: profile.licenseNo,
+        mustChangePassword: profile.mustChangePassword,
+      })
+      .from(profile)
+      .leftJoin(image, eq(profile.imageId, image.id))
+      .where(eq(profile.userId, userId));
+    return result[0];
+  },
+  ['profile-by-user-id'],
+  {
+    tags: [CACHE_TAGS.profiles],
+    revalidate: CACHE_REVALIDATE_TIMES.medium,
+  }
+);
+
 export async function getProfileByUserId(userId: string) {
-  const result = await db
-    .select({
-      id: profile.id,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      userId: profile.userId,
-      imageId: profile.imageId,
-      imageUrl: image.imageUrl,
-      licenseNo: profile.licenseNo,
-      mustChangePassword: profile.mustChangePassword,
-    })
-    .from(profile)
-    .leftJoin(image, eq(profile.imageId, image.id))
-    .where(eq(profile.userId, userId));
-  return result[0];
+  return getProfileByUserIdCached(userId);
 }
 
 export async function getRoleById(id: string) {
@@ -302,23 +340,34 @@ export async function getRoleById(id: string) {
   return result[0];
 }
 
-export async function getRoleByUserIdAndOrganizationId(userId: string, organizationId: string) {
-  const result = await db
-    .select({
-      id: role.id,
-      name: role.name,
-    })
-    .from(organizationStaff)
-    .innerJoin(profile, eq(organizationStaff.staffId, profile.id))
-    .innerJoin(role, eq(organizationStaff.roleId, role.id))
-    .where(
-      and(
-        eq(profile.userId, userId),
-        eq(organizationStaff.organizationId, organizationId)
+const getRoleByUserIdAndOrganizationIdCached = withCache(
+  async (userId: string, organizationId: string) => {
+    const result = await db
+      .select({
+        id: role.id,
+        name: role.name,
+      })
+      .from(organizationStaff)
+      .innerJoin(profile, eq(organizationStaff.staffId, profile.id))
+      .innerJoin(role, eq(organizationStaff.roleId, role.id))
+      .where(
+        and(
+          eq(profile.userId, userId),
+          eq(organizationStaff.organizationId, organizationId)
+        )
       )
-    )
-    .limit(1);
-  return result[0] || null;
+      .limit(1);
+    return result[0] || null;
+  },
+  ['role-by-user-org'],
+  {
+    tags: [CACHE_TAGS.profiles, CACHE_TAGS.organizations],
+    revalidate: CACHE_REVALIDATE_TIMES.medium,
+  }
+);
+
+export async function getRoleByUserIdAndOrganizationId(userId: string, organizationId: string) {
+  return getRoleByUserIdAndOrganizationIdCached(userId, organizationId);
 }
 
 export async function getAllRoles() {
@@ -579,7 +628,8 @@ export async function getMonthlyStats() {
   };
 }
 
-export async function getAllReports(organizationId: string) {
+// Cache at request level for deduplication
+const getAllReportsCached = cache(async (organizationId: string) => {
   return await db
     .select({
       id: report.id,
@@ -599,6 +649,7 @@ export async function getAllReports(organizationId: string) {
       generatedByRole: role.name,
       title: report.title,
       testType: report.testType,
+      status: report.status,
     })
     .from(report)
     // 1. Add the filter here, based on the new report.organizationId column
@@ -616,6 +667,10 @@ export async function getAllReports(organizationId: string) {
     ))
     .leftJoin(role, eq(organizationStaff.roleId, role.id))
     .orderBy(report.createdAt);
+});
+
+export async function getAllReports(organizationId: string) {
+  return getAllReportsCached(organizationId);
 }
 
 export async function getAllReportsByUserId(userId: string) {
@@ -761,12 +816,23 @@ export async function getReportsByPatientId(patientId: string) {
     .orderBy(report.createdAt);
 }
 
+const getOrganizationByIdCached = withCache(
+  async (organizationId: string) => {
+    const organizations = await db
+      .select()
+      .from(organization)
+      .where(eq(organization.id, organizationId));
+    return organizations[0];
+  },
+  ['organization-by-id'],
+  {
+    tags: [CACHE_TAGS.organizations],
+    revalidate: CACHE_REVALIDATE_TIMES.long,
+  }
+);
+
 export const getOrganizationById = async (organizationId: string) => {
-  const organizations = await db
-    .select()
-    .from(organization)
-    .where(eq(organization.id, organizationId));
-  return organizations[0];
+  return getOrganizationByIdCached(organizationId);
 }
 
 export const getOrganizationsByProfileId = async (profileId: string) => {
@@ -775,7 +841,7 @@ export const getOrganizationsByProfileId = async (profileId: string) => {
       id: organization.id,
       name: organization.name,
       address: organization.address,
-      color: organization.color,
+      imageUrl: organization.image_url,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,
     })
@@ -855,4 +921,15 @@ export async function getPatientsFromOrganizationForUser(
     seen.add(p.id)
     return true
   })
+}
+
+// Get AI-generated image for a sample image
+export async function getSampleImageAiByOriginalId(originalSampleImageId: string) {
+  const result = await db
+    .select()
+    .from(sampleImageAi)
+    .where(eq(sampleImageAi.originalSampleImageId, originalSampleImageId))
+    .orderBy(desc(sampleImageAi.createdAt))
+    .limit(1);
+  return result[0] || null;
 }

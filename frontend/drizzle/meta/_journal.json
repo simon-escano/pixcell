@@ -43,6 +43,13 @@
       "when": 1749906744644,
       "tag": "0005_thin_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766058484078,
+      "tag": "0006_mushy_northstar",
+      "breakpoints": true
     }
   ]
 }

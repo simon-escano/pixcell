@@ -46,14 +46,22 @@ interface Sample {
   createdByName?: string
 }
 
+interface Organization {
+  id: string
+  name: string | null
+  address: string | null
+  image_url: string | null
+}
+
 interface CreateReportFormProps {
   patients: MetaPatient[]
   currentUserId: string
   profiles: Profile[]
   role: Role
+  organization?: Organization | null
 }
 
-export default function CreateReportForm({ patients, currentUserId, profiles, role }: CreateReportFormProps) {
+export default function CreateReportForm({ patients, currentUserId, profiles, role, organization }: CreateReportFormProps) {
   console.log("CreateReportForm rendered")
   const params = useParams()
   const orgId = (params as any)?.organizationId || undefined
@@ -224,6 +232,7 @@ export default function CreateReportForm({ patients, currentUserId, profiles, ro
       initialFormData={initialFormData}
       initialPatientId={initialPatientId}
       initialSampleId={initialSampleId}
+      organization={organization}
     />
   )
 }

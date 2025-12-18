@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { doctorPatient, patient } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 // GET: List all assigned patients for a doctor
 export async function GET(
@@ -10,14 +12,18 @@ export async function GET(
 ) {
   const { doctorId } = context.params;
   if (!doctorId) return NextResponse.json({ error: "Missing doctorId" }, { status: 400 });
-  // Get all patient assignments for this doctor
-  const assignments = await db
-    .select({ patientId: doctorPatient.patientId })
-    .from(doctorPatient)
-    .where(eq(doctorPatient.doctorId, doctorId));
+  
+  // Parallelize: get assignments and all patients simultaneously
+  const [assignments, allPatients] = await Promise.all([
+    db
+      .select({ patientId: doctorPatient.patientId })
+      .from(doctorPatient)
+      .where(eq(doctorPatient.doctorId, doctorId)),
+    db.select().from(patient)
+  ]);
+  
   const assignedPatientIds = assignments.map((a) => a.patientId);
-  // Get patient details
-  const allPatients = await db.select().from(patient);
+  
   // Return both all patients and assigned IDs
   return NextResponse.json({
     allPatients: allPatients.map((p: any) => ({
@@ -51,6 +57,11 @@ export async function POST(
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
   // Insert assignment if not exists
   await db.insert(doctorPatient).values({ doctorId, patientId });
+  
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.patients);
+  revalidateTag(`patient-${patientId}`);
+  
   return NextResponse.json({ success: true });
 }
 
@@ -65,5 +76,10 @@ export async function DELETE(
   const patientId = searchParams.get("patientId");
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
   await db.delete(doctorPatient).where(and(eq(doctorPatient.doctorId, doctorId), eq(doctorPatient.patientId, patientId)));
+  
+  // Revalidate cache
+  revalidateTag(CACHE_TAGS.patients);
+  revalidateTag(`patient-${patientId}`);
+  
   return NextResponse.json({ success: true });
 } 

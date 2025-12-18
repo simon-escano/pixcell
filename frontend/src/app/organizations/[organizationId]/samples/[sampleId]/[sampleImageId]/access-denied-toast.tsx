@@ -25,13 +25,13 @@ export default function AccessDeniedToast({ message }: AccessDeniedToastProps) {
   }, [message]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
+    <div className="min-h-screen flex items-center justify-centerp-4">
       <Card className="w-full max-w-md mx-auto shadow-xl border-2 border-destructive/20 bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
-          <CardTitle className="text-xl font-semibold text-destructive">
+          <CardTitle className="text-base font-normal text-destructive">
             Access Denied
           </CardTitle>
         </CardHeader>
