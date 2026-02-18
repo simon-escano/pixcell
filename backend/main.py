@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 from fastapi import FastAPI, File, UploadFile, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 from PIL import Image
@@ -9,6 +10,17 @@ from typing import Dict, List, Any
 from collections import Counter
 import base64
 
+=======
+import os
+import sys
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from db import get_supabase_client 
+from routers import auth, organization, patient, profile, report
+# Import llm module to trigger initialization and print statements
+import llm
+sys.stdout.flush()  # Ensure prints appear immediately
+>>>>>>> Stashed changes
 app = FastAPI()
 
 

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+<<<<<<< Updated upstream
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY environment variable is not set. Please set it in your environment or .env file.")
@@ -14,9 +15,30 @@ if not GEMINI_API_KEY:
 # Find fresh ones at free-proxy-list.net or proxylister.com — filter for US, HTTP, high uptime
 #os.environ['HTTP_PROXY'] = 'http://198.199.86.11:80'
 #os.environ['HTTPS_PROXY'] = 'http://198.199.86.11:80'
+=======
+# Get API key from environment variable (matching JavaScript: process.env.GOOGLE_API_KEY)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.getenv('GEMINI_API_KEY')
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY environment variable is not set. Please set it in your environment or .env file.")
+
+# Get location/region (defaults to us-central1 to match JavaScript config)
+# This matches: const client = new GoogleGenerativeAI({ apiKey, location: "us-central1" })
+GEMINI_LOCATION = os.environ.get("GEMINI_LOCATION") or os.getenv('GEMINI_LOCATION', 'us-central1')
+
+# Configure the API client - Python equivalent of JavaScript GoogleGenerativeAI client
+# In Python SDK, configure the client with API key
+# Location is typically handled via project settings or can be set via environment variables
+genai.configure(api_key=GEMINI_API_KEY)
+
+# Set the region/location via environment variable if needed
+# Some Python SDK versions may use GOOGLE_CLOUD_REGION for location routing
+if GEMINI_LOCATION:
+    os.environ['GOOGLE_CLOUD_REGION'] = GEMINI_LOCATION
+>>>>>>> Stashed changes
 
 # Get API key from environment variable
 # Check GC LOL -molt
+
 def build_prompt_from_counts(class_counts: Dict[str, int], sample_type: str = "Blood smear", stain: str = "Giemsa", magnification: str = "1000x") -> str:
     """
     Build a prompt for AI analysis based on detection results.
@@ -60,12 +82,18 @@ def analyze_detections(class_counts: Dict[str, int], sample_type: str = "Blood s
         Dictionary containing analysis results
     """
     try:
+<<<<<<< Updated upstream
         # Configure the API key
         genai.configure(api_key=GEMINI_API_KEY,transport='rest')
         #print("Gemini configured with proxy successfully.")
         
         # Initialize the Gemini model
         model = genai.GenerativeModel('gemini-2.5-flash')
+=======
+        # Initialize the Gemini model (API client already configured at module level)
+        # Location is set via GEMINI_LOCATION environment variable or defaults to us-central1
+        model = genai.GenerativeModel('gemini-2.0-pro')
+>>>>>>> Stashed changes
         
         # Build the prompt
         prompt = build_prompt_from_counts(class_counts, sample_type, stain, magnification)
