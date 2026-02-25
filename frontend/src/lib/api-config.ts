@@ -14,10 +14,10 @@ export const getBackendUrl = (): string => {
   // Check for environment variable first (for local development or custom deployments)
   if (typeof window !== 'undefined') {
     // Client-side: use NEXT_PUBLIC_ prefix
-    return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://aizerner-pixcell-backend.hf.space'
+    return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://pixcell-ss-pixcell-backend.hf.space'
   } else {
     // Server-side: can use regular env var
-    return process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://aizerner-pixcell-backend.hf.space'
+    return process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://pixcell-ss-pixcell-backend.hf.space'
   }
 }
 

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Test endpoint to verify Hugging Face Space connectivity
  */
-const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL || 'https://aizerner-pixcell-backend.hf.space';
+const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL;
 
 export async function GET(req: NextRequest) {
   try {
