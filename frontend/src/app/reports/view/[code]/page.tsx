@@ -290,7 +290,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
 }
 
 // Export with Suspense wrapper for better loading experience
-export function ReportViewByCodePageWithSuspense({ params }: { params: Promise<{ code: string }> }) {
+function ReportViewByCodePageWithSuspense({ params }: { params: Promise<{ code: string }> }) {
   return (
     <Suspense fallback={<ReportViewSkeleton />}>
       <ImprovedReportViewByCodePage params={params} />

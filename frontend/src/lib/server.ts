@@ -11,6 +11,6 @@ export async function createClient() {
   // Await the cookies before passing to createServerComponentClient
   const cookieStore = await getCookieStore();
   return createServerComponentClient({
-    cookies: () => cookieStore,
+    cookies: () => cookieStore as any,
   });
 }

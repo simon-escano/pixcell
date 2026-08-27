@@ -3,10 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Test endpoint to verify Hugging Face Space connectivity
  */
-const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL;
+const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL || 'https://pixcell-ss-pixcell-backend.hf.space';
 
 export async function GET(req: NextRequest) {
   try {
+    if (!DETECTION_BACKEND_URL) {
+      return NextResponse.json({ success: false, error: 'Detection backend URL not configured' }, { status: 500 });
+    }
     // Try to access the docs endpoint to verify the space is accessible
     const docsUrl = `${DETECTION_BACKEND_URL}/docs`;
     const rootUrl = DETECTION_BACKEND_URL;

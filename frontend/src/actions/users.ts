@@ -85,11 +85,9 @@ export const signupAction = async (formData: FormData) => {
       }
 
     await db.insert(profile).values({
-      id: userId,
       firstName,
       lastName,
       userId,
-      roleId,
       imageId,
       licenseNo,
     });
@@ -502,17 +500,11 @@ export const createUserWithAutoPasswordAction = async (formData: FormData) => {
 
     // Use transaction to ensure atomicity
     await db.transaction(async (tx) => {
-      // Insert profile (roleId is temporary placeholder - will be removed when column is deleted)
-      // Get first role as placeholder since roleId is still required in schema
-      const [firstRole] = await tx.select().from(role).limit(1);
-      const placeholderRoleId = firstRole?.id || crypto.randomUUID();
-      
       await tx.insert(profile).values({
         id: userId,
         firstName,
         lastName,
         userId,
-        roleId: placeholderRoleId, // Temporary - will be removed when roleId column is deleted
         imageId,
         licenseNo,
         mustChangePassword: true,

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Proxy route for Hugging Face Space predict endpoint (returns processed image)
  * This avoids CORS issues and provides better error handling
  */
-const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL;
+const DETECTION_BACKEND_URL = process.env.NEXT_PUBLIC_DETECTION_BACKEND_URL || 'https://pixcell-ss-pixcell-backend.hf.space';
 
 export async function POST(req: NextRequest) {
   try {

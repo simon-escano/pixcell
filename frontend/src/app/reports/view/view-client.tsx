@@ -77,7 +77,17 @@ export default function ReportViewClient(props: Props) {
       <ReportPreview
         formData={props.formData}
         reportContent={props.reportContent}
-        selectedPatient={props.selectedPatient}
+        selectedPatient={
+          props.selectedPatient
+            ? {
+                ...props.selectedPatient,
+                imageUrl: props.selectedPatient.imageUrl ?? null,
+                fullName: `${props.selectedPatient.firstName} ${props.selectedPatient.lastName}`,
+                role: "Patient" as const,
+                createdBy: props.selectedPatient.id,
+              }
+            : undefined
+        }
         selectedSample={props.selectedSample}
         doctorName={props.doctorName}
         doctorRole={props.doctorRole}

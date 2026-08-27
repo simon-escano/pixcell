@@ -34,11 +34,11 @@ export function PatientSearchCombobox({
   const filteredPatients = patients.filter((p) => {
     const term = searchTerm.toLowerCase().trim()
     if (term === "") return true
-    const individualMatch = p.fullName.toLowerCase().includes(term) || p.email.toLowerCase().includes(term)
+    const individualMatch = p.fullName.toLowerCase().includes(term) || (p.email?.toLowerCase().includes(term) ?? false)
     const fullNameMatch = p.fullName.includes(term)
     const searchTerms = term.split(/\s+/)
     const multiTermMatch = searchTerms.every(
-      (term) => p.fullName.toLowerCase().includes(term) || p.email.toLowerCase().includes(term),
+      (term) => p.fullName.toLowerCase().includes(term) || (p.email?.toLowerCase().includes(term) ?? false),
     )
     return individualMatch || fullNameMatch || multiTermMatch
   })

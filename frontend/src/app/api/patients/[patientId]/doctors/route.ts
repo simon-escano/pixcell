@@ -9,9 +9,9 @@ import { CACHE_TAGS } from "@/lib/cache";
 // GET: List all assigned doctors for a patient
 export async function GET(
   req: NextRequest,
-  context: { params: { patientId: string } }
+  context: { params: Promise<{ patientId: string }> }
 ) {
-  const { patientId } = context.params;
+  const { patientId } = await context.params;
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
   
   // Parallelize: get assignments and all doctors simultaneously
@@ -32,9 +32,9 @@ export async function GET(
 // POST: Assign a doctor to a patient
 export async function POST(
   req: NextRequest,
-  context: { params: { patientId: string } }
+  context: { params: Promise<{ patientId: string }> }
 ) {
-  const { patientId } = context.params;
+  const { patientId } = await context.params;
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
   const { doctorId } = await req.json();
   if (!doctorId) return NextResponse.json({ error: "Missing doctorId" }, { status: 400 });
@@ -51,9 +51,9 @@ export async function POST(
 // DELETE: Remove a doctor from a patient
 export async function DELETE(
   req: NextRequest,
-  context: { params: { patientId: string } }
+  context: { params: Promise<{ patientId: string }> }
 ) {
-  const { patientId } = context.params;
+  const { patientId } = await context.params;
   if (!patientId) return NextResponse.json({ error: "Missing patientId" }, { status: 400 });
   const { searchParams } = new URL(req.url);
   const doctorId = searchParams.get("doctorId");

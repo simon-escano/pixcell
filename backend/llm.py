@@ -30,9 +30,9 @@ def analyze_detections(
             "summary and clinical recommendations. Be concise and accurate. Immediately provide your findings as is. Eliminate introductory paragraphs or courtesies."
         )
 
-        # Initialize Model (Using 1.5 Pro as a baseline; update to 2.0 as needed)
+        # Initialize Model (Using gemini-3.6-flash)
         model = genai.GenerativeModel(
-            model_name='gemini-2.5-pro',
+            model_name='gemini-3.6-flash',
             system_instruction=system_msg
         )
 

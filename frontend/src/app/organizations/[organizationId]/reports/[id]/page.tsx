@@ -265,7 +265,7 @@ export default async function ImprovedReportPage({ params }: { params: Promise<{
 }
 
 // Export with Suspense wrapper for better loading experience
-export function ReportPageWithSuspense({ params }: { params: Promise<{ id: string | string[]; organizationId: string }> }) {
+function ReportPageWithSuspense({ params }: { params: Promise<{ id: string | string[]; organizationId: string }> }) {
   return (
     <Suspense fallback={<ReportPageSkeleton />}>
       <ImprovedReportPage params={params} />

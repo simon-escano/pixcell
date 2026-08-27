@@ -35,17 +35,19 @@ export type MetaProfile = {
 export type MetaPatient = {
   id: string;
   fullName: string;
+  firstName?: string | null;
+  lastName?: string | null;
   role: "Patient";
   imageUrl: string | null;
-  birthDate: string;
+  birthDate: string | null;
   sex: string;
-  contactNumber: string;
-  email: string;
-  address: string;
-  height: number;
-  weight: number;
-  bloodType: string;
-  createdAt: Date;
+  contactNumber: string | null;
+  email: string | null;
+  address: string | null;
+  height: number | null;
+  weight: number | null;
+  bloodType: string | null;
+  createdAt: Date | string;
   createdBy: string | null;
 };
 

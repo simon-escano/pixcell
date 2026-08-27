@@ -11,8 +11,8 @@ import { CACHE_TAGS } from '@/lib/cache';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, content, patientId, sampleId, isAiGenerated, generatedBy, testType, status } = body;
-    if (!title || !content || !patientId || !sampleId || !isAiGenerated || !generatedBy || !testType) {
+    const { title, content, patientId, sampleId, isAiGenerated, generatedBy, testType, status, organizationId } = body;
+    if (!title || !content || !patientId || !sampleId || !isAiGenerated || !generatedBy || !testType || !organizationId) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
     await db.insert(report).values({
@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
       isAiGenerated,
       generatedBy,
       testType,
-      status: status || "Draft",
+      organizationId,
+      status: (status as any) || "Draft",
       createdAt: new Date(),
     });
 
@@ -39,9 +40,13 @@ export async function POST(req: NextRequest) {
 }
 
 // GET /api/reports - list all reports (optional, for testing)
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const reports = await getAllReports();
+    const organizationId = req.nextUrl.searchParams.get('organizationId');
+    if (!organizationId) {
+      return NextResponse.json({ success: false, error: 'organizationId is required' }, { status: 400 });
+    }
+    const reports = await getAllReports(organizationId);
     return NextResponse.json(reports);
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch reports' }, { status: 500 });

@@ -20,7 +20,6 @@ import {
 } from "@/db/queries/select";
 import { getUser } from "@/lib/auth";
 import Link from "next/link";
-import OrganizationDropdown from "../organization-dropdown";
 import PixCellLogo from "../pixcell-logo";
 import UploadSampleWrapper from "../samples/upload-sample-wrapper";
 

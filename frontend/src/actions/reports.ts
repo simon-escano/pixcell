@@ -14,15 +14,22 @@ export async function addReport(data: {
   sampleId: string;
   isAiGenerated: boolean;
   generatedBy: string;
-  status?: "Draft" | "Finalized" | "UNDER_REVIEW" | "REJECTED" | "ARCHIVED";
-  organizationId?: string;
+  status?: "Draft" | "Finalized" | "Under Review" | "Rejected" | "Archived" | string;
+  organizationId: string;
+  code?: string;
 }) {
   try {
     await db.insert(report).values({
-      ...data,
-      status: data.status || "Draft",
-      // Persist organization if provided; otherwise set to null
-      organizationId: data.organizationId ?? null,
+      title: data.title,
+      content: data.content,
+      testType: data.testType,
+      patientId: data.patientId,
+      sampleId: data.sampleId,
+      isAiGenerated: data.isAiGenerated,
+      generatedBy: data.generatedBy,
+      status: (data.status as any) || "Draft",
+      organizationId: data.organizationId,
+      code: data.code,
       createdAt: new Date(),
     });
 
@@ -42,15 +49,21 @@ export async function updateReport(id: string, data: {
   title?: string;
   content?: any;
   testType?: string;
-  status?: "Draft" | "Finalized" | "UNDER_REVIEW" | "REJECTED" | "ARCHIVED";
+  status?: "Draft" | "Finalized" | "Under Review" | "Rejected" | "Archived" | string;
   exportedUrl?: string;
   exportFormat?: string;
 }) {
   try {
-    // Map legacy status values to allowed enum values
-    let mappedStatus = data.status;
+    const updateData: any = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.content !== undefined) updateData.content = data.content;
+    if (data.testType !== undefined) updateData.testType = data.testType;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.exportedUrl !== undefined) updateData.exportedUrl = data.exportedUrl;
+    if (data.exportFormat !== undefined) updateData.exportFormat = data.exportFormat;
+
     await db.update(report)
-      .set({ ...data, status: mappedStatus })
+      .set(updateData)
       .where(eq(report.id, id));
 
     // Revalidate cache

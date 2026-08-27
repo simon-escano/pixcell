@@ -35,7 +35,7 @@ export function NavUser({
   role,
 }: {
   user: User;
-  profile: Profile | null;
+  profile: (Profile & { imageUrl?: string | null }) | null;
   role: string | null;
 }) {
   const { isMobile } = useSidebar();

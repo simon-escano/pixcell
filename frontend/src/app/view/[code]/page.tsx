@@ -181,8 +181,8 @@ function ReportHeader({ reportData, code, organizationId }: { reportData: any; c
 }
 
 // Main component
-export default async function ImprovedReportViewByCodePage({ params }: { params: { code: string; organizationId?: string } }) {
-  const { code, organizationId } = params
+export default async function ImprovedReportViewByCodePage({ params }: { params: Promise<{ code: string; organizationId?: string }> }) {
+  const { code, organizationId } = await params
   const baseUrl = "http://localhost:3000"
 
   try {
@@ -290,7 +290,7 @@ export default async function ImprovedReportViewByCodePage({ params }: { params:
 }
 
 // Export with Suspense wrapper for better loading experience
-export function ReportViewByCodePageWithSuspense({ params }: { params: { code: string } }) {
+function ReportViewByCodePageWithSuspense({ params }: { params: Promise<{ code: string }> }) {
   return (
     <Suspense fallback={<ReportViewSkeleton />}>
       <ImprovedReportViewByCodePage params={params} />

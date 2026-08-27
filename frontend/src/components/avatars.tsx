@@ -6,9 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { userIdToColor } from "@/utils";
 
 export default function Avatars() {
-  const profiles = useOthersMapped(other => other.presence.profile).map(([, profile]) => profile);
+  const profiles = useOthersMapped(other => (other.presence as any)?.profile).map(([, profile]) => profile).filter(Boolean);
   const users = useOthers();
-  console.log(users);
   const shownAvatars = profiles.slice(0, 3);
   const hiddenAvatars = profiles.slice(3);
 
@@ -16,7 +15,7 @@ export default function Avatars() {
     <div
       className="-space-x-4 flex flex-row"
     >
-      {shownAvatars.map(({userId, firstName, lastName, imageUrl}, index) => (
+      {shownAvatars.map(({userId, firstName, lastName, imageUrl}: any, index) => (
         <Tooltip key={`${firstName + " " + lastName}-${imageUrl}-${index}`}>
           <TooltipTrigger asChild>
             <Avatar className="hover:z-10" style={{
@@ -47,7 +46,7 @@ export default function Avatars() {
             </Avatar>
           </TooltipTrigger>
           <TooltipContent side="right">
-            {hiddenAvatars.map(({ firstName, lastName }, index) => (
+            {hiddenAvatars.map(({ firstName, lastName }: any, index) => (
               <p key={`${firstName + " " + lastName}-${index}`}>{`${firstName} ${lastName}`}</p>
             ))}
           </TooltipContent>

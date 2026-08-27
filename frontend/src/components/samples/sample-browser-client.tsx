@@ -16,7 +16,7 @@ import {
 import { useMemo, useState } from "react"
 import SampleCard from "./sample-card"
 import SampleDrawer from "./upload-sample-drawer"
-
+import { MetaPatient } from "@/app/organizations/[organizationId]/samples/types"
 
 export default function SampleBrowserClient({ samples, currentUser, patients }: { samples: any[]; currentUser: any, patients: MetaPatient[] }) {
   const [search, setSearch] = useState("")

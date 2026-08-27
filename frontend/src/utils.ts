@@ -14,6 +14,8 @@ export function generateColorFromId(id: string): string {
   return color;
 }
 
+export const userIdToColor = generateColorFromId;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

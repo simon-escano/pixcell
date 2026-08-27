@@ -11,7 +11,7 @@ const getCookieStore = cache(async () => {
 export async function getUser() {
   // Await the cookies before passing to createServerComponentClient
   const cookieStore = await getCookieStore();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
   return user;
@@ -20,6 +20,6 @@ export async function getUser() {
 export const getSupabaseAuth = async () => {
   // Await the cookies before passing to createServerComponentClient
   const cookieStore = await getCookieStore();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
   return supabase.auth;
 };

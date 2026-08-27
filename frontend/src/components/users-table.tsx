@@ -95,6 +95,7 @@ export const UsersTable = ({ users, organizationId }: { users: CombinedUser[], o
         lastName,
         email,
         roleId,
+        orgId,
         phone,
         file ?? undefined,
       );
