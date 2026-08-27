@@ -11,3 +11,4 @@ onnxruntime
 onnx
 python-dotenv
 gradio
+spaces
