@@ -22,19 +22,11 @@ export async function middleware(request: NextRequest) {
   });
 
   // Define unprotected paths once
-  const unprotectedPaths = ["/login", "/signup", "/reset-password", "/reports/view"];
+  const unprotectedPaths = ["/login", "/signup", "/reset-password", "/reports/view", "/view"];
   const isUnprotectedPath = unprotectedPaths.some((up) => path.startsWith(up));
 
-  // For unprotected paths, skip auth check to improve performance
+  // For unprotected paths, let them render directly without redirection loops
   if (isUnprotectedPath) {
-    // If already authenticated and trying to access login, redirect
-    const supabase = createMiddlewareClient({ req: request, res: response });
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user && (path.startsWith("/login") || path.startsWith("/signup") || path.startsWith("/reset-password"))) {
-      return NextResponse.redirect(new URL("/organizations", request.url));
-    }
-    
     return response;
   }
 

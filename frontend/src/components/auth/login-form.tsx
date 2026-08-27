@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { checkAccountExistsAction } from "@/actions/users";
 import toast from "react-hot-toast";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -28,7 +28,8 @@ export function LoginForm({
   const router = useRouter();
   const params = useParams();
   const orgId = (params as any)?.organizationId || "";
-  const [isPending, startTransition] = useTransition();
+  const [isChecking, setIsChecking] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [step, setStep] = useState<'email' | 'password' | 'change-password'>('email');
   const [email, setEmail] = useState('');
   const [accountInfo, setAccountInfo] = useState<{
@@ -46,8 +47,9 @@ export function LoginForm({
       return;
     }
 
-    startTransition(async () => {
-      const result = await checkAccountExistsAction(email);
+    setIsChecking(true);
+    try {
+      const result = await checkAccountExistsAction(email.trim());
       setAccountInfo(result);
       
       if (result.exists) {
@@ -60,7 +62,11 @@ export function LoginForm({
       } else {
         toast.error(result.errorMessage || "Account not found");
       }
-    });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to check account");
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -69,15 +75,21 @@ export function LoginForm({
     const password = formData.get("password") as string;
     const supabase = createClientComponentClient();
 
-    startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setIsLoggingIn(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (!error) {
         toast.success("Successfully logged in");
-        router.replace("/");
+        router.push("/organizations");
+        router.refresh();
       } else {
         toast.error(error.message);
       }
-    });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to sign in");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const handlePasswordChangeSuccess = () => {
@@ -123,8 +135,8 @@ export function LoginForm({
                     required
                   />
                   <div className="flex flex-col items-center gap-2">
-                    <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-                      {isPending ? "Checking..." : "Check Account"}
+                    <Button type="submit" className="w-full cursor-pointer" disabled={isChecking}>
+                      {isChecking ? "Checking..." : "Check Account"}
                     </Button>
                   </div>
                 </div>
@@ -161,11 +173,12 @@ export function LoginForm({
                     name="password"
                     type="password"
                     placeholder="Enter your password"
+                    autoFocus
                     required
                   />
                   <div className="flex flex-col items-center gap-2">
-                    <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-                      {isPending ? "Signing in..." : "Sign In"}
+                    <Button type="submit" className="w-full cursor-pointer" disabled={isLoggingIn}>
+                      {isLoggingIn ? "Signing in..." : "Sign In"}
                     </Button>
                     <ForgotPasswordDialog />
                   </div>
