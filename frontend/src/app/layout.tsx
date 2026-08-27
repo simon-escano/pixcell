@@ -6,7 +6,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Providers } from "./organizations/[organizationId]/samples/[sampleId]/[sampleImageId]/liveblocks/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +42,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Suspense>
-            <Providers>{children}</Providers>
+            {children}
           </Suspense>
           <Toaster
             toastOptions={{
