@@ -11,7 +11,13 @@ declare global {
 }
 
 const client =
-  globalThis.postgresClient ?? postgres(connectionString, { prepare: false })
+  globalThis.postgresClient ??
+  postgres(connectionString, {
+    prepare: false,
+    max: 3,
+    idle_timeout: 10,
+    connect_timeout: 10,
+  })
 if (process.env.NODE_ENV !== 'production') globalThis.postgresClient = client
 
 const db =
