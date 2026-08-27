@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://deqmjalktfhnntoaokfi.supabase.co";
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
@@ -10,7 +12,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    remotePatterns: [new URL(process.env.NEXT_PUBLIC_SUPABASE_URL! + "/**")],
+    remotePatterns: [new URL(supabaseUrl + "/**")],
   },
 };
 
