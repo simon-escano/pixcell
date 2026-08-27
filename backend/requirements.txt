@@ -9,5 +9,5 @@ python-multipart
 ultralytics
 onnxruntime
 onnx
-torch==2.7.0
-torchvision==0.22.0
+python-dotenv
+gradio
